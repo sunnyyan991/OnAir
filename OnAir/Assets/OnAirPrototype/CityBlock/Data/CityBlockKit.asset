@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50c322f3a009af64198c5b029a791305, type: 3}
+  m_Name: CityBlockKit
+  m_EditorClassIdentifier: 
+  buildings: {fileID: 11400000, guid: aa4f1e53ef2866646a8b3c12faa7ebfd, type: 2}
+  rules: {fileID: 4900000, guid: 51c0a026cb255a242bf29d817796aced, type: 3}
+  roadStraight: {fileID: 7679893554430180340, guid: 6571c1983f4acf34fa8f1b42dfcc51b0,
+    type: 3}
+  roadCorner: {fileID: 1523952724435612584, guid: d8c45e4192b9ed041b889e221a2c92be,
+    type: 3}
+  roadT: {fileID: 5407737257881427862, guid: 50026883d6c0c8f4ebff29a1cd2ed1b8, type: 3}
+  roadCross: {fileID: 7575939298057372017, guid: 373c0d5fff9b2f64d8551b0d1b01d638,
+    type: 3}
+  pavement: {fileID: 1158860277815143760, guid: 9ab13e65627085c4baa71a6ca3aa4ab7,
+    type: 3}
+  park: {fileID: 4321589991179165444, guid: 95caa86fd346e83419b3e3d89b5724ea, type: 3}
+  tree: {fileID: 19921600731530874, guid: fb5dae28e51d4b4469491821cef88f6f, type: 3}
+  treeTall: {fileID: 2793514391965552411, guid: 20e0fe83e6487e64aae03574963cbc10,
+    type: 3}
+  hedge: {fileID: 3171394425428613605, guid: a4fed062b51b2f24b91f5f7922dbf3ac, type: 3}
+  lamp: {fileID: 4677115694050446210, guid: fd809b8b2a9ea5d4d860da65aea783b9, type: 3}
+  bench: {fileID: 3196560641927216211, guid: abb4edb526bbe854b9bdc4cc29f04b04, type: 3}
+  planter: {fileID: 5003038444906708791, guid: 92ed271299315104ab6a7a3d3d3189d7, type: 3}

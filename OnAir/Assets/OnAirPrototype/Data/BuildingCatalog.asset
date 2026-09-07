@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0e0085a421f0e84a85aa6cd2eb39467, type: 3}
+  m_Name: BuildingCatalog
+  m_EditorClassIdentifier: 
+  entries:
+  - id: townhouse
+    prefab: {fileID: 7730674802282702213, guid: 3152de33fd88eb84595957eefeb47f96,
+      type: 3}
+  - id: tower
+    prefab: {fileID: 5810681662107854117, guid: 442a17a2f3fdd6e44ac61456d8d2ff99,
+      type: 3}
+  - id: warehouse
+    prefab: {fileID: 8768186740655241560, guid: bf9977624ad305d4583bb0abbcb21aa6,
+      type: 3}
+  - id: lighthouse
+    prefab: {fileID: 1799834103829308170, guid: a5015a7445e8d9d4983aeaa4b9b1ae05,
+      type: 3}
+  - id: adobe
+    prefab: {fileID: 1010633427378124981, guid: 7e1cdf2a2e8c5bc419b0297b0e77f665,
+      type: 3}
+  - id: night_kiosk
+    prefab: {fileID: 7577851599042006849, guid: c76666c0cd6b7604e8cf9548d5f92443,
+      type: 3}

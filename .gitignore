@@ -106,6 +106,9 @@ InitTestScene*.unity*
 /[Aa]ssets/[Ss]ceneDependencyCache*
 
 # Unity project is located in the OnAir subdirectory
+# External art exploration and design references
+/Art/
+
 /OnAir/[Ll]ibrary/
 /OnAir/[Tt]emp/
 /OnAir/[Oo]bj/

@@ -1,0 +1,9 @@
+﻿##var,id,prefab_id,biomes,weather,periods,weight,min_scale,max_scale
+##type,string,string,"(list#sep=|),Biome","(list#sep=|),Weather","(list#sep=|),DayPeriod",float,float,float
+##,数字字符串编号,城市预制体编号,City 城市；* 不限,天气；* 不限,时段；* 不限,相对权重,静止街区保持原比例,静止街区保持原比例
+,7,apartment_03,City,*,*,3,1,1
+,8,office_05,City,*,*,3,1,1
+,9,corner_shop,City,*,*,4,1,1
+,10,apartment_04,City,*,*,3,1,1
+,11,house_02,City,*,*,3,1,1
+,12,mixed_03,City,*,*,3,1,1

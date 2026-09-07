@@ -1,0 +1,9 @@
+﻿##var,id,prefab_id,biomes,weather,periods,weight,min_scale,max_scale
+##type,string,string,"(list#sep=|),Biome","(list#sep=|),Weather","(list#sep=|),DayPeriod",float,float,float
+##,数字编号；string；唯一；保留前导零,预制体查找键；对应 BuildingCatalog,City 城市 / Coast 海岸 / Desert 沙漠；| 多选；* 不限,Clear 晴 / Rain 雨 / Snow 雪；| 多选；* 不限,Dawn 清晨 / Day 白天 / Dusk 黄昏 / Night 夜晚；| 多选；* 不限,相对权重；0 不生成,缩放下限；大于 0,缩放上限；不小于下限；不超过 1.5
+,1,townhouse,City|Coast,*,*,5,0.85,1.1
+,2,tower,City,Clear|Rain,Day|Dusk|Night,2,0.9,1.15
+,3,warehouse,City|Coast,*,*,3,0.85,1.05
+,4,lighthouse,Coast,*,*,4,0.9,1.15
+,5,adobe,Desert,Clear|Rain,*,5,0.85,1.15
+,6,night_kiosk,City|Coast,Clear|Rain,Dusk|Night,4,0.9,1.1
