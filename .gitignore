@@ -104,3 +104,26 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Unity project is located in the OnAir subdirectory
+/OnAir/[Ll]ibrary/
+/OnAir/[Tt]emp/
+/OnAir/[Oo]bj/
+/OnAir/[Bb]uild/
+/OnAir/[Bb]uilds/
+/OnAir/[Ll]ogs/
+/OnAir/[Uu]ser[Ss]ettings/
+/OnAir/[Mm]emoryCaptures/
+/OnAir/[Rr]ecordings/
+/OnAir/[Aa]ssets/Plugins/Editor/JetBrains*
+/OnAir/ServerData
+/OnAir/[Aa]ssets/StreamingAssets/aa*
+/OnAir/[Aa]ssets/AddressableAssetsData/link.xml*
+/OnAir/[Aa]ssets/Addressables_Temp*
+/OnAir/[Aa]ssets/AddressableAssetsData/*/*.bin*
+/OnAir/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db
+/OnAir/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db.meta
+/OnAir/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers
+/OnAir/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers.meta
+/OnAir/[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+/OnAir/[Aa]ssets/[Ss]ceneDependencyCache*
