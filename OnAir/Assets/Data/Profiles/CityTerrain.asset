@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b463252cf33d7634990ebf4e75063588, type: 3}
+  m_Name: CityTerrain
+  m_EditorClassIdentifier: 
+  id: 1
+  kit: {fileID: 11400000, guid: d064109a41745a04597f815ab9882e54, type: 2}
+  ground: {fileID: 2100000, guid: 12e3b9d029ea9b84699f0b29c6510e39, type: 2}
+  scenery: {fileID: 1181577953056993628, guid: 2a06199e4ce53174ab6f801e3e2144d3, type: 3}
+  daySky: {r: 0.50980395, g: 0.6117647, b: 0.654902, a: 1}
+  nightSky: {r: 0.078431375, g: 0.14509805, b: 0.21176471, a: 1}
+  dayAmbient: {r: 0.654902, g: 0.69411767, b: 0.72156864, a: 1}
+  nightAmbient: {r: 0.27450982, g: 0.3372549, b: 0.45882353, a: 1}
+  daySun: {r: 1, g: 0.9137255, b: 0.78431374, a: 1}
+  nightSun: {r: 0.5058824, g: 0.60784316, b: 0.77254903, a: 1}
+  nightWindows: {r: 1, g: 0.78039217, b: 0.47058824, a: 1}
+  dayIntensity: 1.1
+  nightIntensity: 0.12

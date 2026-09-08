@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0e0085a421f0e84a85aa6cd2eb39467, type: 3}
+  m_Name: BuildingCatalog
+  m_EditorClassIdentifier: 
+  entries:
+  - id: city_apartment_03
+    prefab: {fileID: 927644653630382948, guid: 000fae4856599a34e856196dba126aa1, type: 3}
+  - id: city_office_05
+    prefab: {fileID: 5676118378826321588, guid: a149f88e1026aca4e9218f1af8cc86cc,
+      type: 3}
+  - id: city_corner_shop
+    prefab: {fileID: 2503029226320055279, guid: 7a5f759fe74914c4c9c0f67966b9445c,
+      type: 3}
+  - id: city_apartment_04
+    prefab: {fileID: 5110758530918397383, guid: 41bf79ff5b7b8524fa0b01c4f10c6e9a,
+      type: 3}
+  - id: city_house_02
+    prefab: {fileID: 6421458397317204386, guid: c1aad9ed03c268a479a3fdd31821f1d9,
+      type: 3}
+  - id: city_mixed_03
+    prefab: {fileID: 8091063089529322417, guid: 2f282e15260b947489ac267ef091907c,
+      type: 3}
+  - id: coast_apartment_03
+    prefab: {fileID: 1682713040167607587, guid: 1012749ab0991fb45990b47af7738512,
+      type: 3}
+  - id: coast_office_05
+    prefab: {fileID: 4135800050818961941, guid: ce569618affdba44ba1cfb9dedfa4998,
+      type: 3}
+  - id: coast_corner_shop
+    prefab: {fileID: 3593534935779489527, guid: b16b7e98b953df04588ae3c3c0f37afc,
+      type: 3}
+  - id: coast_apartment_04
+    prefab: {fileID: 1338808412561797447, guid: 3d04f5de012442749aed557ec2dd7cfb,
+      type: 3}
+  - id: coast_house_02
+    prefab: {fileID: 7623353296855896535, guid: 580b461bd3ef2954b84d688809491629,
+      type: 3}
+  - id: coast_mixed_03
+    prefab: {fileID: 1907565971983276796, guid: 384cebfb639c38b40a9d4aac32c62dff,
+      type: 3}
+  - id: desert_apartment_03
+    prefab: {fileID: 232274506101467833, guid: c19e4af587a3bfd419f5c187d789b4d1, type: 3}
+  - id: desert_office_05
+    prefab: {fileID: 1829424462579316010, guid: 5374f43304351ad4bb577d1405a51791,
+      type: 3}
+  - id: desert_corner_shop
+    prefab: {fileID: 2975925609490706708, guid: 6c381889c2a958c49978271b62ae14e4,
+      type: 3}
+  - id: desert_apartment_04
+    prefab: {fileID: 4614220529875268596, guid: 95616750b8148db4d9b80d588c1f0544,
+      type: 3}
+  - id: desert_house_02
+    prefab: {fileID: 7938879193667989608, guid: 73276045362c0c049a1a1582dbedad5b,
+      type: 3}
+  - id: desert_mixed_03
+    prefab: {fileID: 2886964054159294061, guid: fe5c8393fee505a4a812e12dca9afb4e,
+      type: 3}

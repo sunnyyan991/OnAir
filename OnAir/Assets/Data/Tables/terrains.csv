@@ -1,0 +1,6 @@
+﻿##var,id,biome,distance_meters,selection_weight,building_density,weather,weather_weights
+##type,string,Biome,float,float,float,"(list#sep=|),Weather","(list#sep=|),float"
+##,数字字符串编号，对应 TerrainProfile.id,地形类型,该地形巡航距离，米,下一地形相对权重，大于0,建筑密度，0到1,允许天气，竖线分隔,与天气一一对应的权重，0表示禁用
+,1,City,320,1,1,Clear|Cloudy|Rain|HeavyRain|Snow,5|1|1|1|1
+,2,Coast,320,1,0.7,Clear|Cloudy|Rain|HeavyRain,5|1|1|1
+,3,Desert,320,1,0.45,Clear|Cloudy|Sandstorm,5|1|1
