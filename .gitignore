@@ -109,6 +109,9 @@ InitTestScene*.unity*
 # External art exploration and design references
 /Art/
 
+# Local generated outputs and validation artifacts
+/outputs/
+
 /OnAir/[Ll]ibrary/
 /OnAir/[Tt]emp/
 /OnAir/[Oo]bj/
