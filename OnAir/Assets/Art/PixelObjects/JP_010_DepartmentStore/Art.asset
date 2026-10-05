@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: JP_010_DepartmentStore pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: e684093d78e55674b8997004b1fca6c3, type: 2}
+  - {fileID: 4300000, guid: f42b027cf81d2554cb22c538dc54ffb1, type: 2}
+  - {fileID: 4300000, guid: 9c6fc0c7bf6435f46a8058e09b12abfb, type: 2}
+  - {fileID: 4300000, guid: 7036768faca09a346acf1b17658e5788, type: 2}
+  materials:
+  - {fileID: 2100000, guid: b41ba0e5c76e922428b1938525277e64, type: 2}
+  - {fileID: 2100000, guid: f2c7f47c111a448498a686f1681b2d11, type: 2}
+  - {fileID: 2100000, guid: 7f17334503db7c343a4fc98a3ad63b1c, type: 2}
+  - {fileID: 2100000, guid: 33d309a171b19d940a4f18a60f595828, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 3052299da719f4d256e0b0e20921d999
+  artRevision: City pixel painting 02

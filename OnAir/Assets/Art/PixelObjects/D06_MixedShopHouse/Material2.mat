@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: D06_MixedShopHouse pixels 2
+  m_Shader: {fileID: 4800000, guid: 3570e74690c132f46b84c4a670d644a7, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 384c6802533d5fd47bd15f36783304ab, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DepthMap:
+        m_Texture: {fileID: 2800000, guid: 1f634253279c43b4f8c62f32c8f7d0ee, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 47ebb5cf8c135844e8f44ee535d149d0, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WindowMap:
+        m_Texture: {fileID: 2800000, guid: 12e056b7fe643a14cbb769477429aac5, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _DepthRange: 14.303332
+    - _Occupancy: 0.46
+    m_Colors:
+    - _BaseColor: {r: 0.8235294, g: 0.8039216, b: 0.7529412, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ObjectSize: {r: 8.25, g: 14.75, b: 0, a: 0}
+    - _TextureSize: {r: 33, g: 59, b: 0.030303031, a: 0.016949153}
+    - _ViewForward: {r: 0.5, g: -0.7071068, b: 0.49999994, a: 0}
+  m_BuildTextureStacks: []

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: D06_MixedShopHouse pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 97c3fb0d0ca6a6e4fb90a4b48b6b4567, type: 2}
+  - {fileID: 4300000, guid: f1d94f77882376948893ab3d7bc9212d, type: 2}
+  - {fileID: 4300000, guid: aef142ffc0423444d959937af6016f68, type: 2}
+  - {fileID: 4300000, guid: da5f62654eac5c440a5fcee8fd7345a8, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 4905ac6ed234626428ee50b1247a1809, type: 2}
+  - {fileID: 2100000, guid: b8fe1da6a67a0ec4fbfc6cb3023b61de, type: 2}
+  - {fileID: 2100000, guid: 0a37105a010204f49a0d2091513df03c, type: 2}
+  - {fileID: 2100000, guid: e5067c21a90b90a419134e339b990762, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 41a40b2c4147a666d0b96f966bf16e4b
+  artRevision: City pixel painting 02

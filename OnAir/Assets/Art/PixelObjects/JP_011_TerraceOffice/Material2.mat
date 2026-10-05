@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: JP_011_TerraceOffice pixels 2
+  m_Shader: {fileID: 4800000, guid: 3570e74690c132f46b84c4a670d644a7, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: a59b217b3bdc44649a554fa0b6a43a53, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DepthMap:
+        m_Texture: {fileID: 2800000, guid: 6da3b2848c08cd44982bbd5af3ca73a9, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 500c31aa4e174e3488ae78fc766af716, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WindowMap:
+        m_Texture: {fileID: 2800000, guid: 93ec4edaa3c53e64f8fcb3c3e440e2ef, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _DepthRange: 20.698229
+    - _Occupancy: 0.57
+    m_Colors:
+    - _BaseColor: {r: 0.78, g: 0.78, b: 0.76, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ObjectSize: {r: 11, g: 21.25, b: 0, a: 0}
+    - _TextureSize: {r: 44, g: 85, b: 0.022727273, a: 0.011764706}
+    - _ViewForward: {r: 0.5, g: -0.7071068, b: 0.49999994, a: 0}
+  m_BuildTextureStacks: []

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A07_ModernApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: b9380cba5db4d764b8ef3707013b2d7d, type: 2}
+  - {fileID: 4300000, guid: 06dda478a0ba2404c91500a585e6294d, type: 2}
+  - {fileID: 4300000, guid: 1d15a99d999d85f4797dd483ca5cb10f, type: 2}
+  - {fileID: 4300000, guid: 156c4c307e4ce0441bd1d7f93324b733, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 58226babfe39d6845b1c3a69bcc03ee1, type: 2}
+  - {fileID: 2100000, guid: e5e41cee9f70cd747af05a6107d5043e, type: 2}
+  - {fileID: 2100000, guid: 231485784e61a4748b74bb56c3b2da80, type: 2}
+  - {fileID: 2100000, guid: baa05ecf63b472a498a2c6a5b8408877, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 8f9a29904590ced2c87e5e6469bb21c0
+  artRevision: City pixel painting 02

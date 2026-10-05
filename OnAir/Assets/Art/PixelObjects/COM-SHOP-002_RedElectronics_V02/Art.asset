@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: COM-SHOP-002_RedElectronics_V02 pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: e64b8408621efa441a43b40c03e501b3, type: 2}
+  - {fileID: 4300000, guid: 6866a15b84b4cd9428d4ad905a10c0ee, type: 2}
+  - {fileID: 4300000, guid: 66da95cf80704394ea349d07afe00130, type: 2}
+  - {fileID: 4300000, guid: 1e135af520c676040a8fc3798b5edcc3, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 867b64ba3750322448c8703156e4cfdf, type: 2}
+  - {fileID: 2100000, guid: 94a9775e954f2e341a6680780594be8c, type: 2}
+  - {fileID: 2100000, guid: 5b943caf50dcdb94da699fe677b108fb, type: 2}
+  - {fileID: 2100000, guid: 4ef38664886a78844b611370a674434f, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: da0188e8ceac9f90f7b1265df6b214e1
+  artRevision: City pixel painting 02

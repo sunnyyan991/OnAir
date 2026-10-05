@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: COM-MALL-004_MintHobbyTower_V02 pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 553148a406ccd12489f2377e38ebbbe1, type: 2}
+  - {fileID: 4300000, guid: f35fab94fbd02014c98d864bd86a4e2b, type: 2}
+  - {fileID: 4300000, guid: eeb9ef0961e038448b77ba7915431a0f, type: 2}
+  - {fileID: 4300000, guid: d19fe98f7919fde4f86dd4bfd7d12c4e, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 1799551bee6d7aa4ebfc60b0f5435e9b, type: 2}
+  - {fileID: 2100000, guid: b81582d8dc1cca145ad0ddd25ca701e4, type: 2}
+  - {fileID: 2100000, guid: effc65edf3471164c928902b6659c386, type: 2}
+  - {fileID: 2100000, guid: 62671d9e8cc64e34eb0b5f8b3cf4fafd, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: ad1e8d571b2bc7aee1c3475fb1b73b96
+  artRevision: City pixel painting 02

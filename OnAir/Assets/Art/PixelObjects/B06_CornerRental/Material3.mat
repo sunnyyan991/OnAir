@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: B06_CornerRental pixels 3
+  m_Shader: {fileID: 4800000, guid: 3570e74690c132f46b84c4a670d644a7, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 4174343d252bda6418b9821b0175aa89, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DepthMap:
+        m_Texture: {fileID: 2800000, guid: 2121850bf41dd794fa8fbb543944ba37, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 4972bf68ecdf14a49a7a9912d9fbfe8e, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WindowMap:
+        m_Texture: {fileID: 2800000, guid: 85d546c9ad5cc8648863e065e2901b24, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _DepthRange: 15.190347
+    - _Occupancy: 0.46
+    m_Colors:
+    - _BaseColor: {r: 0.737255, g: 0.7137255, b: 0.6627451, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ObjectSize: {r: 13, g: 15.75, b: 0, a: 0}
+    - _TextureSize: {r: 52, g: 63, b: 0.01923077, a: 0.015873017}
+    - _ViewForward: {r: 0.5, g: -0.7071068, b: 0.49999994, a: 0}
+  m_BuildTextureStacks: []

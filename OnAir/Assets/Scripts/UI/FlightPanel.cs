@@ -12,13 +12,16 @@ namespace OnAir
         GUIStyle text, small, hit;
         Font font;
         readonly Dictionary<char, Texture2D> glyphs = new Dictionary<char, Texture2D>();
-        bool collapsed, details;
+        bool collapsed, details, biomePicker;
         Vector2 scroll;
+        int dialControl;
         public WeatherParticles weatherFx;
         public GameEntry game;
         static readonly Color Ink = C("C2CEC8"), Muted = C("83999B"), Cyan = C("6CAAB4");
         static Color C(string hex) { ColorUtility.TryParseHtmlString("#" + hex, out var c); return c; }
 
+        public void OpenBiomePicker(){collapsed=false;biomePicker=true;}
+        public void CloseBiomePicker(){biomePicker=false;}
         void Init()
         {
             if (text != null && glyphs.Count > 0) return;
@@ -98,6 +101,55 @@ namespace OnAir
             Label(new Rect(x+252,y+12,20,26),">"); text.normal.textColor = old;
             return GUI.Button(r,new GUIContent("","Cycle " + name),hit);
         }
+        // Sunrise left, noon top, sunset right, midnight bottom. One turn is a full cycle.
+        public static Vector2 TimeDirection(float phase)
+        {
+            float angle=(phase*2-1)*Mathf.PI;
+            return new Vector2(Mathf.Cos(angle),Mathf.Sin(angle));
+        }
+        public static float TimePhase(Vector2 direction)=>Mathf.Repeat((Mathf.Atan2(direction.y,direction.x)+Mathf.PI)/(2*Mathf.PI),1);
+        static void PixelDot(Vector2 position,float size,Color tint)=>Fill(new Rect(Mathf.Round(position.x-size/2),Mathf.Round(position.y-size/2),size,size),tint);
+        void TimeDial(float x,float y)
+        {
+            var area=new Rect(x+8,y,270,100);
+            Fill(area,C("22333B"));Fill(new Rect(area.x,area.yMax-1,area.width,1),C("44585E"));
+            Label(new Rect(x+17,y+3,230,17),"TIME OF DAY",true);
+            var center=new Vector2(x+75,y+59);
+            int id=GUIUtility.GetControlID("WorldTimeDial".GetHashCode(),FocusType.Passive,area);
+            dialControl=id;
+            var ev=Event.current;
+            // IMGUI already transforms event coordinates with GUI.matrix.
+            Vector2 mouse=ev.mousePosition;
+            Vector2 offset=mouse-center;
+            if(ev.type==EventType.MouseDown&&ev.button==0&&offset.sqrMagnitude<=39*39)
+            {
+                GUIUtility.hotControl=id;
+                if(offset.sqrMagnitude>16)context.SetSolarPhase(TimePhase(offset));
+                ev.Use();
+            }
+            else if(GUIUtility.hotControl==id&&ev.type==EventType.MouseDrag)
+            {
+                if(offset.sqrMagnitude>16)context.SetSolarPhase(TimePhase(offset));
+                ev.Use();
+            }
+            else if(GUIUtility.hotControl==id&&ev.type==EventType.MouseUp)
+            {
+                GUIUtility.hotControl=0;ev.Use();
+            }
+            if(ev.type!=EventType.Repaint)return;
+            Color day=C("E6CC83"),night=C("6CAAB4");
+            for(int i=0;i<64;i++)PixelDot(center+TimeDirection(i/64f)*32,3,i<32?day:night);
+            for(int i=0;i<12;i++)PixelDot(center+TimeDirection(i/12f)*37,2,Muted);
+            Vector2 tip=center+TimeDirection(context.solarPhase)*26;
+            for(int i=0;i<=26;i++)PixelDot(Vector2.Lerp(center,tip,i/26f),2,Ink);
+            PixelDot(tip,4,day);PixelDot(center,6,C("17272E"));PixelDot(center,2,Ink);
+            Label(new Rect(x+132,y+22,126,20),"DAY",true);
+            Fill(new Rect(x+118,y+29,5,5),day);
+            Label(new Rect(x+132,y+64,126,20),"NIGHT",true);
+            Fill(new Rect(x+118,y+71,5,5),night);
+            Label(new Rect(x+132,y+42,138,19),context.period==DayPeriod.BlueHour?"BLUE HOUR":context.period.ToString(),true);
+        }
+        void OnDisable(){if(dialControl!=0&&GUIUtility.hotControl==dialControl)GUIUtility.hotControl=0;}
         void OnGUI()
         {
             if (!context || !journey || !terrainWorld) return;
@@ -112,43 +164,55 @@ namespace OnAir
                 text.fontSize = 28; text.normal.textColor = C("E6CC83");
                 Label(new Rect(34,47,180,32),DateTime.Now.ToString("HH:mm:ss"));
                 text.fontSize = 18; text.normal.textColor = Ink;
+                if(game.biomeNavigator){Panel(new Rect(20,100,250,32));Label(new Rect(32,105,226,22),game.biomeNavigator.VisibleName,true);}
                 float x = Screen.width/scale-306;
-                Panel(new Rect(x,20,286,collapsed ? 42 : 376));
+                Panel(new Rect(x,20,286,collapsed ? 42 : 428));
                 Fill(new Rect(x+3,23,280,36),C("213139"));
                 Label(new Rect(x+15,26,225,30),"FLIGHT CONTROL");
                 if (Button(new Rect(x+249,28,27,24),collapsed ? "+" : "-")) collapsed = !collapsed;
-                if (collapsed) return;
+                if (collapsed) { if(GUIUtility.hotControl==dialControl)GUIUtility.hotControl=0; return; }
+                if(game.cabin)
+                {
+                    Panel(new Rect(x,662,286,114));
+                    if(Choice(x,670,"VIEW",game.cabin.IsCabin?"WING":"EXTERIOR"))game.cabin.SetCabin(!game.cabin.IsCabin);
+                    if(Choice(x,723,"LIVERY",game.cabin.LiveryName))game.cabin.NextLivery();
+                }
                 Label(new Rect(x+15,70,250,20),"ENVIRONMENT",true);
-                if (Choice(x,94,"TERRAIN",context.biome.ToString())) journey.NextTerrain();
-                if (Choice(x,148,"WEATHER",context.weather.ToString())) journey.CycleWeather();
-                if (Choice(x,202,"TIME OF DAY",context.period.ToString())) context.CyclePeriod();
-                var toggle = new Rect(x+8,258,270,40);
-                Fill(toggle,C("22333B")); Label(new Rect(x+17,264,200,28),"AUTO FLIGHT");
-                Fill(new Rect(x+226,268,42,21),context.paused ? C("192A31") : C("326574"));
-                Fill(new Rect(x+(context.paused ? 229 : 250),271,15,15),context.paused ? Muted : Ink);
+                if (Choice(x,94,journey.continuousWorld?"EXPLORE":"TERRAIN",journey.continuousWorld?"CHOOSE BIOME":context.biome.ToString())){if(journey.continuousWorld)biomePicker=!biomePicker;else journey.NextTerrain();}
+                if (Choice(x,148,"WEATHER",(context.automaticWeather?"AUTO ":"")+context.weather.ToString())) journey.CycleWeather();
+                TimeDial(x,202);
+                var toggle = new Rect(x+8,310,270,40);
+                Fill(toggle,C("22333B")); Label(new Rect(x+17,316,200,28),"AUTO FLIGHT");
+                Fill(new Rect(x+226,320,42,21),context.paused ? C("192A31") : C("326574"));
+                Fill(new Rect(x+(context.paused ? 229 : 250),323,15,15),context.paused ? Muted : Ink);
                 if (GUI.Button(toggle,new GUIContent("","Pause / resume flight"),hit)) context.TogglePause();
                 text.fontSize = 14;
-                if (Button(new Rect(x+12,311,126,34),"NEW SEED")) journey.NewSeed();
-                if (Button(new Rect(x+146,311,128,34),"RELOAD CSV")) game.ReloadTables();
+                if (Button(new Rect(x+12,363,126,34),"NEW SEED")) journey.NewSeed();
+                if (Button(new Rect(x+146,363,128,34),"RELOAD CSV")) game.ReloadTables();
                 text.fontSize = 18;
-                Fill(new Rect(x+16,366,5,5),context.paused ? C("E6CC83") : Cyan);
-                Label(new Rect(x+29,357,245,23),context.paused ? "FLIGHT PAUSED" : "FLIGHT ACTIVE",true);
-                Panel(new Rect(x,410,286,details ? 140 : 106));
-                Fill(new Rect(x+3,413,280,32),C("213139"));
-                Label(new Rect(x+15,415,225,28),"WORLD STATUS");
-                if (Button(new Rect(x+249,417,27,24),details ? "-" : "+")) details=!details;
-                Label(new Rect(x+15,454,140,22),"BLDGS " + terrainWorld.ActiveBuildingCount,true);
-                Label(new Rect(x+158,454,110,22),"LEG "+(journey.Current.index+1),true);
-                Label(new Rect(x+15,480,250,22),"ROUTE "+journey.TotalMeters.ToString("0")+" M",true);
-                if(flight)
+                Fill(new Rect(x+16,418,5,5),context.paused ? C("E6CC83") : Cyan);
+                Label(new Rect(x+29,409,245,23),context.paused ? "FLIGHT PAUSED" : "FLIGHT ACTIVE",true);
+                Panel(new Rect(x,462,286,details ? 140 : 106));
+                Fill(new Rect(x+3,465,280,32),C("213139"));
+                Label(new Rect(x+15,467,225,28),"WORLD STATUS");
+                if (Button(new Rect(x+249,469,27,24),details ? "-" : "+")) details=!details;
+                Label(new Rect(x+15,506,140,22),"BLDGS " + terrainWorld.ActiveBuildingCount,true);
+                Label(new Rect(x+158,506,110,22),"LEG "+(journey.Current.index+1),true);
+                Label(new Rect(x+15,532,250,22),"ROUTE "+journey.TotalMeters.ToString("0")+" M",true);
+                if(game.frameRate)Label(new Rect(x+17,622,250,22),"FPS "+game.frameRate.FramesPerSecond.ToString("0"),true);
+                Label(new Rect(20,140,280,22),"SEED "+journey.seed,true);
+                if(biomePicker&&game.biomeNavigator)
                 {
-                    if(Button(new Rect(x,details?564:530,286,36),flight.IsCircling?"CIRCLING":"CIRCLE ONCE"))flight.BeginCircle();
+                    float px=Screen.width/scale*.5f-165;
+                    Panel(new Rect(px,150,330,340));Label(new Rect(px+16,163,270,24),"EXPLORE BIOMES");
+                    if(Button(new Rect(px+285,162,28,24),"-"))biomePicker=false;
+                    for(int i=0;i<7;i++){var zone=(ContinuousWorldPlan.EcologyZone)i;if(Button(new Rect(px+16,201+i*37,298,31),BiomeNavigator.Name(zone))){game.biomeNavigator.Preview(zone);biomePicker=false;}}
                 }
                 if (details)
                 {
                     string status=("Next terrain in "+(journey.Current.terrain.distanceMeters-journey.SegmentMeters).ToString("0")+" m")+(weatherFx ? "\n"+weatherFx.Status : "");
                     float h=Mathf.Max(37,small.CalcHeight(new GUIContent(status),240));
-                    scroll=GUI.BeginScrollView(new Rect(x+12,503,262,37),scroll,new Rect(0,0,240,h));
+                    scroll=GUI.BeginScrollView(new Rect(x+12,555,262,37),scroll,new Rect(0,0,240,h));
                     GUI.Label(new Rect(0,0,240,h),status,small); GUI.EndScrollView();
                 }
             }

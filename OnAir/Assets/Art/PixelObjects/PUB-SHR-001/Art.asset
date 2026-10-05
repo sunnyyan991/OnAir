@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: PUB-SHR-001 pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 368691781c2d8ae4588a515ca6971e6f, type: 2}
+  - {fileID: 4300000, guid: 7c85c90e2dbe4f04da9e6df8c0d8970e, type: 2}
+  - {fileID: 4300000, guid: 13cfecf6789ad974682f28b3e02a6fb0, type: 2}
+  - {fileID: 4300000, guid: 7677dcf8fc6d11346b4b7c0b1fd24c38, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 1a886026cae5b3549a8e02872be968b8, type: 2}
+  - {fileID: 2100000, guid: 2845bb59fe5cdc74db43fb135dee6db9, type: 2}
+  - {fileID: 2100000, guid: d047fab761eeabf46b50025800ea2247, type: 2}
+  - {fileID: 2100000, guid: 61568eea0f3775849bb7f825070e1c91, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: ae32671d8171e25a283f05949a892f86
+  artRevision: City pixel painting 02

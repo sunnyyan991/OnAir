@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: JP_002_House pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 1878a6789b4bf1b499206793e4d7653b, type: 2}
+  - {fileID: 4300000, guid: 45bdcbef7c7239547bec0b32cf641162, type: 2}
+  - {fileID: 4300000, guid: 2eccf2a3fbe33cb4ea92b7c636b6e361, type: 2}
+  - {fileID: 4300000, guid: 6070477b662acdd4b8d3c05a9057e51a, type: 2}
+  materials:
+  - {fileID: 2100000, guid: d9c51adfe1318094c96254df48810893, type: 2}
+  - {fileID: 2100000, guid: 4dcf6c3c2327a4c4ca125f89cd8b0011, type: 2}
+  - {fileID: 2100000, guid: 3900fa6c8b15b3740bcbe97a9d43eacc, type: 2}
+  - {fileID: 2100000, guid: dd9903eaedd72284f8cb9e7fe5381741, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: d2ba0610d8f7a95f7530d516792c35cd
+  artRevision: City pixel painting 02

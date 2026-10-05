@@ -11,6 +11,7 @@ namespace OnAir
         public GameObject modelPrefab;
         Transform propeller;
         bool modelLoaded;
+        public AircraftRig Rig{get;private set;}
         void Awake()
         {
             if(!useLowPolyModel)return;
@@ -18,7 +19,7 @@ namespace OnAir
             if(!model)return;
             if(visual&&visual!=transform)visual.gameObject.SetActive(false);
             visual=Instantiate(model,transform,false).transform;
-            visual.name="Low-poly aircraft";
+            visual.name="Aircraft visual";Rig=visual.GetComponent<AircraftRig>();
             propeller=visual.Find("Propeller");modelLoaded=true;
         }
         void LateUpdate()=>Refresh();
@@ -27,7 +28,7 @@ namespace OnAir
             if(!flight||!visual||!sceneCamera)return;
             if(modelLoaded)
             {
-                visual.rotation=Quaternion.LookRotation(flight.Heading,Vector3.up)*Quaternion.Euler(0,0,-flight.Bank);
+                visual.rotation=Quaternion.LookRotation(flight.Heading,Vector3.up)*Quaternion.Euler(0,0,-flight.Bank*(Rig?Rig.bankMultiplier:1));
                 if(propeller&&!(flight.journey&&flight.journey.context&&flight.journey.context.paused))
                     propeller.Rotate(0,0,1200*Time.deltaTime,Space.Self);
                 return;

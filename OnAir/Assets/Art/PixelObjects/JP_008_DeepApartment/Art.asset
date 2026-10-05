@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: JP_008_DeepApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: a50a48b33b2d42044a8878fae98c74ef, type: 2}
+  - {fileID: 4300000, guid: 9a6dc03432d17454fb781545960ff8fc, type: 2}
+  - {fileID: 4300000, guid: 673303c9e12dcb34682ec8dd1b6a5046, type: 2}
+  - {fileID: 4300000, guid: 051499aaa13dfff4788569c99a725ab3, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 503c8b117b8ce1c44bb25a4f2394ff73, type: 2}
+  - {fileID: 2100000, guid: 545048f0beae98243af8e0cfceabd756, type: 2}
+  - {fileID: 2100000, guid: a36fc25dbb81a8940b4cb9b7b261fc29, type: 2}
+  - {fileID: 2100000, guid: fef680ecdcb82f343b50c0dcbc3baba2, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 3ced813b86c046fdbbe6636844e58444
+  artRevision: City pixel painting 02

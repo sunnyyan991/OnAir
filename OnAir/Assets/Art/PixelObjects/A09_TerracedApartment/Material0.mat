@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: A09_TerracedApartment pixels 0
+  m_Shader: {fileID: 4800000, guid: 3570e74690c132f46b84c4a670d644a7, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 0cedd66cd7b6a4c4989617511c61d3f2, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DepthMap:
+        m_Texture: {fileID: 2800000, guid: 78463d45d87ce024eb9531cbda3ea9a8, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 63d670c444172cd408f639a72856e755, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WindowMap:
+        m_Texture: {fileID: 2800000, guid: 6bc753fbe08ea294091e1098712e807a, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _DepthRange: 20.279041
+    - _Occupancy: 0.46
+    m_Colors:
+    - _BaseColor: {r: 0.68235296, g: 0.61960775, b: 0.5490196, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ObjectSize: {r: 17.75, g: 22.75, b: 0, a: 0}
+    - _TextureSize: {r: 71, g: 91, b: 0.014084507, a: 0.010989011}
+    - _ViewForward: {r: 0.5, g: -0.7071068, b: 0.49999994, a: 0}
+  m_BuildTextureStacks: []

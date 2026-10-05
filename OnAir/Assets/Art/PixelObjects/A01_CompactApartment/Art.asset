@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A01_CompactApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 8c39e6fa52b5015408193a83af431f57, type: 2}
+  - {fileID: 4300000, guid: 4e44547b17d2e08458d50ceae3e7e079, type: 2}
+  - {fileID: 4300000, guid: b8dd4b7676bfd7f43a80ab0f930d1665, type: 2}
+  - {fileID: 4300000, guid: cf4d129511e8892448a588a2842b941e, type: 2}
+  materials:
+  - {fileID: 2100000, guid: e197f5b8c259f35468c0a7dbcfa7affd, type: 2}
+  - {fileID: 2100000, guid: f62e7bed7dff48646bba598e4d5f94f2, type: 2}
+  - {fileID: 2100000, guid: f998c00e640aca24a862f542db14cb7d, type: 2}
+  - {fileID: 2100000, guid: bbb1e53c92ae45e4896392cebdf3c2a5, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 5c45fca689a71e43e92265f746dabc5d
+  artRevision: City pixel painting 02

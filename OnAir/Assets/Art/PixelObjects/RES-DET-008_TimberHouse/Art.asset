@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: RES-DET-008_TimberHouse pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 4a5dc4441e1ef2f4fa63ad003a9daf57, type: 2}
+  - {fileID: 4300000, guid: 50c5dd769a64fa045af4b1a3174941d1, type: 2}
+  - {fileID: 4300000, guid: 7475e9cf7e08f6749b638e36b12536a1, type: 2}
+  - {fileID: 4300000, guid: d40a462c124e3ff4095b41e7e5018669, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 222c5dd18ea37894b91f4430658bb85e, type: 2}
+  - {fileID: 2100000, guid: ea670f1be97e392439e2619ab8cc74ec, type: 2}
+  - {fileID: 2100000, guid: 293b6ff9ca2c27d48a6bcc67b34296c4, type: 2}
+  - {fileID: 2100000, guid: 085dcc9f419fda242a4a02e10393cb9c, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: d5ed99e0a0c42816a18a7ac239e8b91b
+  artRevision: City pixel painting 02

@@ -2,17 +2,20 @@
 
 Unity 工程为 `OnAir/`，正式入口为 `Assets/Scenes/Main.unity`。根目录 Art 保存美术原稿，Docs 保存项目说明。
 
+默认世界已升级为 [连续世界 V01](ContinuousWorld.md)：ContinuousWorldPlan 负责全局地理与不等街区，ContinuousWorldLayout 负责表现，TerrainStreamer 只负责加载切片。下方旧分段地形说明保留为兼容模式。
+
 | Assets 内目录 | 内容 |
 | --- | --- |
 | Scenes | Main；临时场景 `_Temp_任务名` 验证完成后删除 |
 | Scripts/Game | GameEntry 初始化和引用连接；GameSession 当前状态及操作 |
 | Scripts/Flight | FlightController 实际移动与盘旋；FlightView 外观；CameraFollow 镜头 |
 | Scripts/World | JourneyController 航程与路线；TerrainStreamer 地块生命周期；BlockGenerator 布局；BuildingFootprint 占地；BuildingView 窗灯引用 |
+| Scripts/World/DenseCityLayout | 城市专用窄路与错位街区，建筑占地排列，路面批量网格与释放；其他地形仍由 BlockGenerator 原布局处理 |
 | Scripts/Environment | EnvironmentController 光照和窗灯；WeatherParticles 天气粒子 |
 | Scripts/UI | FlightPanel 状态显示与操作 |
 | Scripts/Data | CsvReader；各配置读取器、数据类型和资源映射类型 |
 | Prefabs/Characters | Plane 角色根预制体、LowWing 低翼飞机模型预制体 |
-| Prefabs/Buildings | 18 个地形建筑变体；Shared 为变体依赖的基础预制体 |
+| Prefabs/Buildings | 18 个旧地形建筑变体及 13 个日式独立建筑；Residential/Commercial 分类新资产；Shared 为旧变体依赖 |
 | Prefabs/World | 道路、植被、道具及 Shared 基础资源 |
 | Art | Sprites、Meshes、Materials、Shaders |
 | Data/Tables | buildings、terrains、weather_fx 三张规则表 |

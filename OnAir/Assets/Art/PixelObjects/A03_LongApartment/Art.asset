@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A03_LongApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: a953aca124d210547be2f093c5aec11d, type: 2}
+  - {fileID: 4300000, guid: 9163f9ef5c3c374468aa6deb9a02ee5e, type: 2}
+  - {fileID: 4300000, guid: 2e9fc5d06f2721b459f36ce1b387b3be, type: 2}
+  - {fileID: 4300000, guid: 2c4d613079dbf3a409b72f9035a97c82, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 33505ac06002d0c42bc7e9eb76b12994, type: 2}
+  - {fileID: 2100000, guid: 2d3124016613dec4d855aba975aba627, type: 2}
+  - {fileID: 2100000, guid: e5eadee331f639b44beb9b3573b6c2b6, type: 2}
+  - {fileID: 2100000, guid: ce3ec61057318b54e8f5d9a7deffd858, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 2056079c7f940a70e98cdb1e6bc96a77
+  artRevision: City pixel painting 02

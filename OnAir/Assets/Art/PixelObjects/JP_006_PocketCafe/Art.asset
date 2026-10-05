@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: JP_006_PocketCafe pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 4139f6ef532813c46bcdf6116b9b0247, type: 2}
+  - {fileID: 4300000, guid: e90c05d486deaf34cb94d30bdc986f12, type: 2}
+  - {fileID: 4300000, guid: 880dd6c9fa6b70544b625ec42f7f6e06, type: 2}
+  - {fileID: 4300000, guid: 633f3c44c53b0b146b04e8c3181c68db, type: 2}
+  materials:
+  - {fileID: 2100000, guid: b9a746ba3d5205449a6fd3f99f02951a, type: 2}
+  - {fileID: 2100000, guid: 932e4d52a1cafd042a976d4ea236c7d4, type: 2}
+  - {fileID: 2100000, guid: 2f7cd39b66c33fc48b95a13ddb9d2916, type: 2}
+  - {fileID: 2100000, guid: 3ebc3b792b45c814b889864a147df696, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 5e5930221216d6e13aa728db7f19884f
+  artRevision: City pixel painting 02

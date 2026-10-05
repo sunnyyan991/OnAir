@@ -1,104 +1,96 @@
 using UnityEngine;
 namespace OnAir
 {
-    // Owns the character's world position. Journey owns route selection; the camera only observes.
     [DefaultExecutionOrder(-100)]
-    public sealed class FlightController : MonoBehaviour
+    public sealed class FlightController:MonoBehaviour
     {
         public JourneyController journey;
-        [Min(0)] public float speedMetersPerSecond=12;
-        [Min(1)] public float altitude=19;
-        [Min(0)] public float swayAmplitude=1.2f;
-        [Min(.01f)] public float swayFrequency=.32f;
-        [Min(0)] public float bobAmplitude=.2f;
-        public bool autoCircle=true;
-        [Min(1)] public float firstCircleAfter=10;
-        [Min(1)] public float circleInterval=22;
-        [Min(1)] public float circleRadius=4.5f;
-        public bool IsCircling {get;private set;}
-        public Vector3 Heading {get;private set;}=Vector3.forward;
-        public float Bank {get;private set;}
-        public float CircleProgress=>circleAngle/(Mathf.PI*2);
-        float cruiseTime,flightTime,untilCircle,circleAngle,activeRadius;
-        int originLeg,teleport=-1,turnSign=1;
-        Vector3 circleStart,circleForward,circleRight;
-        float WorldSpeed=>Mathf.Max(0,speedMetersPerSecond)*TerrainStreamer.SegmentLength/journey.Current.terrain.distanceMeters;
-
-        void Start()=>Synchronize();
-        void Update()=>Tick(Time.deltaTime);
-        void Synchronize()
+        [Min(0)]public float speedMetersPerSecond=24;
+        public float routeSlope;
+        public float RouteX(float z)=>routeSlope*z;
+        public void SetScreenHeading(Camera camera,float degrees)
         {
-            journey.Initialize();
-            if(teleport!=journey.TeleportRevision)
-            {
-                teleport=journey.TeleportRevision;originLeg=journey.Current.index;
-                cruiseTime=flightTime=0;untilCircle=firstCircleAfter;circleAngle=0;Bank=0;turnSign=1;IsCircling=false;
-                CruisePose();
-            }
-            int delta=journey.Current.index-originLeg;
-            if(delta!=0)
-            {
-                var shift=Vector3.back*(delta*TerrainStreamer.SegmentLength);
-                transform.position+=shift;circleStart+=shift;originLeg=journey.Current.index;
-            }
+            var r=camera.transform.right;var u=camera.transform.up;
+            // Keep the existing screen quadrant; the unsigned angle also has a near-sideways solution.
+            float t=Mathf.Sign(u.z/r.z)*Mathf.Tan(degrees*Mathf.Deg2Rad);
+            routeSlope=(t*r.z-u.z)/(u.x-t*r.x);
         }
+        [Min(1)]public float altitude=19;
+        public float ObstacleCeiling{get;private set;}
+        public void ConfigureClearance(BuildingData buildings)=>ConfigureClearance(buildings.Prefabs.Values);
+        public void ConfigureClearance(System.Collections.Generic.IEnumerable<GameObject> prefabs)
+        {
+            float top=0;
+            foreach(var prefab in prefabs)
+            {
+                var footprint=prefab.GetComponent<BuildingFootprint>();if(footprint)top=Mathf.Max(top,footprint.height);
+                foreach(var renderer in prefab.GetComponentsInChildren<Renderer>(true))top=Mathf.Max(top,renderer.bounds.max.y-prefab.transform.position.y);
+            }
+            ObstacleCeiling=top+1;altitude=Mathf.Max(65,ObstacleCeiling+30);
+        }
+        [Min(0)]public float swayAmplitude=1.2f;
+        [Min(.01f)]public float swayFrequency=.12f;
+        [Min(0)]public float bobAmplitude=.15f;
+        // Serialized compatibility only; orbit behavior has been removed.
+        [HideInInspector]public bool autoCircle=false;
+        [HideInInspector]public float firstCircleAfter=10,circleInterval=22,circleRadius=4.5f;
+        public bool IsCircling=>false;
+        public float CircleProgress=>0;
+        public Vector3 Heading{get;private set;}=Vector3.forward;
+        public float Bank{get;private set;}
+        float flightTime;int teleport=-1;
+        ContinuousWorldPlan landscape;
+        float nextCacheTrim;
+        float groundClearance,clearanceVelocity;
+        float aircraftRadius=8;
+        public void ConfigureAircraft(AircraftRig rig){if(rig)aircraftRadius=.5f*Mathf.Sqrt(rig.length*rig.length+rig.wingspan*rig.wingspan)+2;}
+        public float CruiseHeight=>altitude+groundClearance;
+        float WorldSpeed=>Mathf.Max(0,speedMetersPerSecond)*TerrainStreamer.SegmentLength/journey.Current.terrain.distanceMeters;
+        void Start()=>Tick(0);
+        void Update()=>Tick(Mathf.Min(Time.deltaTime,.05f));
         public void Tick(float seconds)
         {
-            if(!journey)return;
-            Synchronize();
-            if(!IsCircling)CruisePose();
-            if(journey.context.paused||seconds<=0||float.IsNaN(seconds)||float.IsInfinity(seconds)||WorldSpeed<=0)return;
-            if(IsCircling)
+            if(!journey)return;journey.Initialize();
+            if(landscape==null||landscape.seed!=journey.seed||landscape.routeSlope!=routeSlope)landscape=new ContinuousWorldPlan(journey.seed,routeSlope);
+            if(Time.unscaledTime>=nextCacheTrim){landscape.TrimCaches();nextCacheTrim=Time.unscaledTime+2;}
+            if(teleport!=journey.TeleportRevision){teleport=journey.TeleportRevision;flightTime=0;Bank=0;clearanceVelocity=0;}
+            if(!journey.context.paused&&seconds>0&&!float.IsNaN(seconds)&&!float.IsInfinity(seconds)&&WorldSpeed>0){flightTime+=seconds;journey.Advance(seconds*speedMetersPerSecond);}
+            float phase=flightTime*swayFrequency,seedPhase=(journey.seed%997)*.013f;
+            float x=swayAmplitude*(.78f*Mathf.Sin(phase+seedPhase)+.22f*Mathf.Sin(phase*.43f+seedPhase*2));
+            // Visual sway must not yaw the cruise heading.
+            Heading=new Vector3(routeSlope,0,1).normalized;
+            Bank=-Mathf.Sin(phase+seedPhase)*7f;
+            float globalZ=(journey.Current.index+journey.Progress)*TerrainStreamer.SegmentLength;
+            x+=RouteX(globalZ);
+            if(AircraftHeightPreview.Enabled)
             {
-                float rate=WorldSpeed/activeRadius;
-                float used=Mathf.Min(seconds,(Mathf.PI*2-circleAngle)/rate);
-                circleAngle=Mathf.Min(Mathf.PI*2,circleAngle+used*rate);flightTime+=used;
-                var p=circleStart+circleRight*(activeRadius*(1-Mathf.Cos(circleAngle)))+circleForward*(activeRadius*Mathf.Sin(circleAngle));
-                Heading=(circleRight*Mathf.Sin(circleAngle)+circleForward*Mathf.Cos(circleAngle)).normalized;
-                ApplyPose(p,turnSign*27,used);
-                if(circleAngle>=Mathf.PI*2-.00001f)
-                {
-                    IsCircling=false;untilCircle=circleInterval;turnSign=-turnSign;CruisePose();
-                    Cruise(seconds-used);
-                }
+                // Fixed flight altitude with a separate camera/streaming anchor,
+                // preserving the approved framing without terrain-driven climbs.
+                groundClearance=0;clearanceVelocity=0;
+                transform.SetPositionAndRotation(new Vector3(x,AircraftHeightPreview.CameraAnchorHeight,journey.Progress*TerrainStreamer.SegmentLength),Quaternion.LookRotation(Heading,Vector3.up));
+                return;
             }
-            else
-            {
-                Cruise(seconds);
-                if(autoCircle&&untilCircle<=0)BeginCircle();
-            }
+            // Preview the whole aircraft corridor, including hills beside its centre line.
+            // A centre-only preview could miss a wingtip hill until the hard floor
+            // snapped the aircraft (and its following camera) upwards.
+            float terrain=0;
+            if(journey.continuousWorld)for(float ahead=-aircraftRadius;ahead<=80+aircraftRadius;ahead+=4)
+                for(float side=-aircraftRadius;side<=aircraftRadius+4;side+=4)
+                    terrain=Mathf.Max(terrain,landscape.Height(x+routeSlope*ahead+Mathf.Min(side,aircraftRadius),globalZ+ahead));
+            // Hard clearance floor beneath the whole wingspan, independent of the climb smoothing.
+            float localGround=0;
+            // Terrain is a shared 4 m cell height field. Visit every intersected cell,
+            // including the full jet footprint regardless of its heading or bank.
+            if(journey.continuousWorld)for(float gz=Mathf.Floor((globalZ-aircraftRadius)/4)*4;gz<=globalZ+aircraftRadius;gz+=4)
+                for(float gx=Mathf.Floor((x-aircraftRadius)/4)*4;gx<=x+aircraftRadius;gx+=4)localGround=Mathf.Max(localGround,landscape.Height(gx+2,gz+2));
+            if(seconds==0){groundClearance=terrain;clearanceVelocity=0;}
+            else if(!journey.context.paused)groundClearance=Mathf.SmoothDamp(groundClearance,terrain,ref clearanceVelocity,terrain>groundClearance?2.5f:6f,8,seconds);
+            // Clearance is measured against the actual flight altitude. The cruise
+            // altitude already provides a reserve; do not demand the full terrain
+            // height again as an instantaneous extra climb.
+            groundClearance=Mathf.Max(groundClearance,localGround+30-altitude);
+            transform.SetPositionAndRotation(new Vector3(x,altitude+groundClearance+bobAmplitude*(.7f*Mathf.Sin(flightTime*.42f+seedPhase)+.3f*Mathf.Sin(flightTime*.19f+seedPhase*2)),journey.Progress*TerrainStreamer.SegmentLength),Quaternion.LookRotation(Heading,Vector3.up));
         }
-        void Cruise(float seconds)
-        {
-            if(seconds<=0)return;
-            cruiseTime+=seconds;flightTime+=seconds;untilCircle-=seconds;
-            journey.Advance(seconds*speedMetersPerSecond);Synchronize();CruisePose();
-            // Gentle wing banking follows the bend in the cruising path.
-            float bank=-Mathf.Sin(cruiseTime*swayFrequency)*7;
-            Bank=Mathf.Lerp(Bank,bank,1-Mathf.Exp(-3*seconds));
-        }
-        void CruisePose()
-        {
-            float phase=cruiseTime*swayFrequency;
-            var p=new Vector3(Mathf.Sin(phase)*swayAmplitude,0,journey.Progress*TerrainStreamer.SegmentLength);
-            Heading=new Vector3(Mathf.Cos(phase)*swayAmplitude*swayFrequency,0,Mathf.Max(.01f,WorldSpeed)).normalized;
-            ApplyPose(p,Bank,0);
-        }
-        void ApplyPose(Vector3 position,float bank,float seconds)
-        {
-            position.y=altitude+Mathf.Sin(flightTime*1.6f)*bobAmplitude;
-            transform.SetPositionAndRotation(position,Quaternion.LookRotation(Heading,Vector3.up));
-            Bank=Mathf.Lerp(Bank,bank,1-Mathf.Exp(-3*seconds));
-        }
-        public bool BeginCircle()
-        {
-            if(!journey)return false;
-            Synchronize();
-            if(IsCircling||journey.context.paused||WorldSpeed<=0)return false;
-            circleStart=transform.position;circleForward=Heading;
-            circleRight=Vector3.Cross(Vector3.up,circleForward)*turnSign;
-            activeRadius=Mathf.Max(1,circleRadius);circleAngle=0;IsCircling=true;
-            return true;
-        }
+        public bool BeginCircle()=>false;
     }
 }

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A06_OlderGalleryApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 0b7fe3d80b595e74b839167d2d27b113, type: 2}
+  - {fileID: 4300000, guid: 17d4199abae2ca742a95f66ea2af53bd, type: 2}
+  - {fileID: 4300000, guid: 22484e7cb05995c4e96a423b853b8498, type: 2}
+  - {fileID: 4300000, guid: a13d29e8859369d46b20398365d42799, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 66ca7cc083e1adf4bb8bb270416969a8, type: 2}
+  - {fileID: 2100000, guid: 301513e01cfd9f2458328d99aeb9e5fd, type: 2}
+  - {fileID: 2100000, guid: efd656f449853424f9168c08265d24bc, type: 2}
+  - {fileID: 2100000, guid: 4c2cf2a442a99e347b8c504125a67ec0, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: e1b7a9ac95b4f2aaead0c198a49ad673
+  artRevision: City pixel painting 02

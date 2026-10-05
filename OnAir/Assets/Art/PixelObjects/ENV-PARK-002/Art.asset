@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: ENV-PARK-002 pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 28144fac86d56574a89d58b486308879, type: 2}
+  - {fileID: 4300000, guid: 13e6132f7659a3c498523184c1a82159, type: 2}
+  - {fileID: 4300000, guid: b65da25484391f0459f73387c814bdcf, type: 2}
+  - {fileID: 4300000, guid: f348f742b91bdc241b7ea5b62d872913, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 5dc7587d02264034fabb4fd5b2470010, type: 2}
+  - {fileID: 2100000, guid: a389f90dac75db145a34151a31b6bb55, type: 2}
+  - {fileID: 2100000, guid: e1d5c7904806d1346af13007d3d9e60c, type: 2}
+  - {fileID: 2100000, guid: e90dd4f7bd2aabc4797d01e7df585349, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: b201745dfc4f144a2d03ee818f030bc0
+  artRevision: City pixel painting 02

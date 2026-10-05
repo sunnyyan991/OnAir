@@ -131,12 +131,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   journey: {fileID: 0}
-  speedMetersPerSecond: 12
+  speedMetersPerSecond: 24
+  routeSlope: 0
   altitude: 19
   swayAmplitude: 1.2
-  swayFrequency: 0.32
-  bobAmplitude: 0.2
-  autoCircle: 1
+  swayFrequency: 0.12
+  bobAmplitude: 0.15
+  autoCircle: 0
   firstCircleAfter: 10
   circleInterval: 22
   circleRadius: 4.5

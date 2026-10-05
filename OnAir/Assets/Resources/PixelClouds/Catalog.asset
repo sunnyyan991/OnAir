@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 006319d58f0ef7747b91df5fd25dec39, type: 3}
+  m_Name: Catalog
+  m_EditorClassIdentifier: 
+  atlas: {fileID: 2800000, guid: b39596976c028ab49899be75fb845add, type: 3}
+  pixelsPerMetre: 1.4
+  shapes:
+  - id: L01
+    uv:
+      serializedVersion: 2
+      x: 0.053385418
+      y: 0.76660156
+      width: 0.2311198
+      height: 0.16699219
+    grid: {x: 89, y: 43}
+  - id: L02
+    uv:
+      serializedVersion: 2
+      x: 0.33984375
+      y: 0.76660156
+      width: 0.31445312
+      height: 0.16210938
+    grid: {x: 121, y: 42}
+  - id: L03
+    uv:
+      serializedVersion: 2
+      x: 0.69596356
+      y: 0.7363281
+      width: 0.28059897
+      height: 0.24023438
+    grid: {x: 108, y: 62}
+  - id: L04
+    uv:
+      serializedVersion: 2
+      x: 0.017578125
+      y: 0.49414062
+      width: 0.2877604
+      height: 0.2109375
+    grid: {x: 111, y: 54}
+  - id: L05
+    uv:
+      serializedVersion: 2
+      x: 0.32291666
+      y: 0.48535156
+      width: 0.34700522
+      height: 0.2578125
+    grid: {x: 134, y: 66}
+  - id: L06
+    uv:
+      serializedVersion: 2
+      x: 0.671875
+      y: 0.4873047
+      width: 0.31445312
+      height: 0.21875
+    grid: {x: 121, y: 56}
+  - id: M01
+    uv:
+      serializedVersion: 2
+      x: 0.07096354
+      y: 0.2783203
+      width: 0.17838542
+      height: 0.14453125
+    grid: {x: 69, y: 37}
+  - id: M02
+    uv:
+      serializedVersion: 2
+      x: 0.38997397
+      y: 0.25683594
+      width: 0.20442708
+      height: 0.16308594
+    grid: {x: 79, y: 42}
+  - id: M03
+    uv:
+      serializedVersion: 2
+      x: 0.7057292
+      y: 0.26171875
+      width: 0.2591146
+      height: 0.14453125
+    grid: {x: 100, y: 37}
+  - id: M04
+    uv:
+      serializedVersion: 2
+      x: 0.052083332
+      y: 0.036132812
+      width: 0.23502605
+      height: 0.18554688
+    grid: {x: 91, y: 48}
+  - id: M05
+    uv:
+      serializedVersion: 2
+      x: 0.37044272
+      y: 0.06542969
+      width: 0.2877604
+      height: 0.11816406
+    grid: {x: 111, y: 31}
+  - id: M06
+    uv:
+      serializedVersion: 2
+      x: 0.7220052
+      y: 0.051757812
+      width: 0.24479167
+      height: 0.13964844
+    grid: {x: 94, y: 36}

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: COM-OFF-007 pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: b349821df22fd7a49afe4f4e761a9bf2, type: 2}
+  - {fileID: 4300000, guid: 6e3dfd40e8a826a4584d0cd6debf78cf, type: 2}
+  - {fileID: 4300000, guid: 5e0398d7e7466bb498dda95bbf9c7b36, type: 2}
+  - {fileID: 4300000, guid: 9481fb4f7036cd246bddde3159734d5d, type: 2}
+  materials:
+  - {fileID: 2100000, guid: a8a3059266723f64c89661f8fdf1d469, type: 2}
+  - {fileID: 2100000, guid: 06d83fd946a3a924094c42c2d1f8382d, type: 2}
+  - {fileID: 2100000, guid: c0507a0fc076dfe4c8101faea45af378, type: 2}
+  - {fileID: 2100000, guid: 4932eaf945a4cc54eac3a6ce4ba1e3a3, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 1ea79517a2d6db475757581ae8af9b47
+  artRevision: City pixel painting 02

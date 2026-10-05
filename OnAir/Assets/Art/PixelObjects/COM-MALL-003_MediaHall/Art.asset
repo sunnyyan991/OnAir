@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: COM-MALL-003_MediaHall pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 5118b9d9d80efde4fa85cee4febbb714, type: 2}
+  - {fileID: 4300000, guid: 835784f91dee9744c8979ff47ccdfb8d, type: 2}
+  - {fileID: 4300000, guid: e75cf422f80bac347bca6f187ab86d99, type: 2}
+  - {fileID: 4300000, guid: fa9c005f1c5846140bbb222a19a410d3, type: 2}
+  materials:
+  - {fileID: 2100000, guid: b45c163ed66b3e44e9a47a857a30c325, type: 2}
+  - {fileID: 2100000, guid: 4dbd72f81197f5741b720d73692ed060, type: 2}
+  - {fileID: 2100000, guid: 00f61fe758c4d65498a539db450f80c0, type: 2}
+  - {fileID: 2100000, guid: ea5272a3469f4e44dbc4c425ee4b64aa, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: cfb93b5f615aba4b0dc1d3f24c9d9f9a
+  artRevision: City pixel painting 02

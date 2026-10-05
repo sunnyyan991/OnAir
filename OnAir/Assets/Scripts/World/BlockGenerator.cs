@@ -38,6 +38,11 @@ namespace OnAir
                 if(Application.isPlaying)Destroy(generated.gameObject);else DestroyImmediate(generated.gameObject);
             }
             generated=new GameObject("Generated street block").transform;generated.SetParent(transform,false);
+            if(biome==Biome.City && kit.cityAsphalt && kit.cityPaving && kit.cityPaint)
+            {
+                BuildingCount=DenseCityLayout.Build(this);
+                return;
+            }
             var roads=new GameObject("Road network").transform;roads.SetParent(generated,false);
             var lots=new GameObject("Building lots").transform;lots.SetParent(generated,false);
             var greenery=new GameObject("Park and street furniture").transform;greenery.SetParent(generated,false);

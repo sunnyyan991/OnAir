@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: COM-MALL-005_CornerDuo_V02 pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 72833b25478aec04cb41b7b578f9901b, type: 2}
+  - {fileID: 4300000, guid: 1c9c2998620b24543bfdb54cb30235e9, type: 2}
+  - {fileID: 4300000, guid: d074b0e7717df4844b662c187ab6c971, type: 2}
+  - {fileID: 4300000, guid: b90f13f6d8ac06649a5e95088284248b, type: 2}
+  materials:
+  - {fileID: 2100000, guid: a7a0b830e6e77b442bc7673f8c4266c1, type: 2}
+  - {fileID: 2100000, guid: e9e14c4261679d447a0aa309f34f40e5, type: 2}
+  - {fileID: 2100000, guid: 95557f5f30f66934bb3ac83237421579, type: 2}
+  - {fileID: 2100000, guid: 9b7abffd11a83c241b7c356b4a784e06, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: a66311426de81765e135a7a020d043c3
+  artRevision: City pixel painting 02

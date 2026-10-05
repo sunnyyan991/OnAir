@@ -1,31 +1,37 @@
 # OnAir
 
-## 已确定的方向
+当前飞机：Main 使用原 LowWing 小飞机。第二视角暂时关闭并保留进度；第一视角使用已确认的 12 款云形和三层运行云，统一颗粒度，支持云海飞行与穿云。A330 及涂装已归档。详见 [分层云说明](Docs/CloudAssetApproval.md) 与 [三层云更新](Docs/CloudLayers.md)。
 
-- 开发引擎：Unity。
-- 美术参考：《八方旅人》的 HD-2D 视觉风格。
-- 画面目标：2D 像素角色与带有像素质感的 3D 场景结合，通过光影、空间层次和适度景深形成微缩景观感。
+面向副屏的日式城市飞行氛围游戏：飞机持续前进，城市、河流、森林与山地在下方滚动，并显示现实时间。
 
-## 建议的美术落地方式
+## 打开与运行
 
-- 角色：采用像素精灵和逐帧动画，统一角色比例及像素密度。
-- 环境：使用 3D 地形、建筑与道具，搭配统一尺度的像素贴图。
-- 摄影：先验证固定倾斜视角；以角色轮廓清晰、场景遮挡合理为优先。
-- 光影：强调环境色与局部光源的冷暖关系，控制泛光和景深，保证可玩区域清晰。
-- 技术验证：重点检查像素角色与场景的遮挡、受光、投影，以及镜头移动时的像素稳定性。
+Unity 工程在 `OnAir/`，版本为 `2022.3.62f3c1`。打开唯一正式场景 **`OnAir/Assets/Scenes/Main.unity`**，点击 Play。
 
-## 当前状态
+- 每次启动默认使用新种子；NEW SEED 换地图，EXPLORE 快速预览群系。
+- 原生分辨率连续渲染；已移除 PIXEL 2X / PIXEL 3X 整屏颗粒化路径。
+- 现有 13 种日式建筑和两种树木已接入独立物体像素外观，保留真实遮挡、昼夜和窗灯。原始模型继续作为制作源；像素美术细节仍需打磨。
+- 飞机居中，约 30° 屏幕航向，速度 24 米/秒；无自动盘旋，有轻微游移、翼灯及地形安全高度。
+- 天气独立随机；TIME OF DAY 使用像素旋钮连续选时，拨动后从该时刻继续自动推进。
+- 地图按镜头覆盖和前方预加载；历史航程保存重建数据，不保留所有经过的场景对象。
 
-Unity 工程位于 `OnAir/`，使用 Unity `2022.3.62f3c1` 和 URP。打开 **`OnAir/Assets/Scenes/Main.unity`** 后点击 Play。这是唯一正式场景，也是打包入口。
+## 当前说明
 
-已实现飞机巡航与盘旋、镜头平滑跟随、按航程切换地形、道路与建筑生成、天气和各地形昼夜表现。飞机已接入新交付的低翼 3D 模型，保留 Sprite 回退；建筑与道路使用 3D 几何体。
+- [项目全盘进度](Docs/ProjectStatus.md)
+- [配置与操作](Docs/Configuration.md)
+- [原生渲染、资产清理与性能验证](Docs/NativeRenderingCleanup.md)
+- [像素材质核查与后续美术制作](Docs/PixelMaterialWorkflow.md)
+- [像素片体架构自查、第二轮绘制与随机夜灯](Docs/PixelArtV2.md)
+- [建筑共创工作流](Docs/BuildingArtWorkflow.md)
+- [镜头驱动的地图加载](Docs/WorldV14.md)
+- [项目结构](Docs/ProjectStructure.md)
 
-- 飞行参数：`Assets/Prefabs/Characters/Plane.prefab` 的 FlightController。
-- 建筑、地形、天气表：`Assets/Data/Tables`。
-- 地形昼夜表现：`Assets/Data/Profiles`。
-- 预制体与资源映射：`Assets/Data/Catalogs`。
-- 统一渲染配置：`Assets/Settings/Rendering/MainPipeline.asset`。
+## 文件管理
 
-详细说明见 [项目结构](Docs/ProjectStructure.md)、[配置与操作](Docs/Configuration.md) 和 [飞机模型](Docs/Aircraft.md)。根目录 `Art/` 保存美术原稿，游戏实际使用的资源位于 Unity 工程的 `Assets/Art`。
+道路车辆、绿地神社 / 公园 / 球场已接入，见[生成与资产说明](Docs/CityLife.md)和[日夜实物图](Art/Reviews/CityLife/index.html)。启动耗时的测量结果与后续执行重点见[性能诊断](Docs/PerformancePriorities-2026-10-04.md)。
 
-临时验证场景统一使用 `Assets/Scenes/_Temp_任务名.unity`，验证完成后合入正式资源并删除临时场景。不再按每轮原型建立平行项目目录。
+运行资源统一在 Unity `Assets` 中，规则表、资源映射和渲染表现分开维护。`Docs/` 保留说明，根目录 `Art/` 保存美术原稿、验证截图和退役资产归档。
+
+本轮归档位于 `Art/Archive/2026-09-24-retired-city/`，保留 GUID、引用审计和恢复所需的配置快照。不会删除现有建筑仍依赖的共享素材。历史 V01–V14 文档描述各阶段状态；与当前操作冲突时，以本 README 和 Configuration 为准。
+
+临时场景使用 `_Temp_任务名`，不加入打包，验证后清理。Main 始终是唯一正式入口。

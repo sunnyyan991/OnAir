@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: JP_009_PencilOffice pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 8479ae06d11b28d469d7311a67f6e24f, type: 2}
+  - {fileID: 4300000, guid: ea816746f46f24b4dba2661b1ce1e2e9, type: 2}
+  - {fileID: 4300000, guid: b9f5ed3f8d7c3324ab1d97c7b9ac564b, type: 2}
+  - {fileID: 4300000, guid: d3a6b21c8d27083448336203fbfe5bda, type: 2}
+  materials:
+  - {fileID: 2100000, guid: b0875f6d4b839164d981aced83e5cabf, type: 2}
+  - {fileID: 2100000, guid: 7e8dfbb504f13da4e8521fce8b66710d, type: 2}
+  - {fileID: 2100000, guid: bcee8bc68d3303043905db5c94cefd50, type: 2}
+  - {fileID: 2100000, guid: 80bd101ec183acb4d850852fbb267c71, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 6b1a8d44e6bbd714c26b907cce71122b
+  artRevision: City pixel painting 02

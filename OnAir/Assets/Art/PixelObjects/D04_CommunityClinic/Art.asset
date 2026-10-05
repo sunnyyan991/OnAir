@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: D04_CommunityClinic pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 8e444785599e6d64e95ec524de6ab0e5, type: 2}
+  - {fileID: 4300000, guid: 8ea259ebdf09b804487a5444494580bf, type: 2}
+  - {fileID: 4300000, guid: fe5df3345adc7b948b1e4acdb398dbb3, type: 2}
+  - {fileID: 4300000, guid: 11e7647ca16d69541bc9656235bdbb7a, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 7c16002e7d7b6654783a0ce33a32f14b, type: 2}
+  - {fileID: 2100000, guid: a9830e28a74d0ad42b59f4ee4b0b22ab, type: 2}
+  - {fileID: 2100000, guid: 37867d93eb8a4ad4c89beeb10ce02d02, type: 2}
+  - {fileID: 2100000, guid: 8281a52b5d5e8dd489b27286bc104cde, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: ffecd335a782dbe793c530ed7d3ba403
+  artRevision: City pixel painting 02

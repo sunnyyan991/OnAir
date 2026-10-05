@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: COM-SHOP-003_NarrowTenant pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 6ec742f6cf6875c40b522168ca2ba643, type: 2}
+  - {fileID: 4300000, guid: 5eec9bb0a59ec684fab37d3b1bfaa6c7, type: 2}
+  - {fileID: 4300000, guid: 6514dff2c6c390f47b549386f330a118, type: 2}
+  - {fileID: 4300000, guid: 66e8f32214eb66b499e184f9b9edeafc, type: 2}
+  materials:
+  - {fileID: 2100000, guid: daec619938bfa5c4abfa0bb8603563cd, type: 2}
+  - {fileID: 2100000, guid: ea6a0505c3f4cee4f8119e8bf6dd63f3, type: 2}
+  - {fileID: 2100000, guid: fa9d76ca756683d438f02619fa9008a5, type: 2}
+  - {fileID: 2100000, guid: 78da641a9529cb74a8b67cdb87435e4d, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 990848956a3793ae1f22a0b2c1a4e7c1
+  artRevision: City pixel painting 02

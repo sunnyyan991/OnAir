@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A10_BrownBrickApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 9bacd6e185ce7354287d8468ff5f9806, type: 2}
+  - {fileID: 4300000, guid: dd657374872a2bc4d8c540eb4d1829d4, type: 2}
+  - {fileID: 4300000, guid: a666f0c9d5a7cf048a896ccf1626044f, type: 2}
+  - {fileID: 4300000, guid: cd723deb3b5f5c4418228fc00e32e91c, type: 2}
+  materials:
+  - {fileID: 2100000, guid: a5937158c03fe244d8a805873da1668e, type: 2}
+  - {fileID: 2100000, guid: 78913b6fb3b8300469554212aeb603c5, type: 2}
+  - {fileID: 2100000, guid: 21da0af190658c34484936a6da176e93, type: 2}
+  - {fileID: 2100000, guid: be4e5a64dafc1f441b18c1988b125876, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 9ef56efb16c2d2dcc41002b32012d46e
+  artRevision: City pixel painting 02

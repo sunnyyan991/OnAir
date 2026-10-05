@@ -18,10 +18,21 @@ MonoBehaviour:
   scenery: {fileID: 1181577953056993628, guid: 2a06199e4ce53174ab6f801e3e2144d3, type: 3}
   daySky: {r: 0.50980395, g: 0.6117647, b: 0.654902, a: 1}
   nightSky: {r: 0.078431375, g: 0.14509805, b: 0.21176471, a: 1}
-  dayAmbient: {r: 0.654902, g: 0.69411767, b: 0.72156864, a: 1}
+  dayAmbient: {r: 0.53333336, g: 0.59607846, b: 0.6666667, a: 1}
   nightAmbient: {r: 0.27450982, g: 0.3372549, b: 0.45882353, a: 1}
-  daySun: {r: 1, g: 0.9137255, b: 0.78431374, a: 1}
+  daySun: {r: 1, g: 0.96862745, b: 0.9098039, a: 1}
   nightSun: {r: 0.5058824, g: 0.60784316, b: 0.77254903, a: 1}
   nightWindows: {r: 1, g: 0.78039217, b: 0.47058824, a: 1}
-  dayIntensity: 1.1
+  dayIntensity: 1.35
   nightIntensity: 0.12
+  directionalPeriods: 1
+  dawnSun: {r: 1, g: 0.8784314, b: 0.7019608, a: 1}
+  duskSun: {r: 1, g: 0.8156863, b: 0.62352943, a: 1}
+  dawnAmbient: {r: 0.47058824, g: 0.5411765, b: 0.67058825, a: 1}
+  duskAmbient: {r: 0.45490196, g: 0.5176471, b: 0.6313726, a: 1}
+  dawnIntensity: 1.12
+  duskIntensity: 1.18
+  dawnDirection: {x: 20, y: -95, z: 0}
+  dayDirection: {x: 48, y: -55, z: 0}
+  duskDirection: {x: 16, y: 85, z: 0}
+  nightDirection: {x: 35, y: -20, z: 0}

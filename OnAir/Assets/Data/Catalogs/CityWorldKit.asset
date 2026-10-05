@@ -29,3 +29,23 @@ MonoBehaviour:
   lamp: {fileID: 4677115694050446210, guid: fd809b8b2a9ea5d4d860da65aea783b9, type: 3}
   bench: {fileID: 3196560641927216211, guid: abb4edb526bbe854b9bdc4cc29f04b04, type: 3}
   planter: {fileID: 5003038444906708791, guid: 92ed271299315104ab6a7a3d3d3189d7, type: 3}
+  greenSpaceAssets:
+  - {fileID: 8044371917915150583, guid: ea0f41faa9131284aa5ab4a002c8b2ad, type: 3}
+  - {fileID: 4532435876035549898, guid: ec158a5a452f2bd4f8794db89901dbc0, type: 3}
+  - {fileID: 4208241699871744248, guid: b31cb0a76c0796d49b36dde2230c2ef7, type: 3}
+  - {fileID: 5660048444332149682, guid: 16b6ab78ac38baa4b9e985094c0418e3, type: 3}
+  - {fileID: 2221633327036101072, guid: 55383b35fd8cea141aa2a347d6eec979, type: 3}
+  cityAsphalt: {fileID: 2100000, guid: ccdca1f3cd5257e4e81576e2e2b0a430, type: 2}
+  cityPaving: {fileID: 2100000, guid: 9350854befb9f4c4ea80860d1d59a27d, type: 2}
+  cityPaint: {fileID: 2100000, guid: 0374166ba44fcf54f8c3a79138cb0bb7, type: 2}
+  buildingGapModules: 1
+  streetSetbackModules: 1
+  emptyPlotModules: 12
+  emptyPlotChance: 0.035
+  facadePalette:
+  - {r: 0.76862746, g: 0.77254903, b: 0.7607843, a: 1}
+  - {r: 0.7921569, g: 0.79607844, b: 0.78039217, a: 1}
+  - {r: 0.7176471, g: 0.7294118, b: 0.72156864, a: 1}
+  - {r: 0.8117647, g: 0.80784315, b: 0.7921569, a: 1}
+  - {r: 0.7490196, g: 0.75686276, b: 0.7490196, a: 1}
+  - {r: 0.8, g: 0.76862746, b: 0.70980394, a: 1}

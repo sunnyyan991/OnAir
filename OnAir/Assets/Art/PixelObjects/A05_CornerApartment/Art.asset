@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A05_CornerApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 0062fc8d86f7ffc49bd1580a95615cfa, type: 2}
+  - {fileID: 4300000, guid: 944f49408fc1a8249a6a5254679004af, type: 2}
+  - {fileID: 4300000, guid: 25c499a421d5f3f4584b3619c93f7dd1, type: 2}
+  - {fileID: 4300000, guid: 0bf7068a5171a8945a945ca2836d8d86, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 13ba3b7f215ea3b4cae9e1ff847f0606, type: 2}
+  - {fileID: 2100000, guid: 150e6f770b07fac448400ce7b78e91a3, type: 2}
+  - {fileID: 2100000, guid: eb2f31c301abb1546acc3bf32210e451, type: 2}
+  - {fileID: 2100000, guid: 7055817dc8664d2498597a73435d256e, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: ff39450784c1cf102246635458abcac6
+  artRevision: City pixel painting 02

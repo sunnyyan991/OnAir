@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A09_TerracedApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 8ebab1064c4dc3d41adaf9e06f176aa1, type: 2}
+  - {fileID: 4300000, guid: bc196e0f5b9dd234d8e0d981628ce29c, type: 2}
+  - {fileID: 4300000, guid: 71ea62d30d9781945bb132625ef2c1d0, type: 2}
+  - {fileID: 4300000, guid: 4c92495e2ae5b714eabedbfb7b76afee, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 16691396a08ccd843864cd78ff5e28e2, type: 2}
+  - {fileID: 2100000, guid: cda64921b34fc5849b17aca1d08d9f7c, type: 2}
+  - {fileID: 2100000, guid: 7c955cdcd8c65424093b7c1dcd3fe85d, type: 2}
+  - {fileID: 2100000, guid: c5cebc0dd725e864ab9584a35592b64e, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 7e88c2a6f060cb06763028aee43e1d05
+  artRevision: City pixel painting 02

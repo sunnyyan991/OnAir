@@ -29,3 +29,17 @@ MonoBehaviour:
   lamp: {fileID: 4677115694050446210, guid: fd809b8b2a9ea5d4d860da65aea783b9, type: 3}
   bench: {fileID: 3196560641927216211, guid: abb4edb526bbe854b9bdc4cc29f04b04, type: 3}
   planter: {fileID: 5003038444906708791, guid: 92ed271299315104ab6a7a3d3d3189d7, type: 3}
+  greenSpaceAssets:
+  - {fileID: 8044371917915150583, guid: ea0f41faa9131284aa5ab4a002c8b2ad, type: 3}
+  - {fileID: 4532435876035549898, guid: ec158a5a452f2bd4f8794db89901dbc0, type: 3}
+  - {fileID: 4208241699871744248, guid: b31cb0a76c0796d49b36dde2230c2ef7, type: 3}
+  - {fileID: 5660048444332149682, guid: 16b6ab78ac38baa4b9e985094c0418e3, type: 3}
+  - {fileID: 2221633327036101072, guid: 55383b35fd8cea141aa2a347d6eec979, type: 3}
+  cityAsphalt: {fileID: 0}
+  cityPaving: {fileID: 0}
+  cityPaint: {fileID: 0}
+  buildingGapModules: 1
+  streetSetbackModules: 1
+  emptyPlotModules: 12
+  emptyPlotChance: 0.04
+  facadePalette: []

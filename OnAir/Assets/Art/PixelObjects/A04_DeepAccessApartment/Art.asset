@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A04_DeepAccessApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: e3a5ce394672e424ebddd7ff703ed203, type: 2}
+  - {fileID: 4300000, guid: 304b72b974c71874d8c8b165045e7f09, type: 2}
+  - {fileID: 4300000, guid: 3c385d171807ba749b7608d592e56ade, type: 2}
+  - {fileID: 4300000, guid: 8c36c2b60d63cb940a546f2a39487a5f, type: 2}
+  materials:
+  - {fileID: 2100000, guid: a38108f012f9d7644862b5e750f8e729, type: 2}
+  - {fileID: 2100000, guid: 15a62a6e38229a54baaee6c89642f999, type: 2}
+  - {fileID: 2100000, guid: 66ac7c1999c6cb4479d0c41409cc188e, type: 2}
+  - {fileID: 2100000, guid: d9264cfadd5cc5b44b4edb77fd239c64, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: fa50b047df38b8350deee4af1a0638d2
+  artRevision: City pixel painting 02

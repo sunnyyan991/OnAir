@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: JP_012_RowHouse pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 210ca1897ff5d4f4f9d02310c76c2ca2, type: 2}
+  - {fileID: 4300000, guid: ecf81b265266321479642e1fa3431564, type: 2}
+  - {fileID: 4300000, guid: 85f7ddf9a6869b948b6fafdfeae9fda9, type: 2}
+  - {fileID: 4300000, guid: a864824338793344497332f6fe9d725e, type: 2}
+  materials:
+  - {fileID: 2100000, guid: c88544669b3e1764c83e6c62596470fe, type: 2}
+  - {fileID: 2100000, guid: ad9c936203ca2de41bd6c7b8babacabe, type: 2}
+  - {fileID: 2100000, guid: 151cf9e0e1722f442a6736e9f1f0bc0c, type: 2}
+  - {fileID: 2100000, guid: 17ecb2e94cc05c646938dc5e3ca10597, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 43808db61d1574f1050865ce0efd3dd8
+  artRevision: City pixel painting 02

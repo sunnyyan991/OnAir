@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: C05_ModernNagaya pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 0e68e380d25dcbd4faba0dd431de185e, type: 2}
+  - {fileID: 4300000, guid: 98095bee80ee6e845ac062231364a71f, type: 2}
+  - {fileID: 4300000, guid: fbe2e2c1d7a19f14b87e21485a3ef82a, type: 2}
+  - {fileID: 4300000, guid: 3a624ea0694b1924dab99068b73326e6, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 00b62ea5303732f42b39e8816e5a5d1e, type: 2}
+  - {fileID: 2100000, guid: 6431b6b8be67e694ab550a7132e3fadd, type: 2}
+  - {fileID: 2100000, guid: 8b2a827dd5a74e44ab87246240afa138, type: 2}
+  - {fileID: 2100000, guid: 0d232c44fee6c794fb98dc8529e784c6, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 38ff5f54017d01570cc90a69286f7071
+  artRevision: City pixel painting 02

@@ -13,12 +13,18 @@ namespace OnAir
         public EnvironmentController environment;
         public WeatherParticles weather;
         public FlightPanel panel;
+        public BiomeNavigator biomeNavigator;
         public Camera sceneCamera;
         public Light sun;
         public TextAsset buildingsTable,terrainsTable,weatherTable;
         public BuildingCatalog buildings;
         public TerrainCatalog terrains;
         public Shader weatherShader;
+        public bool randomizeOnStart=true;
+        public FrameRateDisplay frameRate;
+        public AircraftCabinView cabin;
+        public bool enableExperimentalWingView=false;
+        public LayeredPixelClouds clouds;
         string loadedTerrains;
         void Awake()
         {
@@ -28,12 +34,29 @@ namespace OnAir
             var definitions=terrains.Resolve(TerrainTable.Parse(loadedTerrains));
             world.buildings=new BuildingData(TableSource.Read(buildingsTable),buildings);
             WeatherFxTable.Parse(TableSource.Read(weatherTable));
+            if(randomizeOnStart)journey.seed=JourneyController.FreshSeed(journey.seed);
+            var arguments=System.Environment.GetCommandLineArgs();
+            for(int i=0;i<arguments.Length-1;i++)if(arguments[i]=="-onairSeed"&&int.TryParse(arguments[i+1],out int fixedSeed))journey.seed=fixedSeed;
             journey.context=session;journey.terrains=definitions;journey.Initialize();
+            session.InitializeClimate(System.Environment.TickCount);
+            if(journey.continuousWorld){sceneCamera.orthographicSize=68;sceneCamera.farClipPlane=1000;cameraFollow.offset*=2.5f;}
             flight.journey=journey;cameraFollow.target=flight;
+            // World travel follows +Z; retain the authored camera and pixel-art view.
+            flight.routeSlope=0;
+            flight.ConfigureClearance(world.buildings);
+            var aircraft=flight.GetComponent<FlightView>().modelPrefab;if(aircraft)flight.ConfigureAircraft(aircraft.GetComponent<AircraftRig>());
+            flight.swayAmplitude=3;flight.swayFrequency=.09f;flight.bobAmplitude=.3f;flight.Tick(0);cameraFollow.Follow(0);
             flight.GetComponent<FlightView>().sceneCamera=sceneCamera;
-            world.journey=journey;environment.journey=journey;environment.world=world;environment.sceneCamera=sceneCamera;environment.sun=sun;
+            if(!flight.GetComponent<AircraftLights>())flight.gameObject.AddComponent<AircraftLights>();
+            if(enableExperimentalWingView){cabin=flight.gameObject.AddComponent<AircraftCabinView>();cabin.view=flight.GetComponent<FlightView>();cabin.sceneCamera=sceneCamera;}
+            else RenderSettings.fog=false;
+            clouds=gameObject.AddComponent<LayeredPixelClouds>();clouds.game=this;
+            world.wingView=cabin;world.journey=journey;world.flight=flight;world.sceneCamera=sceneCamera;world.environment=environment;environment.journey=journey;environment.world=world;environment.sceneCamera=sceneCamera;environment.sun=sun;
             weather.context=session;weather.sceneCamera=sceneCamera;weather.table=weatherTable;weather.shader=weatherShader;
+            biomeNavigator=gameObject.AddComponent<BiomeNavigator>();biomeNavigator.game=this;
             panel.context=session;panel.journey=journey;panel.terrainWorld=world;panel.flight=flight;panel.weatherFx=weather;panel.game=this;
+            frameRate=gameObject.AddComponent<FrameRateDisplay>();
+            var traffic=gameObject.AddComponent<CityTraffic>();traffic.game=this;
         }
         public bool ReloadTables()
         {
@@ -45,6 +68,7 @@ namespace OnAir
                 WeatherFxTable.Parse(TableSource.Read(weatherTable));
                 if(!weather.ReloadTable())return false;
                 world.buildings=nextBuildings;
+                flight.ConfigureClearance(nextBuildings);flight.Tick(0);cameraFollow.Follow(0);
                 if(loadedTerrains!=terrainText){journey.ReplaceTerrains(nextTerrains);loadedTerrains=terrainText;}
                 world.RebuildAll();return true;
             }

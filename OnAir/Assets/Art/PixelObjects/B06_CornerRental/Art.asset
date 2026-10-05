@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: B06_CornerRental pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 608ee5755280ec9479f0f05116dbfc5d, type: 2}
+  - {fileID: 4300000, guid: 35164df689023f84fa3db69655cce37c, type: 2}
+  - {fileID: 4300000, guid: 083b2380b8fd6cc48bec139ed3cbc17b, type: 2}
+  - {fileID: 4300000, guid: b760a10582591db41a740933989e7633, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 3b5fbd737eb8fb34ab2c3075c26cf4ea, type: 2}
+  - {fileID: 2100000, guid: a6734bb31baf99f429e828e411fb6420, type: 2}
+  - {fileID: 2100000, guid: 962da0fba399b114a8ea885aa7790fd4, type: 2}
+  - {fileID: 2100000, guid: becac8e7d28de6a48a3748661fb96137, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 1fc41a75d9c9e06499ee338cbc0da5fe
+  artRevision: City pixel painting 02

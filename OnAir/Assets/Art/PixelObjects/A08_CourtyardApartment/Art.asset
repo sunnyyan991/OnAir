@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A08_CourtyardApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: b177335f7e33aa545b6ca4199cc33659, type: 2}
+  - {fileID: 4300000, guid: b8469ca0c6b9f6844a77d779f9668737, type: 2}
+  - {fileID: 4300000, guid: 7041cbabe53eb7d419f6dd87b4be20b2, type: 2}
+  - {fileID: 4300000, guid: ea4f022440d31e14a85ebdbfea300954, type: 2}
+  materials:
+  - {fileID: 2100000, guid: 5d9e1d5eb5abcf4428e111a8fd34fb71, type: 2}
+  - {fileID: 2100000, guid: 5600340d1b7a7d748b4405ffb1838df9, type: 2}
+  - {fileID: 2100000, guid: 839ff86a9acfb1845b112826bd720863, type: 2}
+  - {fileID: 2100000, guid: d77b27987abb9254882d293f29993153, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 68e3e2ec7901340e0176303a51574dc7
+  artRevision: City pixel painting 02

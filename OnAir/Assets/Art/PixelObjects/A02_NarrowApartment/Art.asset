@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: A02_NarrowApartment pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 24dff1650f338794a9f2d0d9ba6d0bf7, type: 2}
+  - {fileID: 4300000, guid: b17b1b47c84fa2041b04a3144119952b, type: 2}
+  - {fileID: 4300000, guid: 8e033fa0ca891d84098b044309f0a2f5, type: 2}
+  - {fileID: 4300000, guid: 10dfd7da2596f244f8ed6ae4059400e3, type: 2}
+  materials:
+  - {fileID: 2100000, guid: a80f9049fdd7e2d409724122cae4dd46, type: 2}
+  - {fileID: 2100000, guid: 23e66e9a84519f342abc5bcd4d3b933e, type: 2}
+  - {fileID: 2100000, guid: 2b9ee4b3520fa134fb55d704c3532021, type: 2}
+  - {fileID: 2100000, guid: aa60b2e5159273d4793b432fcecbd4d6, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 15c465262cf38becd5649fa93392e153
+  artRevision: City pixel painting 02

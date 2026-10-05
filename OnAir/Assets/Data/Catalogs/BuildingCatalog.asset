@@ -13,23 +13,6 @@ MonoBehaviour:
   m_Name: BuildingCatalog
   m_EditorClassIdentifier: 
   entries:
-  - id: city_apartment_03
-    prefab: {fileID: 927644653630382948, guid: 000fae4856599a34e856196dba126aa1, type: 3}
-  - id: city_office_05
-    prefab: {fileID: 5676118378826321588, guid: a149f88e1026aca4e9218f1af8cc86cc,
-      type: 3}
-  - id: city_corner_shop
-    prefab: {fileID: 2503029226320055279, guid: 7a5f759fe74914c4c9c0f67966b9445c,
-      type: 3}
-  - id: city_apartment_04
-    prefab: {fileID: 5110758530918397383, guid: 41bf79ff5b7b8524fa0b01c4f10c6e9a,
-      type: 3}
-  - id: city_house_02
-    prefab: {fileID: 6421458397317204386, guid: c1aad9ed03c268a479a3fdd31821f1d9,
-      type: 3}
-  - id: city_mixed_03
-    prefab: {fileID: 8091063089529322417, guid: 2f282e15260b947489ac267ef091907c,
-      type: 3}
   - id: coast_apartment_03
     prefab: {fileID: 1682713040167607587, guid: 1012749ab0991fb45990b47af7738512,
       type: 3}
@@ -64,4 +47,181 @@ MonoBehaviour:
       type: 3}
   - id: desert_mixed_03
     prefab: {fileID: 2886964054159294061, guid: fe5c8393fee505a4a812e12dca9afb4e,
+      type: 3}
+  - id: jp_apartment_04
+    prefab: {fileID: 717220174488708594, guid: 136943da57953f541b0763a608a64f91, type: 3}
+  - id: jp_house_02
+    prefab: {fileID: 6665154879512505212, guid: 770422e3f33e2374b9cc49a81b9ea6ee,
+      type: 3}
+  - id: jp_shop_02
+    prefab: {fileID: 2776807470840905797, guid: eac78ee7b69d25a4ba0b891d2c812ea0,
+      type: 3}
+  - id: jp_office_04
+    prefab: {fileID: 599245225351958799, guid: 27f48b535a6f1764fbe088d6966fbe53, type: 3}
+  - id: jp_005_narrowhouse
+    prefab: {fileID: 9036606867392668066, guid: 7e3c6048e32c606468810cf960d58808,
+      type: 3}
+  - id: jp_006_pocketcafe
+    prefab: {fileID: 2985339571366442977, guid: 852c1dd70490af24da86dcd7101bd601,
+      type: 3}
+  - id: jp_007_longapartment
+    prefab: {fileID: 905109541233395605, guid: 09d230da98b451f4791a8b3eb8dcc656, type: 3}
+  - id: jp_008_deepapartment
+    prefab: {fileID: 7751882580192132832, guid: 60f07a67b00cee148a527cfa6dcf7b7a,
+      type: 3}
+  - id: jp_009_penciloffice
+    prefab: {fileID: 3689204424545746220, guid: 9fdf07daf81bb624396d4cdc215da509,
+      type: 3}
+  - id: jp_010_departmentstore
+    prefab: {fileID: 5029361525086582781, guid: 45512a16433e14b47b9359a0405b2f96,
+      type: 3}
+  - id: jp_011_terraceoffice
+    prefab: {fileID: 5273079033291621221, guid: 88de756747902354093fe032261297f4,
+      type: 3}
+  - id: jp_012_rowhouse
+    prefab: {fileID: 7057922344361206179, guid: 9ea73d4d4a7d4d84b97acaba9d84e201,
+      type: 3}
+  - id: jp_013_tower20
+    prefab: {fileID: 8392132639370066856, guid: 6d7248036683a7e4e89caee2b608d4c4,
+      type: 3}
+  - id: jp_a01_compact
+    prefab: {fileID: 3717224847981674377, guid: 5d6abcb4c5484c348883c95bf0685f7e,
+      type: 3}
+  - id: jp_a03_long
+    prefab: {fileID: 3824591761160781290, guid: 37ac35929f078f947843ea3e5095171e,
+      type: 3}
+  - id: jp_a05_corner
+    prefab: {fileID: 2412360524116730350, guid: b3673594d92d0f74789001545f6dcd52,
+      type: 3}
+  - id: jp_a02_narrow
+    prefab: {fileID: 8972974979369527433, guid: 1ddb37c816fde15448a1e5ea5f3bee75,
+      type: 3}
+  - id: jp_a04_deep
+    prefab: {fileID: 8800486206204027541, guid: d98695a2266efe94481a050e517efdc7,
+      type: 3}
+  - id: jp_a06_gallery
+    prefab: {fileID: 5694167412142337478, guid: d14ef34d4e7142e438cfef8d160e38c9,
+      type: 3}
+  - id: jp_a07_modern
+    prefab: {fileID: 5788095298780089834, guid: c1c7d22fe020030498047816de756b24,
+      type: 3}
+  - id: jp_a08_courtyard
+    prefab: {fileID: 5349567219748321850, guid: 7a22c9d201de700478b657d1f5cc0f82,
+      type: 3}
+  - id: jp_a09_terraced
+    prefab: {fileID: 134481702772063930, guid: 00a45bc17a13c4745be8ddc24b624f45, type: 3}
+  - id: jp_a10_brown
+    prefab: {fileID: 615736097198247338, guid: fd03a68ed7cec914e992899005de049a, type: 3}
+  - id: jp_b01_gallery
+    prefab: {fileID: 2471996159080152268, guid: 023a817fb65cddf49a15a2353b5bb475,
+      type: 3}
+  - id: jp_b02_modern
+    prefab: {fileID: 3173066538924126879, guid: e5f14b1f7943db240875dcdee3d4ab5c,
+      type: 3}
+  - id: jp_b03_narrow
+    prefab: {fileID: 2572762481437615105, guid: b2782429865598840a393d382cd63b1c,
+      type: 3}
+  - id: jp_b04_tile
+    prefab: {fileID: 1434630296290041884, guid: 12af47f5f79aada4b930ff26a6cf0af0,
+      type: 3}
+  - id: jp_b05_courtyard
+    prefab: {fileID: 6275072879291832014, guid: 5556eef2bcfa53048a8bc446052dd988,
+      type: 3}
+  - id: jp_b06_corner
+    prefab: {fileID: 5488673487495476776, guid: 23c0a00082316b148afe75c6e0a744da,
+      type: 3}
+  - id: jp_c01_traditional
+    prefab: {fileID: 2460629328747422209, guid: 70633df73e12ed746b2e2f79983efe2f,
+      type: 3}
+  - id: jp_c02_sage
+    prefab: {fileID: 485778031818767335, guid: b7ee31502dc002946bac8a6b963b7a51, type: 3}
+  - id: jp_c03_garage
+    prefab: {fileID: 6187773254078236253, guid: f2355f01a8c9ec040bf9baa309e66523,
+      type: 3}
+  - id: jp_c04_timber
+    prefab: {fileID: 7111386714223468633, guid: 53354effef83e214781a10f670922e22,
+      type: 3}
+  - id: jp_c05_nagaya
+    prefab: {fileID: 1845308449362058968, guid: ce3bccc6a0366bc42b649bf95b700124,
+      type: 3}
+  - id: jp_c06_corner
+    prefab: {fileID: 1904909102946567818, guid: 29eb39d364ef2914f8818eadd9be7d6e,
+      type: 3}
+  - id: jp_s01_izakaya
+    prefab: {fileID: 7780176494621302735, guid: 3fbe623e5fb4469489e0f79dd0c64eb4,
+      type: 3}
+  - id: jp_s02_corner_convenience
+    prefab: {fileID: 5389831062246266046, guid: 9fb8db8a8fc6c644a9cab052158dacd5,
+      type: 3}
+  - id: jp_s03_kissaten
+    prefab: {fileID: 6868113949735030203, guid: e1f7d679430a39348a71d0b810e71a61,
+      type: 3}
+  - id: jp_s04_community_clinic
+    prefab: {fileID: 5041937434818185799, guid: 75f715d046e636b49a3441addecd4177,
+      type: 3}
+  - id: jp_s05_sushi_restaurant
+    prefab: {fileID: 1808989026353280414, guid: 0047d0a1a70569745a7b7cf1f159b158,
+      type: 3}
+  - id: jp_s06_mixed_shophouse
+    prefab: {fileID: 5250645479618947432, guid: 1b922b6eef8ed4644b716ec50bf7dc38,
+      type: 3}
+  - id: jp_res-det-006_compactdormer
+    prefab: {fileID: 7948223266231872818, guid: bebe8920f1d7b33499115096bcd51fc5,
+      type: 3}
+  - id: jp_res-det-007_traditionalcompound
+    prefab: {fileID: 5913385645864679269, guid: ef88e7eb9b85b674e963d0e3f564712a,
+      type: 3}
+  - id: jp_res-low-007_longrental
+    prefab: {fileID: 41407040492747488, guid: 1145eff3cd47503408af0f7eb06ef2e1, type: 3}
+  - id: jp_res-det-008_timberhouse
+    prefab: {fileID: 4602483434705417019, guid: 62b3c47696c818b49a2332d2a37ca24c,
+      type: 3}
+  - id: jp_res-low-008_cornerapartment
+    prefab: {fileID: 1955852633811166913, guid: 06ba429759074d84eb4d0b9963f6cf08,
+      type: 3}
+  - id: com-shop-002
+    prefab: {fileID: 347327898345570026, guid: c49973fd7949c2847ac972b836f2bd54, type: 3}
+  - id: com-shop-003
+    prefab: {fileID: 8815010698100740567, guid: e884fb9f1e4680e41b2e4c42ab7767c3,
+      type: 3}
+  - id: com-mall-003
+    prefab: {fileID: 3309248957215739013, guid: 0c619700b5d43094d864391fb6df4fff,
+      type: 3}
+  - id: com-mall-004
+    prefab: {fileID: 709458798806427635, guid: 50fdd017e73816b47af41a74a53eb67e, type: 3}
+  - id: com-mall-005
+    prefab: {fileID: 5785754720741959367, guid: 672e338a102d1b14b94ddbecbb095c20,
+      type: 3}
+  - id: com-mall-006
+    prefab: {fileID: 3291504592621686202, guid: 2ba7eb49860667647bbc03806ba0b4ca,
+      type: 3}
+  - id: com-mall-007
+    prefab: {fileID: 2101960937211472996, guid: 2ee8a135aa8529749b4387cd1429fdee,
+      type: 3}
+  - id: com-mall-008
+    prefab: {fileID: 4228638914111799910, guid: c23d78eabc663b94f8fc59c6f0b2af57,
+      type: 3}
+  - id: com-off-005
+    prefab: {fileID: 5546991039165312551, guid: 76b2ee9867468f649bcbc3f5528f7b55,
+      type: 3}
+  - id: com-off-007
+    prefab: {fileID: 5535484054638461460, guid: 19ae477fce6056c488ee3a501b1bac68,
+      type: 3}
+  - id: com-off-006
+    prefab: {fileID: 6517141921347557104, guid: a6816f2f68aa7304b854f50c93c48a3c,
+      type: 3}
+  - id: pub-shr-001
+    prefab: {fileID: 8044371917915150583, guid: ea0f41faa9131284aa5ab4a002c8b2ad,
+      type: 3}
+  - id: env-park-001
+    prefab: {fileID: 4532435876035549898, guid: ec158a5a452f2bd4f8794db89901dbc0,
+      type: 3}
+  - id: env-park-002
+    prefab: {fileID: 4208241699871744248, guid: b31cb0a76c0796d49b36dde2230c2ef7,
+      type: 3}
+  - id: env-park-003
+    prefab: {fileID: 5660048444332149682, guid: 16b6ab78ac38baa4b9e985094c0418e3,
+      type: 3}
+  - id: pub-shr-002
+    prefab: {fileID: 2221633327036101072, guid: 55383b35fd8cea141aa2a347d6eec979,
       type: 3}

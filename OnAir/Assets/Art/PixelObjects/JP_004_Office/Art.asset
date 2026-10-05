@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
+  m_Name: JP_004_Office pixel art
+  m_EditorClassIdentifier: 
+  meshes:
+  - {fileID: 4300000, guid: 3220a6d2dd1f46842a095ef2ba141a02, type: 2}
+  - {fileID: 4300000, guid: 146116f5856ebf34bbd036fe58381aef, type: 2}
+  - {fileID: 4300000, guid: 314969e5a3cc8384eab21072099d17fe, type: 2}
+  - {fileID: 4300000, guid: be73e688b3e46ae43a3479d7af7e1ff0, type: 2}
+  materials:
+  - {fileID: 2100000, guid: eb2c8d82e89f0ec4d83dc545c83bef52, type: 2}
+  - {fileID: 2100000, guid: 7c9a20405db2a2d4a80fb12ca09dc21b, type: 2}
+  - {fileID: 2100000, guid: 1f034a28702a98d4abe2b37553529094, type: 2}
+  - {fileID: 2100000, guid: 71bb2280d1dec0d4b87e51c929db5e1d, type: 2}
+  pixelsPerUnit: 4
+  viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
+  sourceGeometryHash: 7da6d9ccf8503d30a43709777a152e82
+  artRevision: City pixel painting 02
