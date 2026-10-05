@@ -18,6 +18,13 @@ namespace OnAir
         public WeatherRule[] weatherRules={new WeatherRule(Weather.Clear,65,240,480),new WeatherRule(Weather.Cloudy,23,90,180),new WeatherRule(Weather.Rain,10,60,120),new WeatherRule(Weather.HeavyRain,2,30,60)};
         System.Random weatherRandom;float weatherRemaining;
         public float WeatherRemaining=>weatherRemaining;
+        public event System.Action PlayerChanged;
+        public ClimateState CaptureState()=>new ClimateState{weather=weather,period=period,paused=paused,automaticWeather=automaticWeather,automaticDaylight=automaticDaylight,solarPhase=solarPhase,weatherRemaining=Mathf.Max(.001f,weatherRemaining)};
+        public void RestoreState(ClimateState saved)
+        {
+            weather=saved.weather;period=saved.period;paused=saved.paused;automaticWeather=saved.automaticWeather;automaticDaylight=saved.automaticDaylight;solarPhase=saved.solarPhase;
+            weatherRandom=new System.Random(System.Environment.TickCount^0x572391);weatherRemaining=saved.weatherRemaining;EnvironmentChanged?.Invoke();
+        }
         public void InitializeClimate(int seed){weatherRandom=new System.Random(seed^0x572391);ScheduleWeather();}
         void ScheduleWeather(){var rule=System.Array.Find(weatherRules,r=>r.weather==weather);weatherRemaining=rule==null?180:Mathf.Lerp(rule.minSeconds,Mathf.Max(rule.minSeconds,rule.maxSeconds),(float)weatherRandom.NextDouble());}
         void Update()=>TickClimate(Time.deltaTime);
@@ -54,9 +61,9 @@ namespace OnAir
         {
             biome=terrain;EnvironmentChanged?.Invoke();
         }
-        public void SetWeather(Weather value){weather=value;if(weatherRandom!=null)ScheduleWeather();EnvironmentChanged?.Invoke();}
-        public void SetPeriod(DayPeriod value){automaticDaylight=false;period=value;solarPhase=value==DayPeriod.Dawn?.055f:value==DayPeriod.Day?.25f:value==DayPeriod.Dusk?.455f:value==DayPeriod.BlueHour?.535f:.75f;EnvironmentChanged?.Invoke();}
+        public void SetWeather(Weather value){weather=value;if(weatherRandom!=null)ScheduleWeather();EnvironmentChanged?.Invoke();PlayerChanged?.Invoke();}
+        public void SetPeriod(DayPeriod value){automaticDaylight=false;period=value;solarPhase=value==DayPeriod.Dawn?.055f:value==DayPeriod.Day?.25f:value==DayPeriod.Dusk?.455f:value==DayPeriod.BlueHour?.535f:.75f;EnvironmentChanged?.Invoke();PlayerChanged?.Invoke();}
         public void CyclePeriod(){if(automaticDaylight){SetPeriod(DayPeriod.Dawn);return;}if(period==DayPeriod.Night){automaticDaylight=true;return;}SetPeriod(period==DayPeriod.Dawn?DayPeriod.Day:period==DayPeriod.Day?DayPeriod.Dusk:period==DayPeriod.Dusk?DayPeriod.BlueHour:DayPeriod.Night);}
-        public void TogglePause()=>paused=!paused;
+        public void TogglePause(){paused=!paused;PlayerChanged?.Invoke();}
     }
 }

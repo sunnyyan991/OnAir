@@ -12,6 +12,14 @@
 - 地面等 Lit 材质使用 OnAir/Cloud Receiving Lit（基于工程现有 URP 14 Lit 前向着色，只扩展主光遮挡）；烘焙建筑和飞机在自己的着色器里读取同一张图。新增运行材质须用此接收 Shader；保留原材质 GUID、颜色和属性。
 - CloudShadowOverlay 类名及文件名为旧兼容名称，已不绘制屏幕乘色滤镜。
 
+## Unity 6.3 接入：2026-10-05
+
+工程升级到 Unity 6000.3.25f1 / URP 17.3.0。CloudShadowOverlay 改用 `RecordRenderGraph`：通过图内纹理和光栅 Pass 生成同一张太阳空间投影图，再用 `SetGlobalTextureAfterPass` 发布给接收材质。纹理生命周期交给 Render Graph；没有云或直射光时清空投影并发布零强度，防止上一帧残留。
+
+正式配置关闭 Compatibility Mode，不需要 `URP_COMPATIBILITY_MODE`。云形、渐隐、投影算法、接收 Shader 和强度规则保留；Lit 接收 Shader 仍源自 URP 14 的前向实现，已验证其在 URP 17.3 的当前渲染路径可用。本次没有将它扩展为完整的 URP 17 Lit 功能集合。
+
+隔离小场景的日景无云、日景有云、夜景在兼容路径与新路径下的 PNG 完全一致；Main 昼夜和雨天的短时检查、Windows 构建及独立程序相机输出通过。详情见 [升级记录](UnityUpgrade6000.3.25f1.md)。
+
 ## 本次定向验证
 
 隔离小场景验证 0 / 0.5 / 0.999 / 1 透明度，采样亮度依次约 0.564 / 0.455 / 0.301 / 0.301；满强度切换无阶跃。检查主光阴影系数 0.8，Shader 编译及 Main 短时接入通过。亮度本身不是线性数值，因为截图经历色彩编码。

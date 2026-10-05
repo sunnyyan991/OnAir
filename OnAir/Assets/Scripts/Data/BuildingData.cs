@@ -8,13 +8,20 @@ namespace OnAir
         public IReadOnlyList<SpawnRule> Rules {get;}
         public IReadOnlyDictionary<string,GameObject> Prefabs {get;}
         readonly Dictionary<GameObject,BuildingFootprint> footprints=new Dictionary<GameObject,BuildingFootprint>();
+        readonly Dictionary<GameObject,string> saveIds=new Dictionary<GameObject,string>();
+        readonly Dictionary<string,GameObject> savedPrefabs=new Dictionary<string,GameObject>();
+        public string SaveId(GameObject prefab)=>saveIds.TryGetValue(prefab,out var id)?id:throw new InvalidOperationException("Unregistered saved building: "+prefab.name);
+        public bool TryResolveSaveId(string id,out GameObject prefab){prefab=null;return id!=null&&savedPrefabs.TryGetValue(id,out prefab);}
         public BuildingFootprint Footprint(GameObject prefab){if(!footprints.TryGetValue(prefab,out var fp))footprints[prefab]=fp=prefab.GetComponent<BuildingFootprint>();return fp;}
         public BuildingData(string csv,BuildingCatalog catalog)
         {
             Rules=BuildingRules.Parse(csv);Prefabs=catalog.Resolve();
             foreach(var row in Rules)
+            {
                 if(!Prefabs.TryGetValue(row.PrefabId,out var prefab)||!prefab.GetComponent<BuildingFootprint>()||row.MinScale!=1||row.MaxScale!=1)
                     throw new InvalidOperationException("Building "+row.Id+": missing footprint/prefab or unsupported lot scale.");
+                savedPrefabs.Add(row.Id,prefab);if(!saveIds.ContainsKey(prefab))saveIds.Add(prefab,row.Id);
+            }
             if(AircraftHeightPreview.Enabled)
             {
                 var eligible=new List<SpawnRule>();

@@ -20,6 +20,35 @@ namespace OnAir
         readonly Dictionary<GameObject,float> roofs=new Dictionary<GameObject,float>();
         readonly HashSet<Vector2Int> attempted=new HashSet<Vector2Int>();
         bool accepted,seen;float nextSeedZ=float.NegativeInfinity;
+        Vector2Int? planningKey;
+        public bool CanCapture=>!Active||Published;
+        public HighwayState CaptureState()
+        {
+            if(!CanCapture)throw new InvalidOperationException("Highway publication is incomplete.");
+            var saved=new RouteState[routes.Count];
+            for(int i=0;i<routes.Count;i++)
+            {
+                var r=routes[i];saved[i]=new RouteState{points=r.points.ToArray(),supports=r.supports.ToArray(),occupied=r.occupied.ToArray(),exits=r.exits.ToArray(),
+                    noiseBarrier=r.noiseBarrier,upperTier=r.upperTier,independentLayer=r.independentLayer,ramp=r.ramp,ascending=r.ascending,
+                    heading=r.heading,turnAngle=r.turnAngle,turnRadius=r.turnRadius,mergeDistance=r.mergeDistance,overflownBuildings=r.overflownBuildings,
+                    previous=r.previous==null?-1:routes.IndexOf(r.previous),next=r.next==null?-1:routes.IndexOf(r.next),parent=r.parentRoute==null?-1:routes.IndexOf(r.parentRoute)};
+            }
+            var keys=new List<Vector2Int>();foreach(var key in attempted)if(!planningKey.HasValue||key!=planningKey.Value)keys.Add(key);
+            keys.Sort((a,b)=>a.y==b.y?a.x.CompareTo(b.x):a.y.CompareTo(b.y));
+            return new HighwayState{routes=saved,attempted=keys.ToArray(),seen=seen,hasNextSeedZ=!float.IsNegativeInfinity(nextSeedZ),nextSeedZ=float.IsNegativeInfinity(nextSeedZ)?0:nextSeedZ,networksCreated=NetworksCreated};
+        }
+        public void RestoreState(HighwayState saved)
+        {
+            routes.Clear();attempted.Clear();planningKey=null;
+            foreach(var key in saved.attempted)attempted.Add(key);
+            foreach(var r in saved.routes)
+            {
+                var route=new WorldHighways.Route{noiseBarrier=r.noiseBarrier,upperTier=r.upperTier,independentLayer=r.independentLayer,ramp=r.ramp,ascending=r.ascending,heading=r.heading,turnAngle=r.turnAngle,turnRadius=r.turnRadius,mergeDistance=r.mergeDistance,overflownBuildings=r.overflownBuildings};
+                route.points.AddRange(r.points);route.supports.AddRange(r.supports);route.occupied.AddRange(r.occupied);route.exits.AddRange(r.exits);Measure(route);routes.Add(route);
+            }
+            for(int i=0;i<routes.Count;i++){var r=saved.routes[i];routes[i].previous=r.previous<0?null:routes[r.previous];routes[i].next=r.next<0?null:routes[r.next];routes[i].parentRoute=r.parent<0?null:routes[r.parent];}
+            seen=saved.seen;nextSeedZ=saved.hasNextSeedZ?saved.nextSeedZ:float.NegativeInfinity;NetworksCreated=saved.networksCreated;Published=true;State=Active?"running":"waiting";Revision++;
+        }
         public int Candidates,BuildingChecks,PlanningFailures,Revision,NetworksCreated;
         public string State{get;private set;}="waiting";
         public IEnumerable<WorldHighways.Route> Routes=>routes;
@@ -223,7 +252,7 @@ namespace OnAir
             });
             int entries=0;
             foreach(var key in keys){
-                attempted.Add(key);var region=plan.BuildRegion(key.x,key.y);
+                attempted.Add(key);planningKey=key;var region=plan.BuildRegion(key.x,key.y);
                 var candidates=new List<WorldHighways.Route>();
                 foreach(var road in region.roads){
                     if(Mathf.Min(road.width,road.height)<(Definition?Definition.minimumRoadWidth:3.9f)||Mathf.Max(road.width,road.height)<32)continue;
@@ -245,9 +274,9 @@ namespace OnAir
                     var exclusion=currentView!=null?currentView():protectedView;
                     bool visible=false;if(!initial)foreach(var r in answer)if(Intersects(r,exclusion)){visible=true;break;}if(visible)continue;
                     for(int k=0;k<answer.Count;k++){answer[k].previous=k>0?answer[k-1]:null;answer[k].next=k+1<answer.Count?answer[k+1]:null;}
-                    routes.AddRange(answer);Published=false;Revision++;NetworksCreated++;State="running";yield break;
+                    routes.AddRange(answer);planningKey=null;Published=false;Revision++;NetworksCreated++;State="running";yield break;
                 }
-                yield return null;
+                planningKey=null;yield return null;
             }
             State="waiting";
         }

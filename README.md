@@ -6,9 +6,9 @@
 
 ## 打开与运行
 
-Unity 工程在 `OnAir/`，版本为 `2022.3.62f3c1`。打开唯一正式场景 **`OnAir/Assets/Scenes/Main.unity`**，点击 Play。
+Unity 工程在 `OnAir/`，版本为 `6000.3.25f1`，使用 URP `17.3.0` 与原生 Render Graph。打开唯一正式场景 **`OnAir/Assets/Scenes/Main.unity`**，点击 Play。
 
-- 每次启动默认使用新种子；NEW SEED 换地图，EXPLORE 快速预览群系。
+- 有存档时启动自动继续旅程；首次运行使用新种子。NEW SEED 换地图并保留上一段旅程，PREVIOUS FLIGHT 返回上一段旅程；EXPLORE 快速预览群系。
 - 原生分辨率连续渲染；已移除 PIXEL 2X / PIXEL 3X 整屏颗粒化路径。
 - 现有 13 种日式建筑和两种树木已接入独立物体像素外观，保留真实遮挡、昼夜和窗灯。原始模型继续作为制作源；像素美术细节仍需打磨。
 - 飞机居中，约 30° 屏幕航向，速度 24 米/秒；无自动盘旋，有轻微游移、翼灯及地形安全高度。
@@ -17,6 +17,8 @@ Unity 工程在 `OnAir/`，版本为 `2022.3.62f3c1`。打开唯一正式场景 
 
 ## 当前说明
 
+- [Unity 6.3 升级与验证记录](Docs/UnityUpgrade6000.3.25f1.md)
+- [自动存档与恢复](Docs/SaveSystem.md)
 - [项目全盘进度](Docs/ProjectStatus.md)
 - [配置与操作](Docs/Configuration.md)
 - [原生渲染、资产清理与性能验证](Docs/NativeRenderingCleanup.md)

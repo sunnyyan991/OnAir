@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Rendering.RenderGraphModule;
+using UnityEngine.Experimental.Rendering;
 namespace OnAir
 {
     // Historical name retained for serialized/editor compatibility. This renders an
@@ -10,7 +12,16 @@ namespace OnAir
         public readonly Vector4[] centres=new Vector4[128],sizes=new Vector4[128],rects=new Vector4[128],grids=new Vector4[128];
         public int count;
         public const float RelativeStrength=.8f;
-        readonly Material material;RTHandle map;Vector4 bounds,slope,heights;float strength;
+        readonly Material material;Vector4 bounds,slope,heights;float strength;
+        static readonly int MapId=Shader.PropertyToID("_OnAirCloudShadowMap"),BoundsId=Shader.PropertyToID("_OnAirCloudShadowBounds"),SlopeId=Shader.PropertyToID("_OnAirCloudShadowSlope"),HeightsId=Shader.PropertyToID("_OnAirCloudShadowHeights"),StrengthId=Shader.PropertyToID("_OnAirCloudShadowStrength");
+        sealed class PassData
+        {
+            public Material material;
+            public Vector4[] centres,sizes,rects,grids;
+            public Vector4 bounds,slope,heights;
+            public int count;
+            public float strength;
+        }
         public CloudShadowOverlay(){material=CoreUtils.CreateEngineMaterial(Shader.Find("Hidden/OnAir/CloudShadowOverlay"));renderPassEvent=RenderPassEvent.BeforeRenderingOpaques;}
         public void Prepare(Texture atlas,Camera camera,Light light)
         {
@@ -33,18 +44,29 @@ namespace OnAir
         }
         // Kept for old diagnostics; opacity is relative to the real main-light shadow.
         public static float ShadowStrength(Color sky,Color sunlight,float intensity,float elevation,float strength)=>elevation>.01f&&intensity>0?RelativeStrength*strength:0;
-        public override void OnCameraSetup(CommandBuffer cmd,ref RenderingData data){
-            var descriptor=new RenderTextureDescriptor(1024,1024,RenderTextureFormat.ARGBHalf,0){msaaSamples=1,sRGB=false};
-            RenderingUtils.ReAllocateIfNeeded(ref map,descriptor,FilterMode.Bilinear,TextureWrapMode.Clamp,name:"Cloud sun-space opacity");
-            ConfigureTarget(map);ConfigureClear(ClearFlag.Color,Color.clear);
+        public override void RecordRenderGraph(RenderGraph graph,ContextContainer frameData)
+        {
+            // URP's opaque/transparent passes consume global textures. Publishing
+            // through the graph declares their dependency on this sun-space map.
+            var map=graph.CreateTexture(new TextureDesc(1024,1024){name="Cloud sun-space opacity",colorFormat=GraphicsFormat.R16G16B16A16_SFloat,filterMode=FilterMode.Bilinear,wrapMode=TextureWrapMode.Clamp,clearBuffer=true,clearColor=Color.clear});
+            using(var builder=graph.AddRasterRenderPass<PassData>("Cloud projected sunlight shadows",out var data))
+            {
+                data.material=material;data.centres=centres;data.sizes=sizes;data.rects=rects;data.grids=grids;
+                data.bounds=bounds;data.slope=slope;data.heights=heights;data.count=count;data.strength=count>0?strength:0;
+                builder.SetRenderAttachment(map,0,AccessFlags.Write);
+                builder.SetGlobalTextureAfterPass(map,MapId);
+                builder.AllowGlobalStateModification(true);
+                // Even with no visible clouds, clear the map and publish zero
+                // strength so a previous camera/frame cannot leave stale shadows.
+                builder.AllowPassCulling(false);
+                builder.SetRenderFunc((PassData pass,RasterGraphContext context)=>
+                {
+                    pass.material.SetVectorArray("_CloudCentres",pass.centres);pass.material.SetVectorArray("_CloudSizes",pass.sizes);pass.material.SetVectorArray("_CloudRects",pass.rects);pass.material.SetVectorArray("_CloudGrids",pass.grids);
+                    if(pass.count>0&&pass.strength>0)context.cmd.DrawProcedural(Matrix4x4.identity,pass.material,0,MeshTopology.Triangles,6,pass.count);
+                    context.cmd.SetGlobalVector(BoundsId,pass.bounds);context.cmd.SetGlobalVector(SlopeId,pass.slope);context.cmd.SetGlobalVector(HeightsId,pass.heights);context.cmd.SetGlobalFloat(StrengthId,pass.strength);
+                });
+            }
         }
-        public override void Execute(ScriptableRenderContext context,ref RenderingData data){
-            var cmd=CommandBufferPool.Get("Cloud projected sunlight shadows");
-            material.SetVectorArray("_CloudCentres",centres);material.SetVectorArray("_CloudSizes",sizes);material.SetVectorArray("_CloudRects",rects);material.SetVectorArray("_CloudGrids",grids);
-            if(count>0&&strength>0)cmd.DrawProcedural(Matrix4x4.identity,material,0,MeshTopology.Triangles,6,count);
-            cmd.SetGlobalTexture("_OnAirCloudShadowMap",map.nameID);cmd.SetGlobalVector("_OnAirCloudShadowBounds",bounds);cmd.SetGlobalVector("_OnAirCloudShadowSlope",slope);cmd.SetGlobalVector("_OnAirCloudShadowHeights",heights);cmd.SetGlobalFloat("_OnAirCloudShadowStrength",count>0?strength:0);
-            context.ExecuteCommandBuffer(cmd);CommandBufferPool.Release(cmd);
-        }
-        public void Dispose(){Shader.SetGlobalFloat("_OnAirCloudShadowStrength",0);map?.Release();CoreUtils.Destroy(material);}
+        public void Dispose(){Shader.SetGlobalFloat(StrengthId,0);CoreUtils.Destroy(material);}
     }
 }

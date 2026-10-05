@@ -26,5 +26,31 @@ namespace OnAir
         public int Hits{get;private set;}public int Misses{get;private set;}public int Builds{get;private set;}
         public bool TryGet(ContinuousWorldPlan.Region key,out Region value){bool hit=entries.TryGetValue(key.coordinates,out value);if(hit)Hits++;else Misses++;return hit;}
         public void Add(ContinuousWorldPlan.Region key,Region value){if(!entries.ContainsKey(key.coordinates))order.Enqueue(key.coordinates);entries[key.coordinates]=value;Builds++;while(order.Count>256)entries.Remove(order.Dequeue());}
+        public PopulationState[] CaptureState(BuildingData data,HashSet<Vector2Int> needed)
+        {
+            var saved=new List<PopulationState>();
+            foreach(var pair in entries)
+            {
+                if(!needed.Contains(pair.Key))continue;
+                var region=pair.Value;var buildings=new PlacementState[region.buildings.Count];
+                for(int i=0;i<buildings.Length;i++){var b=region.buildings[i];buildings[i]=new PlacementState{buildingId=data.SaveId(b.prefab),bounds=b.bounds,rotation=b.rotation,tint=b.tint,color=b.color};}
+                saved.Add(new PopulationState{coordinates=pair.Key,buildings=buildings,roads=region.roads.ToArray()});
+            }
+            saved.Sort((a,b)=>a.coordinates.y==b.coordinates.y?a.coordinates.x.CompareTo(b.coordinates.x):a.coordinates.y.CompareTo(b.coordinates.y));
+            return saved.ToArray();
+        }
+        public void RestoreState(PopulationState[] saved,ContinuousWorldPlan plan,BuildingData data)
+        {
+            foreach(var item in saved)
+            {
+                var region=new Region();region.roads.AddRange(item.roads);
+                foreach(var b in item.buildings)
+                {
+                    if(!data.TryResolveSaveId(b.buildingId,out var prefab))throw new System.InvalidOperationException("Saved building ID is missing: "+b.buildingId);
+                    region.buildings.Add(new Building{prefab=prefab,bounds=b.bounds,rotation=b.rotation,tint=b.tint,color=b.color});
+                }
+                Add(plan.BuildRegion(item.coordinates.x,item.coordinates.y),region);
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace OnAir
         float cloudCover;
         public float CloudCover=>cloudCover;
         void LateUpdate()=>Refresh(Time.deltaTime);
-        public void Refresh(float seconds)
+        public void Refresh(float seconds,bool immediate=false)
         {
             journey.Initialize();var t=journey.Current.terrain.profile;
             if(!sunCaptured){originalSunRotation=sun.transform.rotation;sunCaptured=true;}
@@ -31,9 +31,9 @@ namespace OnAir
             float night=1-Mathf.SmoothStep(0,1,Mathf.Sin(phase*Mathf.PI*2)*3);
             CityParkGeometry.RefreshLights(t.nightWindows*(night*1.4f));
             float targetCloud=session.weather==Weather.Clear?0:session.weather==Weather.Cloudy?.5f:session.weather==Weather.HeavyRain?1:.85f;
-            cloudCover=Mathf.Lerp(cloudCover,targetCloud,1-Mathf.Exp(-seconds*.35f));
+            cloudCover=immediate?targetCloud:Mathf.Lerp(cloudCover,targetCloud,1-Mathf.Exp(-seconds*.35f));
             float directTransmission=Mathf.Lerp(1,.08f,cloudCover),ambientTransmission=Mathf.Lerp(1,.94f,cloudCover);
-            float mix=1-Mathf.Exp(-seconds*1.8f);
+            float mix=immediate?1:1-Mathf.Exp(-seconds*1.8f);
             Color ambient=Color.Lerp(t.dayAmbient,t.nightAmbient,night),light=Color.Lerp(t.daySun,t.nightSun,night);
             float intensity=Mathf.Lerp(t.dayIntensity,t.nightIntensity,night);var rotation=originalSunRotation;
             // Continuous palette knots: dawn, daylight, sunset, blue hour and moonlit night.

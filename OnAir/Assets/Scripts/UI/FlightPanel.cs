@@ -13,6 +13,8 @@ namespace OnAir
         Font font;
         readonly Dictionary<char, Texture2D> glyphs = new Dictionary<char, Texture2D>();
         bool collapsed, details, biomePicker;
+        public SaveSettings CaptureSettings()=>new SaveSettings{panelCollapsed=collapsed,worldDetails=details};
+        public void RestoreSettings(SaveSettings settings){collapsed=settings.panelCollapsed;details=settings.worldDetails;}
         Vector2 scroll;
         int dialControl;
         public WeatherParticles weatherFx;
@@ -134,7 +136,7 @@ namespace OnAir
             }
             else if(GUIUtility.hotControl==id&&ev.type==EventType.MouseUp)
             {
-                GUIUtility.hotControl=0;ev.Use();
+                GUIUtility.hotControl=0;game.saves.RequestSave();ev.Use();
             }
             if(ev.type!=EventType.Repaint)return;
             Color day=C("E6CC83"),night=C("6CAAB4");
@@ -169,7 +171,8 @@ namespace OnAir
                 Panel(new Rect(x,20,286,collapsed ? 42 : 428));
                 Fill(new Rect(x+3,23,280,36),C("213139"));
                 Label(new Rect(x+15,26,225,30),"FLIGHT CONTROL");
-                if (Button(new Rect(x+249,28,27,24),collapsed ? "+" : "-")) collapsed = !collapsed;
+                if (Button(new Rect(x+249,28,27,24),collapsed ? "+" : "-")){collapsed = !collapsed;game.saves.RequestSave();}
+                if(game.saves!=null)GUI.Label(new Rect(x+15,collapsed?70:441,270,18),game.saves.Status,small);
                 if (collapsed) { if(GUIUtility.hotControl==dialControl)GUIUtility.hotControl=0; return; }
                 if(game.cabin)
                 {
@@ -179,7 +182,7 @@ namespace OnAir
                 }
                 Label(new Rect(x+15,70,250,20),"ENVIRONMENT",true);
                 if (Choice(x,94,journey.continuousWorld?"EXPLORE":"TERRAIN",journey.continuousWorld?"CHOOSE BIOME":context.biome.ToString())){if(journey.continuousWorld)biomePicker=!biomePicker;else journey.NextTerrain();}
-                if (Choice(x,148,"WEATHER",(context.automaticWeather?"AUTO ":"")+context.weather.ToString())) journey.CycleWeather();
+                if (Choice(x,148,"WEATHER",(context.automaticWeather?"AUTO ":"")+context.weather.ToString())){journey.CycleWeather();game.saves.RequestSave();}
                 TimeDial(x,202);
                 var toggle = new Rect(x+8,310,270,40);
                 Fill(toggle,C("22333B")); Label(new Rect(x+17,316,200,28),"AUTO FLIGHT");
@@ -187,7 +190,7 @@ namespace OnAir
                 Fill(new Rect(x+(context.paused ? 229 : 250),323,15,15),context.paused ? Muted : Ink);
                 if (GUI.Button(toggle,new GUIContent("","Pause / resume flight"),hit)) context.TogglePause();
                 text.fontSize = 14;
-                if (Button(new Rect(x+12,363,126,34),"NEW SEED")) journey.NewSeed();
+                if (Button(new Rect(x+12,363,126,34),"NEW SEED")) game.saves.StartNewJourney();
                 if (Button(new Rect(x+146,363,128,34),"RELOAD CSV")) game.ReloadTables();
                 text.fontSize = 18;
                 Fill(new Rect(x+16,418,5,5),context.paused ? C("E6CC83") : Cyan);
@@ -195,11 +198,12 @@ namespace OnAir
                 Panel(new Rect(x,462,286,details ? 140 : 106));
                 Fill(new Rect(x+3,465,280,32),C("213139"));
                 Label(new Rect(x+15,467,225,28),"WORLD STATUS");
-                if (Button(new Rect(x+249,469,27,24),details ? "-" : "+")) details=!details;
+                if (Button(new Rect(x+249,469,27,24),details ? "-" : "+")){details=!details;game.saves.RequestSave();}
                 Label(new Rect(x+15,506,140,22),"BLDGS " + terrainWorld.ActiveBuildingCount,true);
                 Label(new Rect(x+158,506,110,22),"LEG "+(journey.Current.index+1),true);
                 Label(new Rect(x+15,532,250,22),"ROUTE "+journey.TotalMeters.ToString("0")+" M",true);
                 if(game.frameRate)Label(new Rect(x+17,622,250,22),"FPS "+game.frameRate.FramesPerSecond.ToString("0"),true);
+                if(game.saves.HasPreviousJourney&&!game.cabin&&Button(new Rect(x+12,660,262,32),"PREVIOUS FLIGHT"))game.saves.ReturnToPreviousJourney();
                 Label(new Rect(20,140,280,22),"SEED "+journey.seed,true);
                 if(biomePicker&&game.biomeNavigator)
                 {

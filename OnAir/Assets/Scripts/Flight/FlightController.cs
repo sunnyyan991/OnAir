@@ -45,6 +45,12 @@ namespace OnAir
         float aircraftRadius=8;
         public void ConfigureAircraft(AircraftRig rig){if(rig)aircraftRadius=.5f*Mathf.Sqrt(rig.length*rig.length+rig.wingspan*rig.wingspan)+2;}
         public float CruiseHeight=>altitude+groundClearance;
+        public FlightState CaptureState()=>new FlightState{flightTime=flightTime,routeSlope=routeSlope,speedMetersPerSecond=speedMetersPerSecond};
+        public void RestoreState(FlightState saved)
+        {
+            routeSlope=saved.routeSlope;speedMetersPerSecond=saved.speedMetersPerSecond;
+            Tick(0);flightTime=saved.flightTime;Tick(0);
+        }
         float WorldSpeed=>Mathf.Max(0,speedMetersPerSecond)*TerrainStreamer.SegmentLength/journey.Current.terrain.distanceMeters;
         void Start()=>Tick(0);
         void Update()=>Tick(Mathf.Min(Time.deltaTime,.05f));

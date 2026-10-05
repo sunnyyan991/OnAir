@@ -44,6 +44,22 @@ namespace OnAir
         public int HighwayNetworksCreated=>plan?.layerHighways.NetworksCreated??0;
         public static Rect TileBounds(Vector2Int key)=>new Rect(key.x*64,key.y*64-32,64,64);
         public double InitialBuildMs{get;private set;}
+        WorldState restoreState;
+        public bool CanCaptureSave=>restoreState==null&&ResidentTileCount>0&&MissingVisibleTiles==0&&revision==journey.Revision&&teleport==journey.TeleportRevision&&plan!=null&&plan.layerHighways.CanCapture;
+        public void RestoreState(WorldState saved){restoreState=saved;}
+        public WorldState CaptureState()
+        {
+            if(!CanCaptureSave)throw new System.InvalidOperationException("World is still preparing.");
+            var needed=new HashSet<Vector2Int>();
+            foreach(var key in wanted)
+            {
+                var b=TileBounds(key);
+                for(int z=Mathf.FloorToInt(b.yMin/128);z<=Mathf.FloorToInt((b.yMax-.01f)/128);z++)for(int x=Mathf.FloorToInt(b.xMin/128);x<=Mathf.FloorToInt((b.xMax-.01f)/128);x++)needed.Add(new Vector2Int(x,z));
+            }
+            foreach(var route in plan.layerHighways.Routes)foreach(var b in route.occupied)needed.Add(new Vector2Int(Mathf.FloorToInt(b.center.x/128),Mathf.FloorToInt(b.center.y/128)));
+            var history=new List<LandscapeMemory>();foreach(var memory in memories.Values)if(memory.slice>=0)history.Add(memory);history.Sort((a,b)=>a.slice.CompareTo(b.slice));
+            return new WorldState{population=populationCache.CaptureState(buildings,needed),highways=plan.layerHighways.CaptureState(),memories=history.ToArray()};
+        }
         void Start(){var watch=System.Diagnostics.Stopwatch.StartNew();Refresh();InitialBuildMs=watch.Elapsed.TotalMilliseconds;}
         void LateUpdate(){Refresh(false);Pump(generationBudgetMs);PumpHighways(pending==null?4:1.5f);}
         void CancelHighways(){(highwayWork as System.IDisposable)?.Dispose();highwayWork=null;if(highwayPlanner)Destroy(highwayPlanner.gameObject);highwayPlanner=null;}
@@ -55,7 +71,11 @@ namespace OnAir
             if(reset)
             {
                 if(flight)flight.Tick(0);var follow=sceneCamera.GetComponent<CameraFollow>();if(follow)follow.Follow(0);
-                if(revision!=journey.Revision){ClearChunks();plan=new ContinuousWorldPlan(journey.seed,flight.routeSlope);revision=journey.Revision;}
+                if(revision!=journey.Revision)
+                {
+                    ClearChunks();plan=new ContinuousWorldPlan(journey.seed,flight.routeSlope);revision=journey.Revision;
+                    if(restoreState!=null){populationCache.RestoreState(restoreState.population,plan,buildings);plan.layerHighways.RestoreState(restoreState.highways);foreach(var memory in restoreState.memories)memories[memory.slice]=memory;restoreState=null;}
+                }
                 if(teleport!=journey.TeleportRevision)CancelHighways();
                 teleport=journey.TeleportRevision;
             }
