@@ -47,8 +47,8 @@ namespace OnAir
         void Update()
         {
             if (!context || !sceneCamera || rules == null || !shader) return;
-            foreach (var layer in layers) { var main = layer.System.main; main.simulationSpeed = context.paused ? 0 : 1; }
-            if (context.paused) return;
+            foreach (var layer in layers) { var main = layer.System.main; main.simulationSpeed = context.SimulationPaused ? 0 : 1; }
+            if (context.SimulationPaused) return;
             if (selected != context.weather)
             {
                 selected = context.weather;

@@ -13,6 +13,13 @@ namespace OnAir
         Font font;
         readonly Dictionary<char, Texture2D> glyphs = new Dictionary<char, Texture2D>();
         bool collapsed, details, biomePicker;
+        public bool IsBiomePickerOpen => biomePicker;
+        public void ReleaseInput(){if(dialControl!=0&&GUIUtility.hotControl==dialControl)GUIUtility.hotControl=0;dialControl=0;}
+        public bool ReleaseCapturedInput(Event ev)
+        {
+            if(dialControl==0||GUIUtility.hotControl!=dialControl||ev.rawType!=EventType.MouseUp||ev.button!=0)return false;
+            ReleaseInput();if(game&&game.saves!=null)game.saves.RequestSave();return true;
+        }
         public SaveSettings CaptureSettings()=>new SaveSettings{panelCollapsed=collapsed,worldDetails=details};
         public void RestoreSettings(SaveSettings settings){collapsed=settings.panelCollapsed;details=settings.worldDetails;}
         Vector2 scroll;
@@ -34,7 +41,7 @@ namespace OnAir
             small = new GUIStyle(text) { fontSize = 12, fontStyle = FontStyle.Normal, wordWrap = true };
             small.normal.textColor = Muted;
             hit = new GUIStyle();
-            const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:-+>/. ";
+            const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:-+>/. %";
             string[] patterns = {
                 "0E11111F111111","1E11111E11111E","0F10101010100F","1E11111111111E","1F10101E10101F","1F10101E101010",
                 "0F10101711110F","1111111F111111","0E04040404040E","0702020212120C","11121418141211","1010101010101F",
@@ -42,7 +49,7 @@ namespace OnAir
                 "0F10100E01011E","1F040404040404","1111111111110E","11111111110A04","11111115151B11","11110A040A1111",
                 "11110A04040404","1F01020408101F","0E11131519110E","040C040404040E","0E11010204081F","1E01010601011E",
                 "02060A121F0202","1F10101E01011E","0E10101E11110E","1F010204080808","0E11110E11110E","0E11110F01010E",
-                "00040400040400","0000001F000000","0004041F040400","10080402040810","01010204081010","00000000000C0C","00000000000000"
+                "00040400040400","0000001F000000","0004041F040400","10080402040810","01010204081010","00000000000C0C","00000000000000","191A0204080B13"
             };
             for (int i=0;i<alphabet.Length;i++)
             {
@@ -103,6 +110,28 @@ namespace OnAir
             Label(new Rect(x+252,y+12,20,26),">"); text.normal.textColor = old;
             return GUI.Button(r,new GUIContent("","Cycle " + name),hit);
         }
+        public void MenuPanel(Rect rect) { Init();Panel(rect); }
+        public void MenuFill(Rect rect,Color color) => Fill(rect,color);
+        public void MenuText(Rect rect,string value,int pixelSize=2,bool centered=false,Color? tint=null)
+        {
+            Init();if(Event.current.type!=EventType.Repaint)return;
+            value=(value??"").ToUpperInvariant();
+            int size=Mathf.Max(1,Mathf.Min(pixelSize,Mathf.FloorToInt(rect.width/Mathf.Max(1,value.Length*6))));
+            float x=centered?rect.center.x-(value.Length*6-1)*size*.5f:rect.x;
+            float y=Mathf.Round(rect.center.y-7*size*.5f);var old=GUI.color;GUI.color=tint??Ink;
+            foreach(char c in value){if(glyphs.TryGetValue(c,out var tex))GUI.DrawTexture(new Rect(Mathf.Round(x),y,5*size,7*size),tex);x+=6*size;}
+            GUI.color=old;
+        }
+        public bool MenuButton(Rect rect,string value,bool enabled=true,bool highlighted=false)
+        {
+            Init();bool usable=enabled&&GUI.enabled;highlighted=highlighted&&usable;
+            Fill(rect,C(!usable?"2E3E44":rect.Contains(Event.current.mousePosition)?"48626B":"354B53"));
+            Fill(new Rect(rect.x,rect.y,rect.width,1),C(highlighted?"E6CC83":"50656A"));
+            Fill(new Rect(rect.x,rect.yMax-2,rect.width,2),C(highlighted?"E6CC83":"17272E"));
+            if(highlighted){Fill(new Rect(rect.x,rect.y,2,rect.height),C("E6CC83"));Fill(new Rect(rect.xMax-2,rect.y,2,rect.height),C("E6CC83"));}
+            MenuText(new Rect(rect.x+8,rect.y,rect.width-16,rect.height),value,2,true,usable?Ink:Muted);
+            bool prior=GUI.enabled;GUI.enabled=usable;bool pressed=GUI.Button(rect,new GUIContent("",value),hit);GUI.enabled=prior;return pressed;
+        }
         // Sunrise left, noon top, sunset right, midnight bottom. One turn is a full cycle.
         public static Vector2 TimeDirection(float phase)
         {
@@ -118,25 +147,20 @@ namespace OnAir
             Label(new Rect(x+17,y+3,230,17),"TIME OF DAY",true);
             var center=new Vector2(x+75,y+59);
             int id=GUIUtility.GetControlID("WorldTimeDial".GetHashCode(),FocusType.Passive,area);
-            dialControl=id;
             var ev=Event.current;
             // IMGUI already transforms event coordinates with GUI.matrix.
             Vector2 mouse=ev.mousePosition;
             Vector2 offset=mouse-center;
             if(ev.type==EventType.MouseDown&&ev.button==0&&offset.sqrMagnitude<=39*39)
             {
-                GUIUtility.hotControl=id;
+                dialControl=id;GUIUtility.hotControl=id;
                 if(offset.sqrMagnitude>16)context.SetSolarPhase(TimePhase(offset));
                 ev.Use();
             }
-            else if(GUIUtility.hotControl==id&&ev.type==EventType.MouseDrag)
+            else if(dialControl!=0&&GUIUtility.hotControl==dialControl&&ev.type==EventType.MouseDrag)
             {
                 if(offset.sqrMagnitude>16)context.SetSolarPhase(TimePhase(offset));
                 ev.Use();
-            }
-            else if(GUIUtility.hotControl==id&&ev.type==EventType.MouseUp)
-            {
-                GUIUtility.hotControl=0;game.saves.RequestSave();ev.Use();
             }
             if(ev.type!=EventType.Repaint)return;
             Color day=C("E6CC83"),night=C("6CAAB4");
@@ -151,16 +175,21 @@ namespace OnAir
             Fill(new Rect(x+118,y+71,5,5),night);
             Label(new Rect(x+132,y+42,138,19),context.period==DayPeriod.BlueHour?"BLUE HOUR":context.period.ToString(),true);
         }
-        void OnDisable(){if(dialControl!=0&&GUIUtility.hotControl==dialControl)GUIUtility.hotControl=0;}
+        void OnDisable(){ReleaseInput();}
         void OnGUI()
         {
-            if (!context || !journey || !terrainWorld) return;
+            // MenuView also calls this before consuming a release: Unity can skip
+            // lower OnGUI handlers once an upper layer uses the event.
+            var ev=Event.current;
+            if(ReleaseCapturedInput(ev)&&ev.type!=EventType.Used)ev.Use();
+            if (!context || !journey || !terrainWorld || (game.menu!=null&&!game.menu.ShowHud)) return;
             Init();
             var matrix = GUI.matrix; var color = GUI.color;
-            float scale = Mathf.Min(Screen.width/960f,Screen.height/800f);
+            float scale = game.display!=null?game.display.UiScale:Mathf.Min(Screen.width/960f,Screen.height/800f);
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale,scale,1)); GUI.color = Color.white;
             try
             {
+                if(game.menu!=null&&(Event.current.isMouse||Event.current.isKey)&&game.menu.CoversHudPoint(Event.current.mousePosition))return;
                 Panel(new Rect(20,20,208,70));
                 Label(new Rect(34,27,180,18),"LOCAL TIME",true);
                 text.fontSize = 28; text.normal.textColor = C("E6CC83");
@@ -173,7 +202,8 @@ namespace OnAir
                 Label(new Rect(x+15,26,225,30),"FLIGHT CONTROL");
                 if (Button(new Rect(x+249,28,27,24),collapsed ? "+" : "-")){collapsed = !collapsed;game.saves.RequestSave();}
                 if(game.saves!=null)GUI.Label(new Rect(x+15,collapsed?70:441,270,18),game.saves.Status,small);
-                if (collapsed) { if(GUIUtility.hotControl==dialControl)GUIUtility.hotControl=0; return; }
+                Label(new Rect(20,140,280,22),"SEED "+journey.seed,true);
+                if (collapsed) { ReleaseInput();return; }
                 if(game.cabin)
                 {
                     Panel(new Rect(x,662,286,114));
@@ -204,7 +234,6 @@ namespace OnAir
                 Label(new Rect(x+15,532,250,22),"ROUTE "+journey.TotalMeters.ToString("0")+" M",true);
                 if(game.frameRate)Label(new Rect(x+17,622,250,22),"FPS "+game.frameRate.FramesPerSecond.ToString("0"),true);
                 if(game.saves.HasPreviousJourney&&!game.cabin&&Button(new Rect(x+12,660,262,32),"PREVIOUS FLIGHT"))game.saves.ReturnToPreviousJourney();
-                Label(new Rect(20,140,280,22),"SEED "+journey.seed,true);
                 if(biomePicker&&game.biomeNavigator)
                 {
                     float px=Screen.width/scale*.5f-165;

@@ -8,7 +8,7 @@ namespace OnAir
     {
         public int schemaVersion = SaveMigration.CurrentVersion;
         public int generatorVersion = ContinuousWorldPlan.GeneratorVersion;
-        public string configuration, journeyId, savedAtUtc;
+        public string configuration, journeyId, savedAtUtc, biomeName;
         public JourneyState journey;
         public FlightState flight;
         public ClimateState climate;

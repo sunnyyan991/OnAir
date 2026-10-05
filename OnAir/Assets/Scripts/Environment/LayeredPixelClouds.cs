@@ -99,7 +99,7 @@ namespace OnAir {
     }
    }
   }
-  void LateUpdate(){Advance(game.session.paused?0:Time.deltaTime);}
+  void LateUpdate(){Advance(game.session.SimulationPaused?0:Time.deltaTime);}
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
   public void ReviewAdvance(float seconds){Advance(seconds);}
 #endif

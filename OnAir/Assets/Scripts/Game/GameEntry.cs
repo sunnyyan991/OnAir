@@ -27,6 +27,11 @@ namespace OnAir
         public LayeredPixelClouds clouds;
         [Min(5)] public float autoSaveIntervalSeconds=30;
         public SaveController saves{get;private set;}
+        [Range(1,8)] public int saveSlotCount=3;
+        public int titleBackgroundSeed=2409;
+        [Min(10)] public float preparationTimeoutSeconds=60;
+        public MenuController menu{get;private set;}
+        public DisplayController display{get;private set;}
         string loadedTerrains;
         void Awake()
         {
@@ -56,7 +61,12 @@ namespace OnAir
             panel.context=session;panel.journey=journey;panel.terrainWorld=world;panel.flight=flight;panel.weatherFx=weather;panel.game=this;
             frameRate=gameObject.AddComponent<FrameRateDisplay>();
             var traffic=gameObject.AddComponent<CityTraffic>();traffic.game=this;
-            saves=gameObject.AddComponent<SaveController>();saves.Initialize(this,randomizeOnStart,arguments);
+            session.menuPaused=true;
+            journey.seed=titleBackgroundSeed;
+            saves=gameObject.AddComponent<SaveController>();saves.Initialize(this,false,arguments,true);
+            display=gameObject.AddComponent<DisplayController>();display.Initialize(saves.RootDirectory,saves.SavingEnabled);
+            menu=gameObject.AddComponent<MenuController>();menu.Initialize(this);
+            var menuView=gameObject.AddComponent<MenuView>();menuView.game=this;
             flight.Tick(0);cameraFollow.Follow(0);environment.Refresh(0,true);
         }
         public bool ReloadTables()

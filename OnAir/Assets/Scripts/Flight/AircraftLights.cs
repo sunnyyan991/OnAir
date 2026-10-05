@@ -38,7 +38,7 @@ namespace OnAir
             var obj=GameObject.CreatePrimitive(PrimitiveType.Sphere);obj.name=label;obj.transform.SetParent(view.visual,false);obj.transform.localPosition=position;obj.transform.localScale=Vector3.one*size;
             Destroy(obj.GetComponent<Collider>());var r=obj.GetComponent<Renderer>();r.sharedMaterial=material;r.shadowCastingMode=ShadowCastingMode.Off;r.receiveShadows=false;return r;
         }
-        void Update(){if(view&&view.flight&&view.flight.journey&&!view.flight.journey.context.paused)Tick(Time.deltaTime);}
+        void Update(){if(view&&view.flight&&view.flight.journey&&!view.flight.journey.context.SimulationPaused)Tick(Time.deltaTime);}
         public void Tick(float seconds){clock+=Mathf.Max(0,seconds);float phase=clock%1.35f;FlashOn=phase<.07f||(phase>.17f&&phase<.24f);if(leftFlash)leftFlash.enabled=FlashOn;if(rightFlash)rightFlash.enabled=FlashOn;if(beacon)beacon.enabled=phase>.6f&&phase<.76f;}
         void OnDestroy(){if(red)Destroy(red);if(green)Destroy(green);if(white)Destroy(white);}
     }

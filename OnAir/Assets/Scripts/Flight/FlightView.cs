@@ -29,7 +29,7 @@ namespace OnAir
             if(modelLoaded)
             {
                 visual.rotation=Quaternion.LookRotation(flight.Heading,Vector3.up)*Quaternion.Euler(0,0,-flight.Bank*(Rig?Rig.bankMultiplier:1));
-                if(propeller&&!(flight.journey&&flight.journey.context&&flight.journey.context.paused))
+                if(propeller&&!(flight.journey&&flight.journey.context&&flight.journey.context.SimulationPaused))
                     propeller.Rotate(0,0,1200*Time.deltaTime,Space.Self);
                 return;
             }

@@ -233,12 +233,12 @@ namespace OnAir
             var session=game.session;float phase=session.automaticDaylight?session.solarPhase:session.period==DayPeriod.Day?.25f:session.period==DayPeriod.Dawn?.055f:session.period==DayPeriod.Dusk?.455f:session.period==DayPeriod.BlueHour?.535f:.75f;
             float night=1-Mathf.SmoothStep(0,1,Mathf.Sin(phase*Mathf.PI*2)*3);front.SetColor("_EmissionColor",new Color(1.3f,1.3f,1.22f)*night);rear.SetColor("_EmissionColor",new Color(1.45f,.025f,.015f)*night);
             occupied.Clear();highwayPopulation=0;foreach(var car in cars)if(car.active){if(car.route==null){occupied.Add(car.from);occupied.Add(car.to);}else highwayPopulation++;}
-            ActiveCount=0;HighwayCount=0;float dt=session.paused?0:Mathf.Min(Time.deltaTime,.1f);
+            ActiveCount=0;HighwayCount=0;float dt=session.SimulationPaused?0:Mathf.Min(Time.deltaTime,.1f);
             foreach(var car in cars)
             {
                 bool lostRoad=car.active&&(car.route==null?(!nodes.ContainsKey(car.from)||!nodes.ContainsKey(car.to)):!routeSet.Contains(car.route));
                 if(lostRoad&&!Visible(car.mapPosition))Stop(car);
-                if(!car.active&&!session.paused)Spawn(car);if(!car.active)continue;
+                if(!car.active&&!session.SimulationPaused)Spawn(car);if(!car.active)continue;
                 if(dt>0&&!lostRoad)Advance(car,dt);
                 // Also update stopped cars and failed junction/ramp transitions:
                 // the floating map origin changes even when a car does not move.

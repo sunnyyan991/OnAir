@@ -7,6 +7,8 @@ namespace OnAir
         public Weather weather = Weather.Clear;
         public DayPeriod period = DayPeriod.Day;
         public bool paused;
+        [System.NonSerialized] public bool menuPaused;
+        public bool SimulationPaused => paused || menuPaused;
         public bool automaticWeather=true,automaticDaylight=true;
         [Min(30)] public float daySeconds=600,nightSeconds=300;
         [Range(0,1)] public float solarPhase=.25f;
@@ -30,7 +32,7 @@ namespace OnAir
         void Update()=>TickClimate(Time.deltaTime);
         public void TickClimate(float seconds)
         {
-            if(paused||seconds<=0)return;if(weatherRandom==null)InitializeClimate(System.Environment.TickCount);
+            if(SimulationPaused||seconds<=0)return;if(weatherRandom==null)InitializeClimate(System.Environment.TickCount);
             if(automaticWeather)
             {
                 weatherRemaining-=seconds;

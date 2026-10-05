@@ -36,6 +36,7 @@ namespace OnAir
         ContinuousWorldPlan plan;int revision=-1,teleport=-1;
         WorldPopulationCache populationCache=new WorldPopulationCache();
         IEnumerator pending;GameObject pendingObject;Vector2Int pendingKey;
+        bool pendingPrepared;
         Vector2 viewCenter;float nextTrim;
         Vector2 velocity;
         IEnumerator highwayWork;ContinuousWorldLayout highwayPlanner;float nextHighwayCheck;
@@ -44,6 +45,14 @@ namespace OnAir
         public int HighwayNetworksCreated=>plan?.layerHighways.NetworksCreated??0;
         public static Rect TileBounds(Vector2Int key)=>new Rect(key.x*64,key.y*64-32,64,64);
         public double InitialBuildMs{get;private set;}
+        public bool PreparingView{get;private set;}
+        public bool ViewReady{get;private set;}
+        public int PreparationDone{get;private set;}
+        public int PreparationTotal{get;private set;}
+        public string PreparationError{get;private set;}
+        public float PreparationProgress=>ViewReady?1:PreparationTotal==0?0:Mathf.Min(.99f,(float)PreparationDone/PreparationTotal);
+        bool preparationSuspended=true;
+        System.Diagnostics.Stopwatch preparationWatch;
         WorldState restoreState;
         public bool CanCaptureSave=>restoreState==null&&ResidentTileCount>0&&MissingVisibleTiles==0&&revision==journey.Revision&&teleport==journey.TeleportRevision&&plan!=null&&plan.layerHighways.CanCapture;
         public void RestoreState(WorldState saved){restoreState=saved;}
@@ -60,8 +69,34 @@ namespace OnAir
             var history=new List<LandscapeMemory>();foreach(var memory in memories.Values)if(memory.slice>=0)history.Add(memory);history.Sort((a,b)=>a.slice.CompareTo(b.slice));
             return new WorldState{population=populationCache.CaptureState(buildings,needed),highways=plan.layerHighways.CaptureState(),memories=history.ToArray()};
         }
-        void Start(){var watch=System.Diagnostics.Stopwatch.StartNew();Refresh();InitialBuildMs=watch.Elapsed.TotalMilliseconds;}
-        void LateUpdate(){Refresh(false);Pump(generationBudgetMs);PumpHighways(pending==null?4:1.5f);}
+        public void BeginPreparation()
+        {
+            CancelPending();CancelHighways();PreparingView=true;ViewReady=false;preparationSuspended=false;
+            PreparationDone=PreparationTotal=0;PreparationError=null;nextHighwayCheck=0;preparationWatch=System.Diagnostics.Stopwatch.StartNew();
+            Refresh(false);
+        }
+        public void CancelPreparation()
+        {
+            PreparingView=false;ViewReady=false;preparationSuspended=true;CancelPending();CancelHighways();
+        }
+        void LateUpdate()
+        {
+            if(preparationSuspended)return;
+            if(!PreparingView){Refresh(false);Pump(generationBudgetMs);PumpHighways(pending==null?4:1.5f);return;}
+            try
+            {
+                Refresh(false);Pump(generationBudgetMs);
+                PreparationTotal=ensure.Count;PreparationDone=0;foreach(var key in ensure)if(chunks.ContainsKey(key))PreparationDone++;
+                // Finish tile preparation before advancing the road planner. Its route
+                // list must stay stable while initial tile meshes yield across frames.
+                if(PreparationDone==PreparationTotal)PumpHighways(4);
+                if(PreparationDone==PreparationTotal&&CanCaptureSave&&highwayWork==null)
+                {
+                    PreparingView=false;ViewReady=true;InitialBuildMs=preparationWatch.Elapsed.TotalMilliseconds;
+                }
+            }
+            catch(System.Exception error){PreparationError=error.Message;CancelPreparation();Debug.LogWarning("World preparation failed: "+error.Message);}
+        }
         void CancelHighways(){(highwayWork as System.IDisposable)?.Dispose();highwayWork=null;if(highwayPlanner)Destroy(highwayPlanner.gameObject);highwayPlanner=null;}
         void ClearChunks(){CancelHighways();initialHighway=false;CancelPending();foreach(var go in chunks.Values){go.SetActive(false);Destroy(go);}chunks.Clear();memories.Clear();populationCache.palette.Dispose();populationCache=new WorldPopulationCache();}
         public void RebuildAll(){ClearChunks();revision=-1;Refresh();}
@@ -86,8 +121,8 @@ namespace OnAir
             // Teleport/resize/overload safety net. Ordinary travel must be served by prefetch;
             // EmergencyCompletions exposes stalls instead of silently counting them as success.
             ensure.Clear();ensure.UnionWith(required);
-            if(reset||immediate)foreach(var key in wanted)if(ArrivalTime(key)<3)ensure.Add(key);
-            foreach(var key in ensure)if(!chunks.ContainsKey(key))
+            if(reset||immediate||PreparingView)foreach(var key in wanted)if(ArrivalTime(key)<3)ensure.Add(key);
+            foreach(var key in ensure)if(!PreparingView&&!chunks.ContainsKey(key))
             {
                 if(!reset&&!immediate){EmergencyCompletions++;Debug.LogWarning("Streaming emergency at frame "+Time.frameCount+" tile "+key+" pending "+(pending!=null?pendingKey.ToString():"none"));}
                 if(pending!=null&&pendingKey==key){while(pending.MoveNext()){}Publish();}
@@ -199,18 +234,29 @@ namespace OnAir
                     bool found=false;Vector2Int chosen=default;float best=float.MaxValue;
                     foreach(var key in wanted)if(!chunks.ContainsKey(key))
                     {
+                        if(PreparingView&&!ensure.Contains(key))continue;
                         float score=ArrivalTime(key)*100000+(TileBounds(key).center-viewCenter).sqrMagnitude;
                         if(score<best){best=score;chosen=key;found=true;}
                     }
                     if(!found)return;pendingKey=chosen;pendingObject=new GameObject("Preparing tile "+chosen);pendingObject.SetActive(false);pendingObject.transform.SetParent(transform,false);
                     var layout=pendingObject.AddComponent<ContinuousWorldLayout>();layout.CommercialViewDirection=-sceneCamera.transform.forward;
-                    pending=layout.BuildIncrementally(journey.seed,chosen.y,journey.Current.terrain.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(chosen),populationCache);
+                    pendingPrepared=PreparingView;
+                    pending=pendingPrepared?PrepareTile(layout,chosen):layout.BuildIncrementally(journey.seed,chosen.y,journey.Current.terrain.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(chosen),populationCache);
                 }
                 var step=System.Diagnostics.Stopwatch.StartNew();bool more=pending.MoveNext();step.Stop();if(step.Elapsed.TotalMilliseconds>MaxPreparationStepMs){MaxPreparationStepMs=step.Elapsed.TotalMilliseconds;SlowestPreparationStage=pendingObject.GetComponent<ContinuousWorldLayout>().BuildStage;}
                 if(!more){Publish();PreparedSlices++;}
             }
         }
-        void Publish(){var go=pendingObject;var key=pendingKey;(pending as System.IDisposable)?.Dispose();pending=null;pendingObject=null;Commit(key,go);}
+        IEnumerator PrepareTile(ContinuousWorldLayout layout,Vector2Int key)
+        {
+            var work=layout.BuildIncrementally(journey.seed,key.y,journey.Current.terrain.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(key),populationCache);
+            while(work.MoveNext())yield return null;
+            work=layout.SyncHighways();while(work.MoveNext())yield return null;
+            if(environment)environment.PrepareWindows(layout.gameObject);
+            layout.gameObject.AddComponent<DistantDetailShadows>().sceneCamera=sceneCamera;
+            yield return null;
+        }
+        void Publish(){var go=pendingObject;var key=pendingKey;(pending as System.IDisposable)?.Dispose();pending=null;pendingObject=null;Commit(key,go,pendingPrepared);}
         Rect DemandBounds()
         {
             float left=float.MaxValue,right=float.MinValue,bottom=float.MaxValue,top=float.MinValue;
@@ -258,11 +304,12 @@ namespace OnAir
             plan.layerHighways.Published=true;
             foreach(var go in chunks.Values)if(go)go.GetComponent<ContinuousWorldLayout>().RevealHighways();
         }
-        void Commit(Vector2Int key,GameObject go)
+        void Commit(Vector2Int key,GameObject go,bool prepared=false)
         {
             go.name="World tile "+key;go.transform.localPosition=new Vector3(0,0,(key.y-journey.Current.index)*64);
-            var transport=go.GetComponent<ContinuousWorldLayout>().SyncHighways();while(transport.MoveNext()){}
-            if(environment)environment.PrepareWindows(go);go.AddComponent<DistantDetailShadows>().sceneCamera=sceneCamera;chunks.Add(key,go);go.SetActive(true);GenerationCount++;
+            if(!prepared){var transport=go.GetComponent<ContinuousWorldLayout>().SyncHighways();while(transport.MoveNext()){}
+                if(environment)environment.PrepareWindows(go);go.AddComponent<DistantDetailShadows>().sceneCamera=sceneCamera;}
+            chunks.Add(key,go);go.SetActive(true);GenerationCount++;
         }
         void CancelPending(){(pending as System.IDisposable)?.Dispose();pending=null;if(pendingObject)Destroy(pendingObject);pendingObject=null;}
         void OnDestroy(){CancelHighways();CancelPending();populationCache.palette.Dispose();}

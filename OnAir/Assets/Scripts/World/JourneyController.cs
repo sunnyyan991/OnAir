@@ -74,7 +74,7 @@ namespace OnAir
         void EnterCurrent()=>context.EnterTerrain(Current.terrain.biome,Current.entryWeather);
         public void Advance(double distance)
         {
-            Initialize();if(context.paused||distance<=0||double.IsNaN(distance)||double.IsInfinity(distance))return;
+            Initialize();if(context.SimulationPaused||distance<=0||double.IsNaN(distance)||double.IsInfinity(distance))return;
             TotalMeters+=distance;SegmentMeters+=distance;
             while(SegmentMeters>=Current.terrain.distanceMeters){SegmentMeters-=Current.terrain.distanceMeters;legs.RemoveAt(0);EnsureLookahead();EnterCurrent();}
         }
@@ -88,7 +88,8 @@ namespace OnAir
         {
             Initialize();if(context.automaticWeather){context.automaticWeather=false;context.SetWeather(Weather.Clear);return;}if(context.weather==Weather.HeavyRain){context.automaticWeather=true;return;}context.SetWeather(context.weather==Weather.Clear?Weather.Cloudy:context.weather==Weather.Cloudy?Weather.Rain:context.weather==Weather.Rain?Weather.HeavyRain:Weather.Clear);
         }
-        public void NewSeed(){BeforeNewSeed?.Invoke();seed=FreshSeed(seed);legs.Clear();TotalMeters=SegmentMeters=0;Revision++;TeleportRevision++;Initialize();JourneyChanged?.Invoke();}
+        public void NewSeed()=>Restart(FreshSeed(seed));
+        public void Restart(int value){BeforeNewSeed?.Invoke();seed=value;legs.Clear();TotalMeters=SegmentMeters=0;Revision++;TeleportRevision++;Initialize();JourneyChanged?.Invoke();}
         public void ReplaceTerrains(TerrainDefinition[] definitions)
         {
             terrains=definitions;legs.Clear();TotalMeters=SegmentMeters=0;Revision++;TeleportRevision++;Initialize();

@@ -60,7 +60,7 @@ namespace OnAir
             if(landscape==null||landscape.seed!=journey.seed||landscape.routeSlope!=routeSlope)landscape=new ContinuousWorldPlan(journey.seed,routeSlope);
             if(Time.unscaledTime>=nextCacheTrim){landscape.TrimCaches();nextCacheTrim=Time.unscaledTime+2;}
             if(teleport!=journey.TeleportRevision){teleport=journey.TeleportRevision;flightTime=0;Bank=0;clearanceVelocity=0;}
-            if(!journey.context.paused&&seconds>0&&!float.IsNaN(seconds)&&!float.IsInfinity(seconds)&&WorldSpeed>0){flightTime+=seconds;journey.Advance(seconds*speedMetersPerSecond);}
+            if(!journey.context.SimulationPaused&&seconds>0&&!float.IsNaN(seconds)&&!float.IsInfinity(seconds)&&WorldSpeed>0){flightTime+=seconds;journey.Advance(seconds*speedMetersPerSecond);}
             float phase=flightTime*swayFrequency,seedPhase=(journey.seed%997)*.013f;
             float x=swayAmplitude*(.78f*Mathf.Sin(phase+seedPhase)+.22f*Mathf.Sin(phase*.43f+seedPhase*2));
             // Visual sway must not yaw the cruise heading.
@@ -90,7 +90,7 @@ namespace OnAir
             if(journey.continuousWorld)for(float gz=Mathf.Floor((globalZ-aircraftRadius)/4)*4;gz<=globalZ+aircraftRadius;gz+=4)
                 for(float gx=Mathf.Floor((x-aircraftRadius)/4)*4;gx<=x+aircraftRadius;gx+=4)localGround=Mathf.Max(localGround,landscape.Height(gx+2,gz+2));
             if(seconds==0){groundClearance=terrain;clearanceVelocity=0;}
-            else if(!journey.context.paused)groundClearance=Mathf.SmoothDamp(groundClearance,terrain,ref clearanceVelocity,terrain>groundClearance?2.5f:6f,8,seconds);
+            else if(!journey.context.SimulationPaused)groundClearance=Mathf.SmoothDamp(groundClearance,terrain,ref clearanceVelocity,terrain>groundClearance?2.5f:6f,8,seconds);
             // Clearance is measured against the actual flight altitude. The cruise
             // altitude already provides a reserve; do not demand the full terrain
             // height again as an instantaneous extra climb.
