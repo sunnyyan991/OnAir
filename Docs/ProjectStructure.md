@@ -12,20 +12,21 @@ Unity 工程为 `OnAir/`，正式入口为 `Assets/Scenes/Main.unity`。根目�
 | Scripts/World | JourneyController 航程与路线；TerrainStreamer 地块生命周期；BlockGenerator 布局；BuildingFootprint 占地；BuildingView 窗灯引用 |
 | Scripts/World/DenseCityLayout | 城市专用窄路与错位街区，建筑占地排列，路面批量网格与释放；其他地形仍由 BlockGenerator 原布局处理 |
 | Scripts/Environment | EnvironmentController 光照和窗灯；WeatherParticles 天气粒子 |
-| Scripts/UI | FlightPanel 状态显示与操作 |
+| Scripts/UI | FlightPanel 状态显示与操作；MenuView 菜单绘制；TitleBackdrop 固定标题镜头与光照 |
 | Scripts/Data | CsvReader；各配置读取器、数据类型和资源映射类型 |
 | Prefabs/Characters | Plane 角色根预制体、LowWing 低翼飞机模型预制体 |
 | Prefabs/Buildings | 18 个旧地形建筑变体及 13 个日式独立建筑；Residential/Commercial 分类新资产；Shared 为旧变体依赖 |
 | Prefabs/World | 道路、植被、道具及 Shared 基础资源 |
+| Prefabs/UI | TitleBackdrop：预先摆好的标题建筑、道路、飞机、独立镜头与日景光源 |
 | Art | Sprites、Meshes、Materials、Shaders |
 | Data/Tables | buildings、terrains、weather_fx 三张规则表 |
 | Data/Profiles | 地形昼夜表现及资源引用 |
 | Data/Catalogs | 建筑键和预制体映射、地形 id 和 Profile 映射、各地形 WorldKit |
 | Settings/Rendering | MainPipeline，项目默认管线和各质量等级共用 |
-| Editor/Tools | 建筑预制体生成；只生成资源，不另建游戏场景 |
+| Editor/Tools | 建筑预制体生成、固定标题摆放；接入 Main，不另建正式场景 |
 | Editor/Validation | 项目结构、配置、飞行、天气和打包检查 |
 
-目录按实际内容建立；新增正式 UI 预制体时放 Prefabs/UI。
+目录按实际内容建立；正式 UI 预制体放 Prefabs/UI。标题和飞行共用 Main，标题期间不生成世界；选择开始或读档后才准备所选旅程，详见 [标题与运行设置](TitleMenu.md)。
 
 ## 运行流程与边界
 

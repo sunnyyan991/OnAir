@@ -35,7 +35,8 @@ namespace OnAir
                 if(menu.ShowHud)DrawRunning();
                 else
                 {
-                    art.MenuFill(new Rect(0,0,width,height),menu.BackgroundReady?new Color(.02f,.08f,.1f,.26f):new Color(.08f,.14f,.17f,1));
+                    bool preparing=menu.Page==MenuPage.Preparing||menu.Page==MenuPage.PrepareFailed;
+                    art.MenuFill(new Rect(0,0,width,height),preparing?new Color(.08f,.14f,.17f,1):new Color(.02f,.08f,.1f,.26f));
                     switch(menu.Page)
                     {
                         case MenuPage.Title:DrawTitle(width);break;
@@ -64,8 +65,6 @@ namespace OnAir
             if(TitleButton(new Rect(x,444,250,64),"CREDITS",focus==2))menu.ShowCredits();
             if(TitleButton(new Rect(x,526,250,64),"SETTINGS",focus==3))menu.OpenDisplay();
             if(TitleButton(new Rect(x,608,250,64),"QUIT",focus==4))menu.AskLeave(LeaveTarget.Quit);
-            Text(x,690,400,!menu.BackgroundReady&&game.world.PreparingView?
-                "PREPARING BACKGROUND "+Mathf.FloorToInt(game.world.PreparationProgress*100)+"%":menu.BackgroundStatus,1);
         }
         // The title has its own brand glyphs; the existing HUD alphabet stays unchanged.
         void DrawTitleBrand(float x,float y)

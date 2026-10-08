@@ -28,20 +28,23 @@ namespace OnAir
         [Min(5)] public float autoSaveIntervalSeconds=30;
         public SaveController saves{get;private set;}
         [Range(1,8)] public int saveSlotCount=3;
-        public int titleBackgroundSeed=2409;
+        public TitleBackdrop titleBackdrop;
         [Min(10)] public float preparationTimeoutSeconds=60;
         public MenuController menu{get;private set;}
         public DisplayController display{get;private set;}
         string loadedTerrains;
+        int flightCameraMask;
+        CityTraffic traffic;
         void Awake()
         {
-            if(!session||!journey||!flight||!cameraFollow||!world||!environment||!weather||!panel||!sceneCamera||!sun||!buildings||!terrains||!weatherShader)
+            if(!session||!journey||!flight||!cameraFollow||!world||!environment||!weather||!panel||!sceneCamera||!sun||!buildings||!terrains||!weatherShader||!titleBackdrop)
                 throw new InvalidOperationException("GameEntry: incomplete scene/resource references.");
             loadedTerrains=TableSource.Read(terrainsTable);
             var definitions=terrains.Resolve(TerrainTable.Parse(loadedTerrains));
             world.buildings=new BuildingData(TableSource.Read(buildingsTable),buildings);
             WeatherFxTable.Parse(TableSource.Read(weatherTable));
             var arguments=System.Environment.GetCommandLineArgs();
+            flightCameraMask=sceneCamera.cullingMask;
             journey.context=session;journey.terrains=definitions;
             if(journey.continuousWorld){sceneCamera.orthographicSize=68;sceneCamera.farClipPlane=1000;cameraFollow.offset*=2.5f;}
             flight.journey=journey;cameraFollow.target=flight;
@@ -60,14 +63,33 @@ namespace OnAir
             biomeNavigator=gameObject.AddComponent<BiomeNavigator>();biomeNavigator.game=this;
             panel.context=session;panel.journey=journey;panel.terrainWorld=world;panel.flight=flight;panel.weatherFx=weather;panel.game=this;
             frameRate=gameObject.AddComponent<FrameRateDisplay>();
-            var traffic=gameObject.AddComponent<CityTraffic>();traffic.game=this;
+            traffic=gameObject.AddComponent<CityTraffic>();traffic.game=this;
             session.menuPaused=true;
-            journey.seed=titleBackgroundSeed;
             saves=gameObject.AddComponent<SaveController>();saves.Initialize(this,false,arguments,true);
             display=gameObject.AddComponent<DisplayController>();display.Initialize(saves.RootDirectory,saves.SavingEnabled);
             menu=gameObject.AddComponent<MenuController>();menu.Initialize(this);
             var menuView=gameObject.AddComponent<MenuView>();menuView.game=this;
-            flight.Tick(0);cameraFollow.Follow(0);environment.Refresh(0,true);
+        }
+        void SetFlightSceneActive(bool active)
+        {
+            flight.gameObject.SetActive(active);sceneCamera.gameObject.SetActive(active);
+            flight.enabled=active;cameraFollow.enabled=active;
+            environment.enabled=active;weather.enabled=active;clouds.enabled=active;traffic.enabled=active;
+            sun.enabled=active;
+        }
+        public void ShowTitleBackdrop()
+        {
+            world.CancelPreparation();
+            foreach(var chunk in world.Chunks)if(chunk)chunk.SetActive(false);
+            SetFlightSceneActive(false);titleBackdrop.Show();
+        }
+        public void BeginFlightPreparation()
+        {
+            titleBackdrop.Hide();sceneCamera.cullingMask=0;SetFlightSceneActive(true);
+        }
+        public void RevealFlight()
+        {
+            sceneCamera.cullingMask=flightCameraMask;world.ResumeStreaming();
         }
         public bool ReloadTables()
         {

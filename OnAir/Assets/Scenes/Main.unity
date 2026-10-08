@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 1
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 1
@@ -42,8 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
-  m_GIWorkflowMode: 1
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -66,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
     m_BakeBackend: 1
@@ -309,16 +306,15 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 622376600}
-  m_Enabled: 1
-  serializedVersion: 10
+  m_Enabled: 0
+  serializedVersion: 12
   m_Type: 1
-  m_Shape: 0
   m_Color: {r: 1, g: 0.89411765, b: 0.7294118, a: 1}
   m_Intensity: 1.2
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
     m_Type: 2
     m_Resolution: -1
@@ -362,8 +358,12 @@ Light:
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
 --- !u!4 &622376602
 Transform:
   m_ObjectHideFlags: 0
@@ -480,6 +480,12 @@ MonoBehaviour:
   randomizeOnStart: 1
   frameRate: {fileID: 0}
   cabin: {fileID: 0}
+  enableExperimentalWingView: 0
+  clouds: {fileID: 0}
+  autoSaveIntervalSeconds: 30
+  saveSlotCount: 3
+  titleBackdrop: {fileID: 1900853974}
+  preparationTimeoutSeconds: 60
 --- !u!4 &1253048606
 Transform:
   m_ObjectHideFlags: 0
@@ -584,7 +590,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!20 &1823388784
 Camera:
   m_ObjectHideFlags: 0
@@ -667,6 +673,86 @@ MonoBehaviour:
   offset: {x: -42.5, y: 43.10408, z: -42.5}
   smoothTime: 0.65
   lookAhead: 2
+--- !u!1001 &1900853973
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4140017841765114647, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_Name
+      value: TitleBackdrop
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488588689724025787, guid: 5f781ce8a668f5a44a266fa56c05856e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5f781ce8a668f5a44a266fa56c05856e, type: 3}
+--- !u!114 &1900853974 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1410507384780935488, guid: 5f781ce8a668f5a44a266fa56c05856e,
+    type: 3}
+  m_PrefabInstance: {fileID: 1900853973}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 044fa69f81b34ca98b1a7836e52d0f3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnAir.TitleBackdrop
 --- !u!1001 &7224282980100417508
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -735,6 +821,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Plane
       objectReference: {fileID: 0}
+    - target: {fileID: 5195705083184913956, guid: 99def2eb0357ac546baf6e625a001ed2,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5504999396830676190, guid: 99def2eb0357ac546baf6e625a001ed2,
         type: 3}
       propertyPath: journey
@@ -767,3 +858,4 @@ SceneRoots:
   - {fileID: 617562409}
   - {fileID: 322918899}
   - {fileID: 1253048606}
+  - {fileID: 1900853973}

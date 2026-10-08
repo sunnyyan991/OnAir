@@ -79,6 +79,8 @@ namespace OnAir
         {
             PreparingView=false;ViewReady=false;preparationSuspended=true;CancelPending();CancelHighways();
         }
+        public void SuspendStreaming(){preparationSuspended=true;}
+        public void ResumeStreaming(){preparationSuspended=false;}
         void LateUpdate()
         {
             if(preparationSuspended)return;

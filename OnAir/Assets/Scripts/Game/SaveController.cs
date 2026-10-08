@@ -101,29 +101,6 @@ namespace OnAir
         }
         JourneySaveData ReadJourney(string text) => SaveMigration.ReadJourney(text, configuration, game.journey.terrains, game.world.buildings);
         public List<SaveSlot> GetSlots() => slots.List(ReadJourney, enabledSaving);
-        // Preview applies a read-only snapshot without binding its slot or enabling writes.
-        public bool PrepareTitlePreview(int fixedSeed)
-        {
-            EndJourneyWithoutSaving();Restored=false;
-            var candidates=GetSlots();
-            candidates.Sort((a,b)=>SavedTime(b).CompareTo(SavedTime(a)));
-            foreach(var slot in candidates)
-            {
-                if(!slot.occupied||!slot.compatible)continue;
-                try
-                {
-                    var data=SaveSlots.Read(slot,ReadJourney,out _);
-                    game.journey.RestoreState(data.journey);game.session.RestoreState(data.climate);
-                    game.world.RestoreState(data.world);game.flight.RestoreState(data.flight);game.cameraFollow.Follow(0);
-                    return true;
-                }
-                catch(Exception error){Debug.LogWarning("Title preview kept read-only: "+error.Message);}
-            }
-            game.world.RestoreState(null);game.session.RestoreState(initialClimate);
-            game.journey.Restart(Mathf.Max(0,fixedSeed));game.flight.RestoreState(initialFlight);game.cameraFollow.Follow(0);
-            return false;
-        }
-        static DateTimeOffset SavedTime(SaveSlot slot)=>DateTimeOffset.TryParse(slot.savedAt,out var value)?value:DateTimeOffset.MinValue;
         public bool StageSlot(SaveSlot slot, bool create, bool overwriteConfirmed = false)
         {
             if (ActiveJourney || slot == null || (create && slot.IsLegacy)) return false;
