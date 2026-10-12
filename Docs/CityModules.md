@@ -33,7 +33,7 @@
 
 打开 Main 后运行，城市使用新模块排列；TIME OF DAY 对比 DAY、DAWN、DUSK、NIGHT。画面截图位于根目录 `Art/Reviews/ModularCity`：`main-noon.png` 为正式路线，其他时段截图临时限定连续城市，仅用于同布局对比，不改变正式路线。
 
-参数位置：`CityWorldKit` 保存间距、空地与外墙色板；`CityTerrain` 保存四时段光照。`ModularCitySetup.Apply` 负责设置美术参数和建筑引用，不改场景与正式路线。
+参数位置：`CityWorldKit` 保存间距、空地与外墙色板；`WorldProfile` 保存四时段光照。`ModularCitySetup.Apply` 负责设置美术参数和建筑引用，不改场景与正式路线。
 
 生成器保留外墙引用与高度登记，重新生成建筑时不会丢失模块接入信息。
 

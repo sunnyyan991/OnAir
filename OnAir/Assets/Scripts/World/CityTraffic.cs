@@ -226,7 +226,7 @@ namespace OnAir
         }
         void LateUpdate()
         {
-            if(random==null||!game.journey.continuousWorld)return;
+            if(random==null)return;
             updateWatch.Restart();Profiler.BeginSample("OnAir.CityTraffic");
             if(revision!=game.journey.Revision||teleport!=game.journey.TeleportRevision){foreach(var car in cars)Stop(car);tiles.Clear();nodes.Clear();revision=game.journey.Revision;teleport=game.journey.TeleportRevision;refresh=0;random=new System.Random(game.journey.seed^30403);}
             if(Time.unscaledTime>=refresh){Discover();refresh=Time.unscaledTime+.5f;}

@@ -40,6 +40,7 @@ namespace OnAir
         public float Bank{get;private set;}
         float flightTime;int teleport=-1;
         ContinuousWorldPlan landscape;
+        public ContinuousWorldPlan Landscape=>landscape;
         float nextCacheTrim;
         float groundClearance,clearanceVelocity;
         float aircraftRadius=8;
@@ -51,13 +52,13 @@ namespace OnAir
             routeSlope=saved.routeSlope;speedMetersPerSecond=saved.speedMetersPerSecond;
             Tick(0);flightTime=saved.flightTime;Tick(0);
         }
-        float WorldSpeed=>Mathf.Max(0,speedMetersPerSecond)*TerrainStreamer.SegmentLength/journey.Current.terrain.distanceMeters;
+        float WorldSpeed=>Mathf.Max(0,speedMetersPerSecond)*TerrainStreamer.SegmentLength/journey.MetersPerSegment;
         void Start()=>Tick(0);
         void Update()=>Tick(Mathf.Min(Time.deltaTime,.05f));
         public void Tick(float seconds)
         {
             if(!journey)return;journey.Initialize();
-            if(landscape==null||landscape.seed!=journey.seed||landscape.routeSlope!=routeSlope)landscape=new ContinuousWorldPlan(journey.seed,routeSlope);
+            if(landscape==null||landscape.seed!=journey.seed||landscape.routeSlope!=routeSlope||landscape.zoneWeights!=journey.ZoneWeights)landscape=new ContinuousWorldPlan(journey.seed,routeSlope,journey.ZoneWeights);
             if(Time.unscaledTime>=nextCacheTrim){landscape.TrimCaches();nextCacheTrim=Time.unscaledTime+2;}
             if(teleport!=journey.TeleportRevision){teleport=journey.TeleportRevision;flightTime=0;Bank=0;clearanceVelocity=0;}
             if(!journey.context.SimulationPaused&&seconds>0&&!float.IsNaN(seconds)&&!float.IsInfinity(seconds)&&WorldSpeed>0){flightTime+=seconds;journey.Advance(seconds*speedMetersPerSecond);}
@@ -80,14 +81,14 @@ namespace OnAir
             // A centre-only preview could miss a wingtip hill until the hard floor
             // snapped the aircraft (and its following camera) upwards.
             float terrain=0;
-            if(journey.continuousWorld)for(float ahead=-aircraftRadius;ahead<=80+aircraftRadius;ahead+=4)
+            for(float ahead=-aircraftRadius;ahead<=80+aircraftRadius;ahead+=4)
                 for(float side=-aircraftRadius;side<=aircraftRadius+4;side+=4)
                     terrain=Mathf.Max(terrain,landscape.Height(x+routeSlope*ahead+Mathf.Min(side,aircraftRadius),globalZ+ahead));
             // Hard clearance floor beneath the whole wingspan, independent of the climb smoothing.
             float localGround=0;
             // Terrain is a shared 4 m cell height field. Visit every intersected cell,
             // including the full jet footprint regardless of its heading or bank.
-            if(journey.continuousWorld)for(float gz=Mathf.Floor((globalZ-aircraftRadius)/4)*4;gz<=globalZ+aircraftRadius;gz+=4)
+            for(float gz=Mathf.Floor((globalZ-aircraftRadius)/4)*4;gz<=globalZ+aircraftRadius;gz+=4)
                 for(float gx=Mathf.Floor((x-aircraftRadius)/4)*4;gx<=x+aircraftRadius;gx+=4)localGround=Mathf.Max(localGround,landscape.Height(gx+2,gz+2));
             if(seconds==0){groundClearance=terrain;clearanceVelocity=0;}
             else if(!journey.context.SimulationPaused)groundClearance=Mathf.SmoothDamp(groundClearance,terrain,ref clearanceVelocity,terrain>groundClearance?2.5f:6f,8,seconds);

@@ -3,7 +3,6 @@ namespace OnAir
 {
     public sealed class GameSession : MonoBehaviour
     {
-        public Biome biome = Biome.City;
         public Weather weather = Weather.Clear;
         public DayPeriod period = DayPeriod.Day;
         public bool paused;
@@ -12,12 +11,12 @@ namespace OnAir
         public bool automaticWeather=true,automaticDaylight=true;
         [Min(30)] public float daySeconds=600,nightSeconds=300;
         [Range(0,1)] public float solarPhase=.25f;
-        [System.Serializable] public class WeatherRule
-        {
-            public Weather weather;public float weight,minSeconds,maxSeconds;
-            public WeatherRule(Weather w,float chance,float min,float max){weather=w;weight=chance;minSeconds=min;maxSeconds=max;}
-        }
-        public WeatherRule[] weatherRules={new WeatherRule(Weather.Clear,65,240,480),new WeatherRule(Weather.Cloudy,23,90,180),new WeatherRule(Weather.Rain,10,60,120),new WeatherRule(Weather.HeavyRain,2,30,60)};
+        // Automatic weather rules per climate zone, loaded from climate.csv by GameEntry.
+        [System.NonSerialized] public System.Collections.Generic.Dictionary<string,ClimateRule[]> climate;
+        // Weather that the current zone disallows ends within this many seconds.
+        const float ZoneExitSeconds=8;
+        string climateZone;
+        public string ClimateZone=>climateZone;
         System.Random weatherRandom;float weatherRemaining;
         public float WeatherRemaining=>weatherRemaining;
         public event System.Action PlayerChanged;
@@ -28,19 +27,29 @@ namespace OnAir
             weatherRandom=new System.Random(System.Environment.TickCount^0x572391);weatherRemaining=saved.weatherRemaining;EnvironmentChanged?.Invoke();
         }
         public void InitializeClimate(int seed){weatherRandom=new System.Random(seed^0x572391);ScheduleWeather();}
-        void ScheduleWeather(){var rule=System.Array.Find(weatherRules,r=>r.weather==weather);weatherRemaining=rule==null?180:Mathf.Lerp(rule.minSeconds,Mathf.Max(rule.minSeconds,rule.maxSeconds),(float)weatherRandom.NextDouble());}
+        ClimateRule[] ZoneRules()=>climate!=null&&climate.TryGetValue(climateZone??nameof(ContinuousWorldPlan.EcologyZone.City),out var rules)?rules:System.Array.Empty<ClimateRule>();
+        public bool ZoneAllows(Weather value)=>System.Array.Exists(ZoneRules(),r=>r.weather==value&&r.weight>0);
+        public void SetClimateZone(string zone){climateZone=zone;}
+        void ScheduleWeather()
+        {
+            int index=System.Array.FindIndex(ZoneRules(),r=>r.weather==weather&&r.weight>0);
+            if(index<0){weatherRemaining=ZoneExitSeconds;return;}
+            var rule=ZoneRules()[index];weatherRemaining=Mathf.Lerp(rule.minSeconds,rule.maxSeconds,(float)weatherRandom.NextDouble());
+        }
         void Update()=>TickClimate(Time.deltaTime);
         public void TickClimate(float seconds)
         {
             if(SimulationPaused||seconds<=0)return;if(weatherRandom==null)InitializeClimate(System.Environment.TickCount);
             if(automaticWeather)
             {
+                // Entering a zone that disallows the current weather shortens it instead of switching instantly.
+                if(climateZone!=null&&!ZoneAllows(weather))weatherRemaining=Mathf.Min(weatherRemaining,ZoneExitSeconds);
                 weatherRemaining-=seconds;
                 while(weatherRemaining<=0)
                 {
-                    float overdue=weatherRemaining,total=0;foreach(var r in weatherRules)if(r.weather!=weather)total+=Mathf.Max(0,r.weight);
-                    if(total<=0){weatherRemaining=180;break;}
-                    double ticket=weatherRandom.NextDouble()*total;foreach(var r in weatherRules)if(r.weather!=weather&&r.weight>0){ticket-=r.weight;if(ticket<0){weather=r.weather;break;}}
+                    var rules=ZoneRules();float overdue=weatherRemaining,total=0;foreach(var r in rules)if(r.weather!=weather)total+=Mathf.Max(0,r.weight);
+                    if(total<=0){ScheduleWeather();weatherRemaining=Mathf.Max(1,weatherRemaining);break;}
+                    double ticket=weatherRandom.NextDouble()*total;foreach(var r in rules)if(r.weather!=weather&&r.weight>0){ticket-=r.weight;if(ticket<0){weather=r.weather;break;}}
                     ScheduleWeather();weatherRemaining=Mathf.Max(1,weatherRemaining)+overdue;EnvironmentChanged?.Invoke();
                 }
             }
@@ -58,10 +67,6 @@ namespace OnAir
         {
             solarPhase=Mathf.Repeat(phase,1);automaticDaylight=true;period=PeriodAt(solarPhase);
             EnvironmentChanged?.Invoke();
-        }
-        public void EnterTerrain(Biome terrain,Weather entryWeather)
-        {
-            biome=terrain;EnvironmentChanged?.Invoke();
         }
         public void SetWeather(Weather value){weather=value;if(weatherRandom!=null)ScheduleWeather();EnvironmentChanged?.Invoke();PlayerChanged?.Invoke();}
         public void SetPeriod(DayPeriod value){automaticDaylight=false;period=value;solarPhase=value==DayPeriod.Dawn?.055f:value==DayPeriod.Day?.25f:value==DayPeriod.Dusk?.455f:value==DayPeriod.BlueHour?.535f:.75f;EnvironmentChanged?.Invoke();PlayerChanged?.Invoke();}

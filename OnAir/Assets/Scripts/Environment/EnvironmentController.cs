@@ -12,9 +12,9 @@ namespace OnAir
         public Light sun;
         public Light moon{get;private set;}
         static readonly float[] knots={0,.06f,.20f,.36f,.46f,.54f,.65f,.90f,1};
-        static Color AmbientAt(TerrainProfile t,int k)=>k==1?t.dawnAmbient:k==2||k==3?t.dayAmbient:k==4?t.duskAmbient:k==6||k==7?t.nightAmbient:new Color(.39f,.48f,.67f);
-        static Color SunAt(TerrainProfile t,int k)=>k<=1||k==8?t.dawnSun:k==2||k==3?t.daySun:k==4?t.duskSun:t.nightSun;
-        int generation=-1;float lastNight=-1;TerrainProfile lastProfile;
+        static Color AmbientAt(WorldProfile t,int k)=>k==1?t.dawnAmbient:k==2||k==3?t.dayAmbient:k==4?t.duskAmbient:k==6||k==7?t.nightAmbient:new Color(.39f,.48f,.67f);
+        static Color SunAt(WorldProfile t,int k)=>k<=1||k==8?t.dawnSun:k==2||k==3?t.daySun:k==4?t.duskSun:t.nightSun;
+        float lastNight=-1;WorldProfile lastProfile;
         readonly Dictionary<Material,Material> windowMaterials=new Dictionary<Material,Material>();
         readonly HashSet<Material> ownedMaterials=new HashSet<Material>();
         Quaternion originalSunRotation;bool sunCaptured;
@@ -24,7 +24,7 @@ namespace OnAir
         void LateUpdate()=>Refresh(Time.deltaTime);
         public void Refresh(float seconds,bool immediate=false)
         {
-            journey.Initialize();var t=journey.Current.terrain.profile;
+            journey.Initialize();var t=journey.profile;
             if(!sunCaptured){originalSunRotation=sun.transform.rotation;sunCaptured=true;}
             var session=journey.context;
             float phase=session.automaticDaylight?session.solarPhase:session.period==DayPeriod.Day?.25f:session.period==DayPeriod.Dawn?.055f:session.period==DayPeriod.Dusk?.455f:session.period==DayPeriod.BlueHour?.535f:.75f;
@@ -69,13 +69,7 @@ namespace OnAir
             Shader.SetGlobalFloat("_WindowSleepProgress",WindowNightSchedule.Progress(session.solarPhase,session.nightSeconds,session.automaticDaylight));
             sun.shadowStrength=Mathf.Lerp(1,.12f,cloudCover);
             sun.transform.rotation=Quaternion.Slerp(sun.transform.rotation,rotation,mix);
-            // Continuous tiles prepare their windows once, before becoming visible.
-            // Only the compatibility world needs discovery here.
-            if(!journey.continuousWorld&&generation!=world.GenerationCount)
-            {
-                foreach(var chunk in world.Chunks)PrepareWindows(chunk);
-                generation=world.GenerationCount;lastNight=-1;
-            }
+            // Tiles prepare their windows once, before becoming visible.
             if(night!=lastNight||t!=lastProfile)
             {
                 foreach(var material in ownedMaterials)material.SetColor("_EmissionColor",t.nightWindows*(night*1.4f));
@@ -85,7 +79,7 @@ namespace OnAir
         public void PrepareWindows(GameObject chunk)
         {
             PreparedWindowChunks++;
-            var t=journey.Current.terrain.profile;var session=journey.context;
+            var t=journey.profile;var session=journey.context;
             float phase=session.automaticDaylight?session.solarPhase:session.period==DayPeriod.Day?.25f:session.period==DayPeriod.Dawn?.055f:session.period==DayPeriod.Dusk?.455f:session.period==DayPeriod.BlueHour?.535f:.75f;
             float amount=1-Mathf.SmoothStep(0,1,Mathf.Sin(phase*Mathf.PI*2)*3);
             foreach(var building in chunk.GetComponentsInChildren<BuildingView>(true))foreach(var r in building.windows)

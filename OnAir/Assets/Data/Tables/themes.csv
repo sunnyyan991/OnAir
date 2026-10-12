@@ -1,0 +1,6 @@
+﻿##var,id,key,name,zones,zone_weights
+##type,string,string,string,"(list#sep=|),EcologyZone","(list#sep=|),float"
+##,数字字符串编号，存档用,英文标识,开局菜单显示名,该主题可生成的地形，竖线分隔,与地形一一对应的相对权重，0表示禁用
+,1,japan,JAPAN,City|Town|CoastalTown|Forest|RiverPlain|Hills|Ocean,40|14|10|14|7|9|6
+,2,usa,USA,City|Town|CoastalTown|Forest|RiverPlain|Hills|Ocean,30|25|8|12|10|10|5
+,3,cyberpunk,CYBERPUNK CITY,City|CoastalTown|RiverPlain|Ocean,85|5|5|5

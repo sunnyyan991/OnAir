@@ -25,6 +25,9 @@ Shader "OnAir/PixelWeather"
                 float2 p=floor(saturate(i.uv)*5);
                 if (_Shape > .5 && _Shape < 1.5) clip((abs(p.x-2)<.5 || abs(p.y-2)<.5) ? 1 : -1);
                 if (_Shape > 1.5) clip((abs(p.x-2)+abs(p.y-2)<3) ? 1 : -1);
+                // Rain streaks taper at both ends so a stretched line reads as a falling trail, not a bar.
+                // Axis-agnostic: the 1-2 pixel width never reaches the taper band.
+                if (_Shape < .5) { float2 e=min(saturate(i.uv),1-saturate(i.uv)); i.color.a*=saturate(min(e.x,e.y)*6); }
                 return i.color;
             }
             ENDHLSL

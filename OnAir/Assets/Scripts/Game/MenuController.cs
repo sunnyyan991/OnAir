@@ -16,11 +16,18 @@ namespace OnAir
         public bool SettingsOpen { get; private set; }
         public bool DisplayOpen { get; private set; }
         public bool OverwriteOpen { get; private set; }
+        public SaveSlot DeletingSlot { get; private set; }
+        public bool DeleteOpen => DeletingSlot != null;
+        public bool CanDeleteSelected => !busy&&(Page==MenuPage.NewFlight||Page==MenuPage.LoadGame)&&Selected>=0&&Selected<Slots.Count&&Slots[Selected].occupied&&game.saves.SavingEnabled;
         public LeaveTarget Leaving { get; private set; }
         public bool TitleQuitOpen { get; private set; }
         public string Notice { get; private set; } = "";
         public List<SaveSlot> Slots { get; private set; } = new List<SaveSlot>();
         public int Selected { get; private set; } = -1;
+        // Country/region theme chosen for a new flight; loaded flights keep their saved theme.
+        public int ThemeIndex { get; private set; }
+        public ThemeRule SelectedTheme => game.journey.themes[Mathf.Clamp(ThemeIndex, 0, game.journey.themes.Length - 1)];
+        public void CycleTheme() { if (!busy) ThemeIndex = (ThemeIndex + 1) % game.journey.themes.Length; }
         public bool ShowHud => Page == MenuPage.Running;
         public bool BlocksHud => !ShowHud || DisplayOpen || Leaving != LeaveTarget.None;
         SaveSlot staged;
@@ -36,18 +43,37 @@ namespace OnAir
         }
         public void OpenSlots(bool create)
         {
-            if (busy || ShowHud) return;
+            if (busy || ShowHud || DeleteOpen || OverwriteOpen) return;
             Page = create ? MenuPage.NewFlight : MenuPage.LoadGame;Notice = "";Slots = game.saves.GetSlots();
             Selected = create ? Slots.FindIndex(s => !s.occupied && !s.IsLegacy) : Slots.FindIndex(s => s.occupied);
         }
-        public void Select(int index) { if (index >= 0 && index < Slots.Count && !busy) { Selected = index;Notice = ""; } }
+        public void Select(int index) { if (index >= 0 && index < Slots.Count && !busy&&!DeleteOpen&&!OverwriteOpen) { Selected = index;Notice = Slots[index].occupied&&!Slots[index].compatible?"OLD OR UNREADABLE SAVE. START NEW OR DELETE IT.":""; } }
+        public void AskDeleteSelected()
+        {
+            if(!CanDeleteSelected||OverwriteOpen||DisplayOpen)return;
+            DeletingSlot=Slots[Selected];Notice="";
+        }
+        public bool ConfirmDelete()
+        {
+            if(!DeleteOpen||busy)return false;
+            int index=DeletingSlot.index,selection=Selected;
+            bool deleted=game.saves.DeleteSlot(index);
+            Notice=game.saves.Status;Slots=game.saves.GetSlots();
+            if(deleted)
+            {
+                DeletingSlot=null;Selected=Slots.FindIndex(slot=>slot.index==index);
+                if(Selected<0)Selected=Slots.Count==0?-1:Mathf.Min(selection,Slots.Count-1);
+            }
+            return deleted;
+        }
         public void StartSelected(bool confirmed = false)
         {
-            if (busy || Selected < 0 || Selected >= Slots.Count) return;
+            if (busy || DeleteOpen || Selected < 0 || Selected >= Slots.Count) return;
             var slot = Slots[Selected];bool create = Page == MenuPage.NewFlight;
             if (create && slot.IsLegacy) return;
             if (!create && !slot.occupied) return;
             if (create && slot.occupied && !confirmed) { OverwriteOpen = true;return; }
+            if (create) game.journey.SelectTheme(SelectedTheme);
             OverwriteOpen = false;staged = slot;stagedNew = create;stagedConfirmed = confirmed;stagedReady = false;StartCoroutine(Prepare());
         }
         IEnumerator Prepare()
@@ -66,7 +92,7 @@ namespace OnAir
             float deadline = Time.unscaledTime + game.preparationTimeoutSeconds;
             while ((!game.world.ViewReady||!game.world.CanCaptureSave)&&game.world.PreparationError==null&&Time.unscaledTime<deadline)yield return null;
             if(game.world.PreparationError!=null){FailPreparation("COULD NOT PREPARE THIS FLIGHT");yield break;}
-            if (!game.world.ViewReady||!game.world.CanCaptureSave) { game.world.CancelPreparation();FailPreparation("FLIGHT PREPARATION TIMED OUT");yield break; }
+            if (!game.world.ViewReady||!game.world.CanCaptureSave) { Debug.LogWarning("Flight preparation timed out waiting for: "+game.world.PreparationWaitingOn);game.world.CancelPreparation();FailPreparation("FLIGHT PREPARATION TIMED OUT");yield break; }
             stagedReady = true;
             PreparationStatus=stagedNew?"SAVING FLIGHT":"READY";yield return null;
             if (!game.saves.CommitStagedSlot(stagedNew)) { FailPreparation("SAVE FAILED");yield break; }
@@ -77,6 +103,7 @@ namespace OnAir
         public void Back()
         {
             if (busy) return;
+            if (DeleteOpen) { DeletingSlot=null;Notice="";return; }
             if (OverwriteOpen) { OverwriteOpen = false;return; }
             if (DisplayOpen) { game.display.RevertMode();DisplayOpen = false;return; }
             Page = MenuPage.Title;Notice = "";SettingsOpen = false;game.saves.EndJourneyWithoutSaving();game.session.menuPaused = true;
@@ -103,7 +130,7 @@ namespace OnAir
         }
         public void CancelLeave()
         {
-            Leaving = LeaveTarget.None;TitleQuitOpen = false;OverwriteOpen = false;Notice = "";
+            Leaving = LeaveTarget.None;TitleQuitOpen = false;OverwriteOpen = false;DeletingSlot=null;Notice = "";
             if (ShowHud) { game.session.menuPaused = false;game.saves.SuspendAutomatic = false; }
         }
         public bool CompleteLeave(bool save)
@@ -128,7 +155,7 @@ namespace OnAir
         public void Escape()
         {
             if (game.display.ModePending) game.display.RevertMode();
-            else if (Leaving != LeaveTarget.None || TitleQuitOpen || OverwriteOpen) CancelLeave();
+            else if (Leaving != LeaveTarget.None || TitleQuitOpen || OverwriteOpen || DeleteOpen) CancelLeave();
             else if (DisplayOpen) Back();
             else if (game.panel.IsBiomePickerOpen) game.panel.CloseBiomePicker();
             else if (SettingsOpen) SettingsOpen = false;

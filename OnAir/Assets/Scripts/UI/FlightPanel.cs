@@ -211,7 +211,7 @@ namespace OnAir
                     if(Choice(x,723,"LIVERY",game.cabin.LiveryName))game.cabin.NextLivery();
                 }
                 Label(new Rect(x+15,70,250,20),"ENVIRONMENT",true);
-                if (Choice(x,94,journey.continuousWorld?"EXPLORE":"TERRAIN",journey.continuousWorld?"CHOOSE BIOME":context.biome.ToString())){if(journey.continuousWorld)biomePicker=!biomePicker;else journey.NextTerrain();}
+                if (Choice(x,94,"EXPLORE","CHOOSE BIOME"))biomePicker=!biomePicker;
                 if (Choice(x,148,"WEATHER",(context.automaticWeather?"AUTO ":"")+context.weather.ToString())){journey.CycleWeather();game.saves.RequestSave();}
                 TimeDial(x,202);
                 var toggle = new Rect(x+8,310,270,40);
@@ -239,11 +239,11 @@ namespace OnAir
                     float px=Screen.width/scale*.5f-165;
                     Panel(new Rect(px,150,330,340));Label(new Rect(px+16,163,270,24),"EXPLORE BIOMES");
                     if(Button(new Rect(px+285,162,28,24),"-"))biomePicker=false;
-                    for(int i=0;i<7;i++){var zone=(ContinuousWorldPlan.EcologyZone)i;if(Button(new Rect(px+16,201+i*37,298,31),BiomeNavigator.Name(zone))){game.biomeNavigator.Preview(zone);biomePicker=false;}}
+                    int row=0;for(int i=0;i<7;i++){var zone=(ContinuousWorldPlan.EcologyZone)i;if(!journey.Theme.Allows(zone))continue;if(Button(new Rect(px+16,201+row++*37,298,31),BiomeNavigator.Name(zone))){game.biomeNavigator.Preview(zone);biomePicker=false;}}
                 }
                 if (details)
                 {
-                    string status=("Next terrain in "+(journey.Current.terrain.distanceMeters-journey.SegmentMeters).ToString("0")+" m")+(weatherFx ? "\n"+weatherFx.Status : "");
+                    string status="Climate "+(context.ClimateZone??"-")+", next weather in "+context.WeatherRemaining.ToString("0")+" s"+(weatherFx ? "\n"+weatherFx.Status : "");
                     float h=Mathf.Max(37,small.CalcHeight(new GUIContent(status),240));
                     scroll=GUI.BeginScrollView(new Rect(x+12,555,262,37),scroll,new Rect(0,0,240,h));
                     GUI.Label(new Rect(0,0,240,h),status,small); GUI.EndScrollView();

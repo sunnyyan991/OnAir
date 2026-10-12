@@ -99,8 +99,27 @@ namespace OnAir
             catch (SaveCompatibilityException error) { settingsBlocked = true;Debug.LogWarning("Saved settings kept: " + error.Message); }
             catch (Exception error) { preserveSettings = true;Debug.LogWarning("Unreadable settings kept: " + error.Message); }
         }
-        JourneySaveData ReadJourney(string text) => SaveMigration.ReadJourney(text, configuration, game.journey.terrains, game.world.buildings);
+        JourneySaveData ReadJourney(string text) => SaveMigration.ReadJourney(text, configuration, game.worldProfile.segmentMeters, game.journey.themes, game.world.buildings);
         public List<SaveSlot> GetSlots() => slots.List(ReadJourney, enabledSaving);
+        public bool DeleteSlot(int index)
+        {
+            if(!initialized||!enabledSaving||ActiveJourney){Status="RETURN TO TITLE BEFORE DELETING A SAVE";return false;}
+            try
+            {
+                CompleteWrite(true);
+                var selected=GetSlots().Find(slot=>slot.index==index);
+                if(selected==null||!selected.occupied){Status="THIS SAVE IS NO LONGER AVAILABLE";return false;}
+                string cleanup=slots.Delete(index);
+                if(cleanup!=null)Debug.LogWarning(cleanup);
+                if(CurrentSlot?.index==index)
+                {
+                    CurrentSlot=null;store=settingsStore;lastGoodSnapshot=null;committedState=null;
+                    previousAvailable=preserveJourney=WriteBlocked=Restored=false;
+                }
+                Status="SAVE DELETED";return true;
+            }
+            catch(Exception error){Status="COULD NOT DELETE THIS SAVE";Debug.LogWarning("Save deletion failed: "+error.Message);return false;}
+        }
         public bool StageSlot(SaveSlot slot, bool create, bool overwriteConfirmed = false)
         {
             if (ActiveJourney || slot == null || (create && slot.IsLegacy)) return false;
@@ -189,7 +208,7 @@ namespace OnAir
             return new JourneySaveData
             {
                 configuration = configuration, journeyId = journeyId, savedAtUtc = DateTimeOffset.UtcNow.ToString("O"),
-                biomeName = game.biomeNavigator ? game.biomeNavigator.VisibleName : game.session.biome.ToString().ToUpperInvariant(),
+                biomeName = game.journey.Theme.name + (game.biomeNavigator ? " / " + game.biomeNavigator.VisibleName : ""),
                 journey = game.journey.CaptureState(), flight = game.flight.CaptureState(),
                 climate = game.session.CaptureState(), world = world
             };

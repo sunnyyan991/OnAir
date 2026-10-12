@@ -14,7 +14,7 @@ namespace OnAir
             switch(zone){case ContinuousWorldPlan.EcologyZone.CoastalTown:return "COASTAL TOWN";case ContinuousWorldPlan.EcologyZone.RiverPlain:return "RIVER PLAIN";default:return zone.ToString().ToUpperInvariant();}
         }
         void Update(){if(Time.unscaledTime>=nextSample){nextSample=Time.unscaledTime+.5f;RefreshLabel();}}
-        void Prepare(){if(plan==null||plan.seed!=game.journey.seed)plan=new ContinuousWorldPlan(game.journey.seed,game.flight.routeSlope);plan.TrimCaches();}
+        void Prepare(){if(plan==null||plan.seed!=game.journey.seed||plan.zoneWeights!=game.journey.ZoneWeights)plan=new ContinuousWorldPlan(game.journey.seed,game.flight.routeSlope,game.journey.ZoneWeights);plan.TrimCaches();}
         public void RefreshLabel()
         {
             if(!game||game.journey.Current==null)return;Prepare();

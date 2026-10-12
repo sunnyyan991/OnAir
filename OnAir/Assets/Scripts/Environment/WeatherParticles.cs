@@ -17,6 +17,9 @@ namespace OnAir
         readonly List<Layer> layers = new List<Layer>();
         Dictionary<Weather, WeatherFxRule> rules;
         Weather selected = (Weather)(-1);
+        // Water ripple clock; stops while the simulation is paused.
+        float rippleTime;
+        static readonly int RainRipplesId = Shader.PropertyToID("_RainRipples"), RainRippleTimeId = Shader.PropertyToID("_RainRippleTime");
         public Shader shader;
         void Start()
         {
@@ -49,6 +52,7 @@ namespace OnAir
             if (!context || !sceneCamera || rules == null || !shader) return;
             foreach (var layer in layers) { var main = layer.System.main; main.simulationSpeed = context.SimulationPaused ? 0 : 1; }
             if (context.SimulationPaused) return;
+            rippleTime += Time.deltaTime;Shader.SetGlobalFloat(RainRippleTimeId, rippleTime);
             if (selected != context.weather)
             {
                 selected = context.weather;
@@ -72,6 +76,9 @@ namespace OnAir
                 var shape = l.System.shape; shape.scale = new Vector3(halfHeight * 2 * sceneCamera.aspect + 4, halfHeight * 2 + 4, .1f);
                 if (l.Target == 0 && l.Mix == 0) Remove(l);
             }
+            // Ripple density follows the fading rain layers, so rings fade in and out with the rain.
+            float ripples = 0; foreach (var l in layers) ripples = Mathf.Max(ripples, l.Rule.Ripples * l.Mix);
+            Shader.SetGlobalFloat(RainRipplesId, ripples);
         }
         void Add(WeatherFxRule rule, bool near)
         {
@@ -87,7 +94,7 @@ namespace OnAir
             main.startLifetime = rule.Lifetime; main.startSpeed = 0;
             main.startSize3D = true; main.startSizeX = rule.Size * scale; main.startSizeY = rule.Length * scale; main.startSizeZ = 1;
             main.startColor = rule.Color;
-            main.startRotation = rule.Shape == "rain" ? -Mathf.Atan2(rule.Wind, Mathf.Max(.01f,rule.Speed)) : 0;
+            main.startRotation = 0;
             main.cullingMode = ParticleSystemCullingMode.AlwaysSimulate;
             var emission = ps.emission; emission.rateOverTime = 0;
             var shape = ps.shape; shape.shapeType = ParticleSystemShapeType.Box; shape.scale = new Vector3(40,28,.1f);
@@ -100,12 +107,22 @@ namespace OnAir
             material.SetColor("_Tint", new Color(1,1,1,0));
             var renderer = ps.GetComponent<ParticleSystemRenderer>(); renderer.sharedMaterial = material; renderer.renderMode = ParticleSystemRenderMode.Billboard;
             renderer.alignment = ParticleSystemRenderSpace.Local; renderer.sortingOrder = near ? 101 : 100;
+            if (rule.Shape == "rain")
+            {
+                // Velocity-stretched streaks follow the actual fall + wind direction, so the trajectory reads clearly.
+                renderer.renderMode = ParticleSystemRenderMode.Stretch;
+                // At least one screen pixel wide (two on the near layer) so streaks never shimmer below pixel size.
+                float pixel = sceneCamera.orthographic ? 2 * sceneCamera.orthographicSize / Mathf.Max(1, Screen.height) : 0;
+                float width = Mathf.Max(rule.Size * scale, pixel * (near ? 2 : 1));
+                main.startSize3D = false; main.startSize = width;
+                renderer.lengthScale = rule.Length * scale / width; renderer.velocityScale = 0; renderer.cameraVelocityScale = 0;
+            }
             renderer.maxParticleSize = .1f;
             layers.Add(new Layer { System = ps, Material = material, Rule = rule, Mix = 0, Target = 1, Share = share });
             ps.Play();
         }
         void Remove(Layer layer) { layers.Remove(layer); if (layer.System) Destroy(layer.System.gameObject); if (layer.Material) Destroy(layer.Material); }
-        void OnDisable() { foreach (var l in layers) if (l.System) l.System.Pause(); }
+        void OnDisable() { foreach (var l in layers) if (l.System) l.System.Pause(); Shader.SetGlobalFloat(RainRipplesId, 0); }
         void OnEnable() { foreach (var l in layers) if (l.System) l.System.Play(); }
         void OnDestroy() { while (layers.Count > 0) Remove(layers[0]); }
     }

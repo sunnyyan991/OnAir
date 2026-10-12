@@ -6,21 +6,26 @@ namespace OnAir
     // Owns distance and the itinerary. Weather and rendering never advance or rebuild the itinerary.
     public sealed class JourneyController : MonoBehaviour
     {
-        public sealed class Leg { public int index,seed; public TerrainDefinition terrain; public Weather entryWeather; public DayPeriod entryPeriod; }
+        // A leg is one 64-unit floating-origin segment of the continuous world.
+        public sealed class Leg { public int index,seed; }
         public GameSession context;
-        [NonSerialized] public TerrainDefinition[] terrains;
+        public WorldProfile profile;
+        public float MetersPerSegment=>profile.segmentMeters;
+        // Country/region themes from themes.csv. The theme is part of the world identity, like the seed.
+        [NonSerialized] public ThemeRule[] themes;
+        public ThemeRule Theme{get;private set;}
+        public float[] ZoneWeights=>Theme.zoneWeights;
         public int seed=2409;
         public static int FreshSeed(int previous)
         {
             int next;do{next=BitConverter.ToInt32(Guid.NewGuid().ToByteArray(),0)&int.MaxValue;}while(next==previous);return next;
         }
-        public bool continuousWorld=true;
         public int TeleportRevision {get;private set;}
         public double TotalMeters {get;private set;}
         public double SegmentMeters {get;private set;}
         public int Revision {get;private set;}
         public Leg Current => legs.Count>0?legs[0]:null;
-        public float Progress=>Current==null?0:(float)(SegmentMeters/Current.terrain.distanceMeters);
+        public float Progress=>Current==null?0:(float)(SegmentMeters/MetersPerSegment);
         readonly List<Leg> legs=new List<Leg>();
         RouteRandom routeRandom;
         public event Action BeforeNewSeed,JourneyChanged;
@@ -37,63 +42,48 @@ namespace OnAir
         public JourneyState CaptureState()
         {
             Initialize();var saved=new LegState[legs.Count];
-            for(int i=0;i<legs.Count;i++){var leg=legs[i];saved[i]=new LegState{index=leg.index,seed=leg.seed,terrainId=leg.terrain.id,entryWeather=leg.entryWeather,entryPeriod=leg.entryPeriod};}
-            return new JourneyState{seed=seed,randomState=routeRandom.State,continuousWorld=continuousWorld,totalMeters=TotalMeters,segmentMeters=SegmentMeters,legs=saved};
+            for(int i=0;i<legs.Count;i++){var leg=legs[i];saved[i]=new LegState{index=leg.index,seed=leg.seed};}
+            return new JourneyState{seed=seed,randomState=routeRandom.State,theme=Theme.id,totalMeters=TotalMeters,segmentMeters=SegmentMeters,legs=saved};
         }
         public void RestoreState(JourneyState saved)
         {
-            seed=saved.seed;continuousWorld=saved.continuousWorld;TotalMeters=saved.totalMeters;SegmentMeters=saved.segmentMeters;
+            Theme=Array.Find(themes,t=>t.id==saved.theme)??throw new InvalidOperationException("Saved theme is missing.");
+            seed=saved.seed;TotalMeters=saved.totalMeters;SegmentMeters=saved.segmentMeters;
             routeRandom=new RouteRandom(saved.randomState,true);legs.Clear();
-            foreach(var leg in saved.legs)legs.Add(new Leg{index=leg.index,seed=leg.seed,terrain=Array.Find(terrains,t=>t.id==leg.terrainId)??throw new InvalidOperationException("Saved terrain is missing."),entryWeather=leg.entryWeather,entryPeriod=leg.entryPeriod});
-            Revision++;TeleportRevision++;EnterCurrent();
+            foreach(var leg in saved.legs)legs.Add(new Leg{index=leg.index,seed=leg.seed});
+            Revision++;TeleportRevision++;
         }
         public void Initialize()
         {
             if(Current!=null)return;
-            if(!context||terrains==null||terrains.Length==0)throw new InvalidOperationException("Journey needs context and terrains.");
-            var ids=new HashSet<string>();
-            foreach(var t in terrains)
-                if(t==null||!ids.Add(t.id)||string.IsNullOrWhiteSpace(t.id)||!t.profile||!t.profile.kit||!t.profile.ground||t.distanceMeters<=0||float.IsNaN(t.distanceMeters)||float.IsInfinity(t.distanceMeters)||t.selectionWeight<=0||float.IsNaN(t.selectionWeight)||t.weather==null||!Array.Exists(t.weather,w=>w.weight>0))throw new InvalidOperationException("Invalid terrain profile.");
+            if(!context||themes==null||themes.Length==0||!profile||!profile.kit||!(profile.segmentMeters>0)||float.IsInfinity(profile.segmentMeters))throw new InvalidOperationException("Journey needs context and a valid world profile.");
+            if(Theme==null||Array.IndexOf(themes,Theme)<0)Theme=themes[0];
             routeRandom=new RouteRandom(seed);
-            var first=Array.Find(terrains,t=>t.biome==(continuousWorld?Biome.City:context.biome))??terrains[0];
-            legs.Add(Create(first,0));EnsureLookahead();EnterCurrent();
+            legs.Add(Create(0));EnsureLookahead();
         }
-        Leg Create(TerrainDefinition terrain,int index)=>new Leg{terrain=terrain,index=index,seed=routeRandom.Next(),entryWeather=context.weather,entryPeriod=context.period};
-        void EnsureLookahead()
-        {
-            while(legs.Count<3)
-            {
-                if(continuousWorld){legs.Add(Create(legs[0].terrain,legs[legs.Count-1].index+1));continue;}
-                var last=legs[legs.Count-1];double total=0;foreach(var t in terrains)if(terrains.Length==1||t!=last.terrain)total+=t.selectionWeight;
-                double ticket=routeRandom.NextDouble()*total;TerrainDefinition chosen=null;
-                foreach(var t in terrains)if(terrains.Length==1||t!=last.terrain){ticket-=t.selectionWeight;if(ticket<0){chosen=t;break;}}
-                legs.Add(Create(chosen??terrains[0],last.index+1));
-            }
-        }
-        public Leg Ahead(int offset){Initialize();return legs[offset];}
-        void EnterCurrent()=>context.EnterTerrain(Current.terrain.biome,Current.entryWeather);
+        Leg Create(int index)=>new Leg{index=index,seed=routeRandom.Next()};
+        void EnsureLookahead(){while(legs.Count<3)legs.Add(Create(legs[legs.Count-1].index+1));}
         public void Advance(double distance)
         {
             Initialize();if(context.SimulationPaused||distance<=0||double.IsNaN(distance)||double.IsInfinity(distance))return;
             TotalMeters+=distance;SegmentMeters+=distance;
-            while(SegmentMeters>=Current.terrain.distanceMeters){SegmentMeters-=Current.terrain.distanceMeters;legs.RemoveAt(0);EnsureLookahead();EnterCurrent();}
+            while(SegmentMeters>=MetersPerSegment){SegmentMeters-=MetersPerSegment;legs.RemoveAt(0);EnsureLookahead();}
         }
         public void JumpForwardWorld(float worldZ)
         {
             Initialize();float current=(Current.index+Progress)*64;if(worldZ<=current)return;
-            bool paused=context.paused;var weather=context.weather;context.paused=false;Advance((worldZ-current)*Current.terrain.distanceMeters/64);context.paused=paused;context.SetWeather(weather);TeleportRevision++;JourneyChanged?.Invoke();
+            bool paused=context.paused;var weather=context.weather;context.paused=false;Advance((worldZ-current)*MetersPerSegment/64);context.paused=paused;context.SetWeather(weather);TeleportRevision++;JourneyChanged?.Invoke();
         }
-        public void NextTerrain(){Initialize();TotalMeters+=Current.terrain.distanceMeters-SegmentMeters;SegmentMeters=0;legs.RemoveAt(0);EnsureLookahead();EnterCurrent();TeleportRevision++;JourneyChanged?.Invoke();}
         public void CycleWeather()
         {
-            Initialize();if(context.automaticWeather){context.automaticWeather=false;context.SetWeather(Weather.Clear);return;}if(context.weather==Weather.HeavyRain){context.automaticWeather=true;return;}context.SetWeather(context.weather==Weather.Clear?Weather.Cloudy:context.weather==Weather.Cloudy?Weather.Rain:context.weather==Weather.Rain?Weather.HeavyRain:Weather.Clear);
+            Initialize();if(context.automaticWeather){context.automaticWeather=false;context.SetWeather(Weather.Clear);return;}if(context.weather==Weather.Sandstorm){context.automaticWeather=true;return;}context.SetWeather(context.weather==Weather.Clear?Weather.Cloudy:context.weather==Weather.Cloudy?Weather.Rain:context.weather==Weather.Rain?Weather.HeavyRain:context.weather==Weather.HeavyRain?Weather.Snow:context.weather==Weather.Snow?Weather.Sandstorm:Weather.Clear);
         }
+        // Takes effect on the next Restart; a theme change always starts a new world.
+        public void SelectTheme(ThemeRule theme){if(theme==null||Array.IndexOf(themes,theme)<0)throw new ArgumentException("Unknown theme.");Theme=theme;}
+        // Table reload: keep the same theme by id, or fall back to the first theme if it was removed.
+        public void ReplaceThemes(ThemeRule[] next){var id=Theme?.id;themes=next;Theme=Array.Find(next,t=>t.id==id)??next[0];}
         public void NewSeed()=>Restart(FreshSeed(seed));
         public void Restart(int value){BeforeNewSeed?.Invoke();seed=value;legs.Clear();TotalMeters=SegmentMeters=0;Revision++;TeleportRevision++;Initialize();JourneyChanged?.Invoke();}
-        public void ReplaceTerrains(TerrainDefinition[] definitions)
-        {
-            terrains=definitions;legs.Clear();TotalMeters=SegmentMeters=0;Revision++;TeleportRevision++;Initialize();
-        }
     }
 }
 

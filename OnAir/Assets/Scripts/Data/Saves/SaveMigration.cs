@@ -19,10 +19,8 @@ namespace OnAir
         public static string ConfigurationKey(GameEntry game)
         {
             var text = new StringBuilder(ContentVersion.ToString(CultureInfo.InvariantCulture));
-            text.Append(':').Append(game.journey.continuousWorld);
             text.Append(':').Append(game.session.daySeconds.ToString("R",CultureInfo.InvariantCulture)).Append(':').Append(game.session.nightSeconds.ToString("R",CultureInfo.InvariantCulture));
-            foreach(var rule in game.session.weatherRules)text.Append(':').Append((int)rule.weather).Append(':').Append(rule.weight.ToString("R",CultureInfo.InvariantCulture)).Append(':').Append(rule.minSeconds.ToString("R",CultureInfo.InvariantCulture)).Append(':').Append(rule.maxSeconds.ToString("R",CultureInfo.InvariantCulture));
-            foreach (var table in new[] { game.buildingsTable, game.terrainsTable, game.weatherTable })
+            foreach (var table in new[] { game.buildingsTable, game.weatherTable, game.climateTable, game.themesTable })
                 text.Append('\n').Append(TableSource.Read(table).Replace("\r\n", "\n"));
             foreach (var pair in game.world.buildings.Prefabs.OrderBy(p => p.Key, StringComparer.Ordinal))
             {
@@ -32,10 +30,9 @@ namespace OnAir
                     .Append(footprint.size.y.ToString("R", CultureInfo.InvariantCulture)).Append(',')
                     .Append(footprint.height.ToString("R", CultureInfo.InvariantCulture));
             }
-            foreach (var terrain in game.journey.terrains)
             {
-                var kit = terrain.profile.kit;
-                text.Append('\n').Append(terrain.id).Append(':').Append(kit.name).Append(':')
+                var kit = game.worldProfile.kit;
+                text.Append('\n').Append(game.worldProfile.segmentMeters.ToString("R", CultureInfo.InvariantCulture)).Append(':').Append(kit.name).Append(':')
                     .Append(kit.buildingGapModules).Append(':').Append(kit.streetSetbackModules).Append(':')
                     .Append(kit.emptyPlotModules).Append(':').Append(kit.emptyPlotChance.ToString("R", CultureInfo.InvariantCulture));
                 foreach (var color in kit.facadePalette) text.Append(':').Append(ColorUtility.ToHtmlStringRGBA(color));
@@ -43,7 +40,7 @@ namespace OnAir
             }
             return SaveFileStore.Hash(text.ToString());
         }
-        public static JourneySaveData ReadJourney(string text, string configuration, TerrainDefinition[] terrains, BuildingData buildings)
+        public static JourneySaveData ReadJourney(string text, string configuration, float metersPerSegment, ThemeRule[] themes, BuildingData buildings)
         {
             JourneySaveData data;
             try { data = JsonUtility.FromJson<JourneySaveData>(SaveFileStore.Unpack(text)); }
@@ -55,15 +52,15 @@ namespace OnAir
             Require(Guid.TryParse(data.journeyId, out _) && DateTimeOffset.TryParse(data.savedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _), "Missing save identity/time.");
             var journey = data.journey;
             Require(journey != null && journey.seed >= 0 && journey.randomState != 0, "Invalid world seed/random state.");
+            Require(themes.Any(t => t.id == journey.theme), "Missing theme.");
             Require(Finite(journey.totalMeters) && journey.totalMeters >= 0 && Finite(journey.segmentMeters) && journey.segmentMeters >= 0, "Invalid distance.");
             Require(journey.legs != null && journey.legs.Length == 3, "Invalid journey lookahead.");
             for (int i = 0; i < journey.legs.Length; i++)
             {
                 var leg = journey.legs[i];
                 Require(leg != null && leg.index >= 0 && leg.index < 10000000 && (i == 0 || leg.index == journey.legs[i-1].index+1), "Invalid leg index.");
-                Require(terrains.Any(t => t.id == leg.terrainId) && Enum.IsDefined(typeof(Weather), leg.entryWeather) && Enum.IsDefined(typeof(DayPeriod), leg.entryPeriod), "Missing terrain or invalid climate.");
             }
-            Require(journey.segmentMeters < terrains.First(t => t.id == journey.legs[0].terrainId).distanceMeters, "Leg progress outside range.");
+            Require(journey.segmentMeters < metersPerSegment, "Leg progress outside range.");
             Require(journey.totalMeters >= journey.segmentMeters, "Invalid accumulated distance.");
             var flight = data.flight;
             Require(flight != null && Finite(flight.flightTime) && flight.flightTime >= 0 && Finite(flight.routeSlope) && Mathf.Abs(flight.routeSlope) <= 10 && Finite(flight.speedMetersPerSecond) && flight.speedMetersPerSecond >= 0, "Invalid flight state.");

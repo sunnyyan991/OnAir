@@ -10,12 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b463252cf33d7634990ebf4e75063588, type: 3}
-  m_Name: CityTerrain
+  m_Name: WorldProfile
   m_EditorClassIdentifier: 
-  id: 1
+  segmentMeters: 320
   kit: {fileID: 11400000, guid: d064109a41745a04597f815ab9882e54, type: 2}
-  ground: {fileID: 2100000, guid: 12e3b9d029ea9b84699f0b29c6510e39, type: 2}
-  scenery: {fileID: 1181577953056993628, guid: 2a06199e4ce53174ab6f801e3e2144d3, type: 3}
   daySky: {r: 0.50980395, g: 0.6117647, b: 0.654902, a: 1}
   nightSky: {r: 0.078431375, g: 0.14509805, b: 0.21176471, a: 1}
   dayAmbient: {r: 0.53333336, g: 0.59607846, b: 0.6666667, a: 1}

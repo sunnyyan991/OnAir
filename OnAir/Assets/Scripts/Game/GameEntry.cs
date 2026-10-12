@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 namespace OnAir
 {
@@ -16,9 +17,9 @@ namespace OnAir
         public BiomeNavigator biomeNavigator;
         public Camera sceneCamera;
         public Light sun;
-        public TextAsset buildingsTable,terrainsTable,weatherTable;
+        public TextAsset buildingsTable,weatherTable,climateTable,themesTable;
         public BuildingCatalog buildings;
-        public TerrainCatalog terrains;
+        public WorldProfile worldProfile;
         public Shader weatherShader;
         public bool randomizeOnStart=true;
         public FrameRateDisplay frameRate;
@@ -32,21 +33,20 @@ namespace OnAir
         [Min(10)] public float preparationTimeoutSeconds=60;
         public MenuController menu{get;private set;}
         public DisplayController display{get;private set;}
-        string loadedTerrains;
         int flightCameraMask;
         CityTraffic traffic;
         void Awake()
         {
-            if(!session||!journey||!flight||!cameraFollow||!world||!environment||!weather||!panel||!sceneCamera||!sun||!buildings||!terrains||!weatherShader||!titleBackdrop)
+            if(!session||!journey||!flight||!cameraFollow||!world||!environment||!weather||!panel||!sceneCamera||!sun||!buildings||!worldProfile||!weatherShader||!titleBackdrop||!climateTable||!themesTable)
                 throw new InvalidOperationException("GameEntry: incomplete scene/resource references.");
-            loadedTerrains=TableSource.Read(terrainsTable);
-            var definitions=terrains.Resolve(TerrainTable.Parse(loadedTerrains));
             world.buildings=new BuildingData(TableSource.Read(buildingsTable),buildings);
             WeatherFxTable.Parse(TableSource.Read(weatherTable));
+            session.climate=ClimateTable.Parse(TableSource.Read(climateTable));
+            journey.themes=ThemeTable.Parse(TableSource.Read(themesTable)).ToArray();
             var arguments=System.Environment.GetCommandLineArgs();
             flightCameraMask=sceneCamera.cullingMask;
-            journey.context=session;journey.terrains=definitions;
-            if(journey.continuousWorld){sceneCamera.orthographicSize=68;sceneCamera.farClipPlane=1000;cameraFollow.offset*=2.5f;}
+            journey.context=session;journey.profile=worldProfile;
+            sceneCamera.orthographicSize=68;sceneCamera.farClipPlane=1000;cameraFollow.offset*=2.5f;
             flight.journey=journey;cameraFollow.target=flight;
             // World travel follows +Z; retain the authored camera and pixel-art view.
             flight.routeSlope=0;
@@ -61,6 +61,7 @@ namespace OnAir
             world.wingView=cabin;world.journey=journey;world.flight=flight;world.sceneCamera=sceneCamera;world.environment=environment;environment.journey=journey;environment.world=world;environment.sceneCamera=sceneCamera;environment.sun=sun;
             weather.context=session;weather.sceneCamera=sceneCamera;weather.table=weatherTable;weather.shader=weatherShader;
             biomeNavigator=gameObject.AddComponent<BiomeNavigator>();biomeNavigator.game=this;
+            gameObject.AddComponent<ClimateZoneTracker>().game=this;
             panel.context=session;panel.journey=journey;panel.terrainWorld=world;panel.flight=flight;panel.weatherFx=weather;panel.game=this;
             frameRate=gameObject.AddComponent<FrameRateDisplay>();
             traffic=gameObject.AddComponent<CityTraffic>();traffic.game=this;
@@ -95,15 +96,15 @@ namespace OnAir
         {
             try
             {
-                string terrainText=TableSource.Read(terrainsTable);
-                var nextTerrains=terrains.Resolve(TerrainTable.Parse(terrainText));
                 var nextBuildings=new BuildingData(TableSource.Read(buildingsTable),buildings);
                 WeatherFxTable.Parse(TableSource.Read(weatherTable));
+                var nextClimate=ClimateTable.Parse(TableSource.Read(climateTable));
+                var nextThemes=ThemeTable.Parse(TableSource.Read(themesTable)).ToArray();
                 if(!weather.ReloadTable())return false;
+                session.climate=nextClimate;journey.ReplaceThemes(nextThemes);
                 saves.BeforeContentChange();
                 world.buildings=nextBuildings;
                 flight.ConfigureClearance(nextBuildings);flight.Tick(0);cameraFollow.Follow(0);
-                if(loadedTerrains!=terrainText){journey.ReplaceTerrains(nextTerrains);loadedTerrains=terrainText;}
                 world.RebuildAll();saves.AfterContentChange();return true;
             }
             catch(Exception e){Debug.LogWarning("Tables unchanged: "+e.Message,this);return false;}

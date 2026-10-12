@@ -150,7 +150,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   context: {fileID: 1727703548}
   seed: 2409
-  continuousWorld: 1
 --- !u!4 &266574121
 Transform:
   m_ObjectHideFlags: 0
@@ -472,10 +471,11 @@ MonoBehaviour:
   sceneCamera: {fileID: 1823388784}
   sun: {fileID: 622376601}
   buildingsTable: {fileID: 4900000, guid: 7e8d5444e9ffa704b91b7a3bd7cf3d9e, type: 3}
-  terrainsTable: {fileID: 4900000, guid: a2dbb2236aa9b304b8ba93b9ee2de07d, type: 3}
   weatherTable: {fileID: 4900000, guid: 0b4af886fb80b6445a946bc5184c00ba, type: 3}
+  climateTable: {fileID: 4900000, guid: 6e23a921a7874eb8919ce6632f562d23, type: 3}
+  themesTable: {fileID: 4900000, guid: 4e7302dc78d5415fa2d6fd9d8f13905a, type: 3}
   buildings: {fileID: 11400000, guid: 7e126ca68c402de49a96bc7fe55fdd5c, type: 2}
-  terrains: {fileID: 11400000, guid: 0c9f103ab337c2d4fb2e5d9a339ae2ea, type: 2}
+  worldProfile: {fileID: 11400000, guid: 106b4cc9b72905940a28b8f59c66000c, type: 2}
   weatherShader: {fileID: 4800000, guid: 296876d2492e36e439ba9c6259212fc2, type: 3}
   randomizeOnStart: 1
   frameRate: {fileID: 0}
@@ -532,7 +532,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d49d1e0ebdea204abfecf693534555c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  biome: 0
   weather: 0
   period: 1
   paused: 0
@@ -541,23 +540,6 @@ MonoBehaviour:
   daySeconds: 600
   nightSeconds: 300
   solarPhase: 0.25
-  weatherRules:
-  - weather: 0
-    weight: 65
-    minSeconds: 240
-    maxSeconds: 480
-  - weather: 3
-    weight: 23
-    minSeconds: 90
-    maxSeconds: 180
-  - weather: 1
-    weight: 10
-    minSeconds: 60
-    maxSeconds: 120
-  - weather: 4
-    weight: 2
-    minSeconds: 30
-    maxSeconds: 60
 --- !u!4 &1727703549
 Transform:
   m_ObjectHideFlags: 0

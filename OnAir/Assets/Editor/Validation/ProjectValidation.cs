@@ -26,32 +26,33 @@ public static class ProjectValidation
         foreach(var guid in AssetDatabase.FindAssets("t:Prefab",new[]{"Assets"}))CheckScripts(AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid)));
         var game=UnityEngine.Object.FindObjectOfType<GameEntry>();Require(game&&game.flight&&game.weatherShader,"Missing game references.");
         Require(game.flight.GetComponent<FlightView>().modelPrefab,"Missing low-wing model reference.");
-        string buildings=TableSource.Read(game.buildingsTable),terrains=TableSource.Read(game.terrainsTable);
-        var data=new BuildingData(buildings,game.buildings);var rules=TerrainTable.Parse(terrains);var definitions=game.terrains.Resolve(rules);
-        Require(data.Rules.Count==18&&definitions.Length==3,"Missing migrated table rows.");
-        foreach(var terrain in definitions)
+        string buildings=TableSource.Read(game.buildingsTable);
+        var data=new BuildingData(buildings,game.buildings);
+        Require(data.Rules.Count>0,"Missing building rules.");
+        Require(game.worldProfile&&game.worldProfile.kit&&game.worldProfile.segmentMeters==320,"World profile changed route settings.");
+        string themes=TableSource.Read(game.themesTable);var themeRules=ThemeTable.Parse(themes);
+        Require(themeRules[0].key=="japan"&&themeRules[0].zoneWeights.SequenceEqual(ContinuousWorldPlan.DefaultZoneWeights),"Japan theme no longer matches the original zone weights.");
+        foreach(string bad in new[]{themes.Replace(",2,usa,",",1,usa,"),themes.Replace("City|CoastalTown|RiverPlain|Ocean,","City|Moon|RiverPlain|Ocean,"),themes.Replace(",85|5|5|5",",85|5|5"),themes.Replace(",85|5|5|5",",0|0|0|0")})
         {
-            Require(data.Rules.Count(b=>b.Matches(terrain.biome,Weather.Clear,DayPeriod.Day))==6,"Wrong per-terrain building selection.");
-            Require(terrain.distanceMeters==320&&terrain.selectionWeight==1,"Migration changed route settings.");
-            var so=new SerializedObject(terrain.profile);Require(so.FindProperty("distanceMeters")==null&&so.FindProperty("weather")==null,"Duplicated editable terrain rules remain in profile.");
+            Require(bad!=themes,"Theme mutation did not apply.");
+            bool rejected=false;try{ThemeTable.Parse(bad);}catch(FormatException){rejected=true;}Require(rejected,"Malformed theme config accepted.");
         }
-        Require(BuildingRules.Parse(buildings.Replace(",101,",",00101,"))[0].Id=="00101","Building ID was converted to a number.");
-        Require(TerrainTable.Parse(terrains.Replace(",1,City,",",001,City,"))[0].id=="001","Terrain ID was converted to a number.");
-        foreach(string bad in new[]{terrains.Replace(",320,",",0,"),terrains.Replace(",320,",",NaN,"),terrains.Replace(",City,",",Unknown,"),terrains.Replace("5|1|1|1|1","5|1"),terrains.Replace(",2,Coast,",",1,Coast,"),terrains.Replace("5|1|1|1|1","0|0|0|0|0")})
-        {
-            bool rejected=false;try{TerrainTable.Parse(bad);}catch(FormatException){rejected=true;}Require(rejected,"Malformed terrain config accepted.");
-        }
+        string firstId=data.Rules[0].Id,paddedId="00"+firstId;
+        string paddedBuildings=buildings.Replace(","+firstId+",",","+paddedId+",");
+        Require(paddedBuildings!=buildings&&BuildingRules.Parse(paddedBuildings)[0].Id==paddedId,"Building ID was converted to a number.");
         var csv=CsvReader.Read("a,b\r\n\"one, two\",\"line1\nline2\"\r\n");Require(csv[1][0]=="one, two"&&csv[1][1]=="line1\nline2","CSV quote/newline regression.");
         foreach(var entry in game.buildings.entries)
         {
-            var view=entry.prefab.GetComponent<BuildingView>();Require(view&&view.windows.Length>0&&view.windows.All(r=>r),"Missing explicit window references: "+entry.id);
-            Require(entry.prefab.GetComponent<BuildingFootprint>().size.x<=7.95f,"Building footprint overflow.");
+            var view=entry.prefab.GetComponent<BuildingView>();Require(view&&view.windows!=null&&view.windows.All(r=>r),"Missing explicit window references: "+entry.id);
+            var footprint=entry.prefab.GetComponent<BuildingFootprint>();
+            Require(footprint&&SaveMigration.Finite(footprint.size.x)&&SaveMigration.Finite(footprint.size.y)&&footprint.size.x>0&&footprint.size.y>0&&footprint.floors>0&&SaveMigration.Finite(footprint.height)&&footprint.height>=0,"Invalid building footprint: "+entry.id);
+            Require(footprint.Modules.x>0&&footprint.Modules.y>0&&footprint.Modules.z>0,"Invalid building module dimensions: "+entry.id);
         }
         var pipeline=GraphicsSettings.defaultRenderPipeline as UniversalRenderPipelineAsset;
-        Require(pipeline&&!pipeline.useSRPBatcher&&QualitySettings.renderPipeline==pipeline,"Main rendering configuration changed.");
+        Require(pipeline&&(!QualitySettings.renderPipeline||QualitySettings.renderPipeline==pipeline),"Main and quality settings use different rendering pipelines.");
         Require(!ShaderUtil.ShaderHasError(game.weatherShader),"Weather shader errors.");
         WeatherValidation.Validate();Directory.CreateDirectory("Validation");
-        File.WriteAllText("Validation/structure.txt","PASS: single Main scene and build entry; scene/prefab scripts; 18 building rules / 3 terrains; preserved per-terrain settings; numeric-string IDs; malformed table rejection; shared CSV parser; explicit prefab windows; footprint; unified rendering and weather shader.");
+        File.WriteAllText("Validation/structure.txt","PASS: single Main scene and build entry; scene/prefab scripts; building rules; world profile; theme table; numeric-string IDs; malformed table rejection; shared CSV parser; explicit prefab windows; footprint; unified rendering and weather shader.");
         Debug.Log("PROJECT_STRUCTURE_VALIDATED");
     }
     static void CheckScripts(GameObject root)

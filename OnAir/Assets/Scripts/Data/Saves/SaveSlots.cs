@@ -20,7 +20,7 @@ namespace OnAir
     {
         readonly string root;
         readonly int count;
-        public SaveSlots(string directory, int slots) { root = directory; count = Math.Max(1, Math.Min(8, slots)); }
+        public SaveSlots(string directory, int slots) { string full=Path.GetFullPath(directory);root=full==Path.GetPathRoot(full)?full:full.TrimEnd(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar);count = Math.Max(1, Math.Min(8, slots)); }
         public List<SaveSlot> List(Func<string, JourneySaveData> validate, bool readFiles)
         {
             var result = new List<SaveSlot>();
@@ -43,6 +43,69 @@ namespace OnAir
             bool imported = File.Exists(Path.Combine(target,"journey.json")) || File.Exists(Path.Combine(target,"journey.bak"));
             if (!imported && !File.Exists(Path.Combine(root, source)) && !(index == -1 && File.Exists(Path.Combine(root,"journey.bak")))) return;
             result.Add(Inspect(new SaveSlot { index = index, name = name, writeDirectory = target, readDirectory = imported ? target : root, primaryName = imported ? "journey.json" : source }, validate, true));
+        }
+        // Only a confirmed, fixed slot index can select deletion targets. Never trust
+        // readDirectory/writeDirectory from a UI record, or delete the shared save root.
+        // Staging moves are reversible until every selected source has been moved.
+        public string Delete(int index)
+        {
+            string folder=index>=1&&index<=8?index.ToString("00"):index==-1?"LegacyCurrent":index==-2?"LegacyPrevious":null;
+            if(folder==null)throw new ArgumentOutOfRangeException(nameof(index));
+            string directory=Path.Combine(root,"Slots",folder);
+            CheckDeletePath(directory);
+            var files=new List<string>();
+            if(index<0&&Directory.Exists(root))
+            {
+                foreach(string file in Directory.GetFiles(root))
+                {
+                    string name=Path.GetFileName(file);
+                    bool selected=index==-1?(SaveArtifact(name,"journey.json")||SaveArtifact(name,"journey.bak")):SaveArtifact(name,"previousJourney.json");
+                    if(selected){CheckDeletePath(file);files.Add(file);}
+                }
+            }
+            if(!Directory.Exists(directory)&&files.Count==0)throw new FileNotFoundException("The selected save is no longer available.");
+            string staging=Path.Combine(root,".deleted-save-"+Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(staging);
+            var moved=new List<(string source,string staged,bool directory)>();
+            try
+            {
+                if(Directory.Exists(directory))
+                {
+                    string target=Path.Combine(staging,"slot");
+                    Directory.Move(directory,target);moved.Add((directory,target,true));
+                }
+                foreach(string file in files)
+                {
+                    string target=Path.Combine(staging,Path.GetFileName(file));
+                    File.Move(file,target);moved.Add((file,target,false));
+                }
+            }
+            catch(Exception failure)
+            {
+                try
+                {
+                    for(int i=moved.Count-1;i>=0;i--)
+                    {
+                        var item=moved[i];
+                        if(item.directory)Directory.Move(item.staged,item.source);else File.Move(item.staged,item.source);
+                    }
+                    Directory.Delete(staging,false);
+                }
+                catch(Exception rollback){throw new IOException("Save deletion failed; recovery files remain at "+staging,new AggregateException(failure,rollback));}
+                throw;
+            }
+            try{Directory.Delete(staging,true);return null;}
+            catch(Exception error){return "Save removed from its slot; temporary deletion files remain at "+staging+": "+error.Message;}
+        }
+        static bool SaveArtifact(string name,string primary)=>name==primary||name==primary+".tmp"||name.StartsWith(primary+".rejected-",StringComparison.Ordinal)||name.StartsWith(primary+".previous-",StringComparison.Ordinal);
+        void CheckDeletePath(string path)
+        {
+            path=Path.GetFullPath(path);
+            string prefix=root.EndsWith(Path.DirectorySeparatorChar.ToString(),StringComparison.Ordinal)?root:root+Path.DirectorySeparatorChar;
+            if(path==root||!path.StartsWith(prefix,StringComparison.OrdinalIgnoreCase))throw new IOException("Deletion target is outside the selected save.");
+            for(string current=path;current!=null&&(current==root||current.StartsWith(prefix,StringComparison.OrdinalIgnoreCase));current=Path.GetDirectoryName(current))
+                if((Directory.Exists(current)||File.Exists(current))&&(File.GetAttributes(current)&FileAttributes.ReparsePoint)!=0)
+                    throw new IOException("Linked save locations cannot be deleted.");
         }
         static SaveSlot Inspect(SaveSlot slot, Func<string, JourneySaveData> validate, bool readFiles)
         {

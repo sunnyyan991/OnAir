@@ -20,16 +20,28 @@
 - 主横路在河流处形成简单桥面；桥面有边线。森林道路暂时中止，不生成任意贯穿自然地形的道路。
 - 完整建筑按中心归属一个加载段，允许轮廓跨段，不切断建筑。跨段原点移动仍由原有航程系统驱动，昼夜和天气不重建地形。
 - 同时加载 8 个 64 长度的切片，横向覆盖 384 场景单位；切片只是加载容器。默认相机正交范围从 40 调为 68，并将镜头后退，维持原投影角度。
-- Main 默认启用 `JourneyController.continuousWorld`。路线保持 City 的光照与天气配置，地貌由连续规划决定。原 TERRAIN 按钮在新模式显示 EXPLORE / NEXT AREA，跳到前方区域。
+- 连续世界是唯一模式，旧分段地形（City / Coast / Desert 轮换）已删除。光照、建筑 kit 和航程比例统一来自 `WorldProfile`；地貌由连续规划决定，自动天气按飞机下方区域选择（见 [天气效果](WeatherFX.md#区域天气)）。EXPLORE 按钮跳到前方指定区域。
+
+## 主题 → 地形 → 天气
+
+地图分三层配置：
+
+1. **主题**（`themes.csv`）：国家/区域风格，例如 JAPAN、USA、CYBERPUNK CITY。每行列出该主题可生成的地形和权重，权重为 0 或不列出即不会生成。
+2. **地形**：连续世界的七种区域 City / Town / CoastalTown / Forest / RiverPlain / Hills / Ocean，每 2400 单位按主题权重抽五段。
+3. **天气**（`climate.csv`）：按飞机下方的地形选择，与主题无关。
+
+主题在开局 NEW FLIGHT 页选择，属于世界身份的一部分（与种子一样），换主题即生成新世界。JAPAN 的权重 40/14/10/14/7/9/6 与旧版硬编码阈值完全一致，同一种子生成的地图不变。EXPLORE 面板只列出当前主题允许的地形。
+
+当前限制：三个主题共用同一套日式建筑、光照和 WorldProfile，只有地形构成不同；美国和赛博朋克专属的建筑、配色与光照需后续制作。飞行中途切换到新主题尚未实现。
 
 ## 文件与调参
 
 - 世界形状、用途连续场、街区切分：`Assets/Scripts/World/ContinuousWorldPlan.cs`。
 - 表面生成、模块放置、树木与桥面：`Assets/Scripts/World/ContinuousWorldLayout.cs`。
-- 加载生命周期：`TerrainStreamer`；旅程分段及新模式开关：`JourneyController`。
+- 加载生命周期：`TerrainStreamer`；旅程里程与 64 单位浮动原点切片：`JourneyController`。
 - Main 的运行接入和远景镜头：`GameEntry`，没有添加另一个正式场景。
 - 建筑基础权重与用途倍率仍在 buildings.csv。自然地形参数当前是代码中的首版参数，尚未做可视化配置编辑器。
-- 旧 DenseCityLayout 和旧地形资源保留供对比；关闭 continuousWorld 可回到旧路线。旧验证工具面向旧模式，新模式用 `ContinuousWorldValidation.Run`，只能在批处理编辑器执行，会退出该实例。
+- 旧 DenseCityLayout / BlockGenerator、terrains.csv、TerrainCatalog 及 Coast / Desert 配置已于 2026-10-12 删除。`ContinuousWorldValidation.Run` 只能在批处理编辑器执行，会退出该实例。
 
 ## 验证
 

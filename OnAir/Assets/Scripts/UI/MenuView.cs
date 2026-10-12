@@ -28,7 +28,7 @@ namespace OnAir
                 var ev=Event.current;
                 if(art.ReleaseCapturedInput(ev)&&ev.type!=EventType.Used)ev.Use();
                 if(ev.type==EventType.KeyDown&&ev.keyCode==KeyCode.Escape){menu.Escape();ev.Use();}
-                bool modal=menu.OverwriteOpen||menu.Leaving!=LeaveTarget.None||menu.TitleQuitOpen||game.display.ModePending;
+                bool modal=menu.OverwriteOpen||menu.DeleteOpen||menu.Leaving!=LeaveTarget.None||menu.TitleQuitOpen||game.display.ModePending;
                 if(modal&&ev.type==EventType.KeyDown&&(ev.keyCode==KeyCode.Return||ev.keyCode==KeyCode.KeypadEnter))
                 { if(game.display.ModePending)game.display.RevertMode();else menu.CancelLeave();ev.Use(); }
                 GUI.enabled=!modal&&!menu.DisplayOpen;
@@ -163,7 +163,9 @@ namespace OnAir
         void DrawSlots(float width,float height)
         {
             bool create=menu.Page==MenuPage.NewFlight;
-            var box=Center(Mathf.Min(660,width-40),520,width,height);art.MenuPanel(box);
+            // New flights add a theme row above the notice and action buttons.
+            float extra=create?52:0;
+            var box=Center(Mathf.Min(660,width-40),520+extra,width,height);art.MenuPanel(box);
             Text(box.x+24,box.y+22,box.width-48,create?"NEW FLIGHT":"LOAD GAME",4);
             var area=new Rect(box.x+16,box.y+76,box.width-32,310);
             slotScroll=GUI.BeginScrollView(area,slotScroll,new Rect(0,0,area.width-18,Mathf.Max(area.height,menu.Slots.Count*98)));
@@ -171,7 +173,7 @@ namespace OnAir
             {
                 var slot=menu.Slots[i];float y=i*98;var row=new Rect(2,y+2,area.width-24,90);
                 bool selected=menu.Selected==i;
-                if(art.MenuButton(row,"",!create||!slot.IsLegacy,selected))menu.Select(i);
+                if(art.MenuButton(row,"",true,selected))menu.Select(i);
                 if(!slot.occupied){Text(18,y+30,row.width-24,"EMPTY SLOT",2);continue;}
                 Text(18,y+8,row.width*.4f,slot.name,2);
                 Text(18,y+40,row.width-36,slot.compatible?slot.biome:slot.error,2);
@@ -184,11 +186,14 @@ namespace OnAir
             }
             GUI.EndScrollView();
             bool occupied=menu.Slots.Any(s=>s.occupied);
-            Text(box.x+24,box.y+397,box.width-48,!create&&!occupied?"NO SAVED FLIGHTS":menu.Notice,1);
+            if(create&&Button(box.x+28,box.y+397,box.width-56,"THEME: "+menu.SelectedTheme.name))menu.CycleTheme();
+            Text(box.x+24,box.y+397+extra,box.width-48,!create&&!occupied?"NO SAVED FLIGHTS":menu.Notice,1);
             bool can=menu.Selected>=0&&menu.Selected<menu.Slots.Count&&(create?!menu.Slots[menu.Selected].IsLegacy:menu.Slots[menu.Selected].occupied);
-            if(Button(box.x+28,box.y+451,box.width*.45f,create?"START":occupied?"LOAD":"NEW FLIGHT",can||(!create&&!occupied),true))
+            float actionWidth=(box.width-72)/3;
+            if(Button(box.x+24,box.y+451+extra,actionWidth,create?"START":occupied?"LOAD":"NEW FLIGHT",can||(!create&&!occupied),true))
             {if(!create&&!occupied)menu.OpenSlots(true);else menu.StartSelected();}
-            if(Button(box.center.x+12,box.y+451,box.width*.45f-16,"BACK"))menu.Back();
+            if(Button(box.x+36+actionWidth,box.y+451+extra,actionWidth,"DELETE SAVE",menu.CanDeleteSelected))menu.AskDeleteSelected();
+            if(Button(box.x+48+actionWidth*2,box.y+451+extra,actionWidth,"BACK"))menu.Back();
         }
         void DrawCredits(float width,float height)
         {
@@ -211,6 +216,7 @@ namespace OnAir
                     Text(box.x+24,box.y+108,472,Mathf.FloorToInt(game.world.PreparationProgress*100)+"%",2,true);
                     art.MenuFill(new Rect(box.x+24,box.y+151,472,12),C("17272E"));
                     art.MenuFill(new Rect(box.x+24,box.y+151,472*game.world.PreparationProgress,12),C("6CAAB4"));
+                    Text(box.x+24,box.y+180,472,game.world.PreparationWaitingOn.ToUpperInvariant(),1,true);
                 }
             }
             if(menu.Page==MenuPage.PrepareFailed)
@@ -236,15 +242,22 @@ namespace OnAir
             art.MenuFill(new Rect(0,0,width,height),new Color(0,0,0,.5f));
             var box=Center(580,310,width,height);art.MenuPanel(box);string prompt;
             if(game.display.ModePending)prompt="KEEP THIS DISPLAY MODE? "+Mathf.CeilToInt(game.display.SecondsRemaining);
+            else if(menu.DeleteOpen)prompt="DELETE "+menu.DeletingSlot.name+"?";
             else if(menu.OverwriteOpen)prompt="OVERWRITE THIS SAVE?";
             else if(menu.TitleQuitOpen)prompt="QUIT GAME?";
             else prompt=menu.Leaving==LeaveTarget.Title?"SAVE BEFORE RETURNING TO TITLE?":"SAVE BEFORE QUITTING?";
             Text(box.x+24,box.y+30,532,prompt,2,true);
             Text(box.x+24,box.y+78,532,menu.Notice,1,true);
+            if(menu.DeleteOpen)Text(box.x+24,box.y+105,532,"THE FLIGHT AND ITS BACKUPS WILL BE REMOVED.",1,true);
             if(game.display.ModePending)
             {
                 if(Button(box.x+24,box.y+150,250,"KEEP"))game.display.ConfirmMode();
                 if(Button(box.x+306,box.y+150,250,"REVERT",true,true))game.display.RevertMode();
+            }
+            else if(menu.DeleteOpen)
+            {
+                if(Button(box.x+24,box.y+150,250,"DELETE"))menu.ConfirmDelete();
+                if(Button(box.x+306,box.y+150,250,"CANCEL",true,true))menu.CancelLeave();
             }
             else if(menu.OverwriteOpen||menu.TitleQuitOpen)
             {

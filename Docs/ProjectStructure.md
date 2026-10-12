@@ -9,9 +9,8 @@ Unity 工程为 `OnAir/`，正式入口为 `Assets/Scenes/Main.unity`。根目�
 | Scenes | Main；临时场景 `_Temp_任务名` 验证完成后删除 |
 | Scripts/Game | GameEntry 初始化和引用连接；GameSession 当前状态及操作 |
 | Scripts/Flight | FlightController 实际移动与盘旋；FlightView 外观；CameraFollow 镜头 |
-| Scripts/World | JourneyController 航程与路线；TerrainStreamer 地块生命周期；BlockGenerator 布局；BuildingFootprint 占地；BuildingView 窗灯引用 |
-| Scripts/World/DenseCityLayout | 城市专用窄路与错位街区，建筑占地排列，路面批量网格与释放；其他地形仍由 BlockGenerator 原布局处理 |
-| Scripts/Environment | EnvironmentController 光照和窗灯；WeatherParticles 天气粒子 |
+| Scripts/World | JourneyController 航程与切片；TerrainStreamer 地块生命周期；ContinuousWorldPlan / ContinuousWorldLayout 连续世界规划与布局；BuildingFootprint 占地；BuildingView 窗灯引用 |
+| Scripts/Environment | EnvironmentController 光照和窗灯；WeatherParticles 天气粒子；ClimateZoneTracker 区域天气取样 |
 | Scripts/UI | FlightPanel 状态显示与操作；MenuView 菜单绘制；TitleBackdrop 固定标题镜头与光照 |
 | Scripts/Data | CsvReader；各配置读取器、数据类型和资源映射类型 |
 | Prefabs/Characters | Plane 角色根预制体、LowWing 低翼飞机模型预制体 |
@@ -30,10 +29,10 @@ Unity 工程为 `OnAir/`，正式入口为 `Assets/Scenes/Main.unity`。根目�
 
 ## 运行流程与边界
 
-1. GameEntry 检查引用、读取三张表，将建筑键对应到预制体，将 TerrainRule 和 TerrainProfile 按 id 对应成 TerrainDefinition，然后连接各模块。
-2. FlightController 在巡航时报告距离增量。JourneyController 只处理距离、路线、进入地形与进入天气，不再自行计时。
-3. TerrainStreamer 维护上一段、当前段和后两段；BlockGenerator 按所属路段的地形、天气及时段快照生成道路与建筑。
-4. 环境系统按当前地形、天气、时段改变表现，不重建地块。窗灯通过 BuildingView 的明确引用控制，不依赖物体名字。
+1. GameEntry 检查引用、读取建筑、天气效果和区域天气三张表，将建筑键对应到预制体，把 WorldProfile 交给旅程与环境系统，然后连接各模块。
+2. FlightController 在巡航时报告距离增量。JourneyController 只按 WorldProfile.segmentMeters 换算里程和 64 单位切片，不再自行计时。
+3. TerrainStreamer 按视野流式生成连续世界地块。
+4. 环境系统按 WorldProfile、天气、时段改变表现，不重建地块；GameSession 按飞机下方区域的权重自动切换天气。窗灯通过 BuildingView 的明确引用控制，不依赖物体名字。
 
 巡航时地面固定；跨段时飞机、地块和镜头同步移动坐标原点，保持画面连续和长距离精度。
 

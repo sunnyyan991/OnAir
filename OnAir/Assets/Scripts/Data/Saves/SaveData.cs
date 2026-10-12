@@ -18,16 +18,13 @@ namespace OnAir
     [Serializable] public sealed class JourneyState
     {
         public int seed, randomState;
-        public bool continuousWorld;
+        public string theme;
         public double totalMeters, segmentMeters;
         public LegState[] legs;
     }
     [Serializable] public sealed class LegState
     {
         public int index, seed;
-        public string terrainId;
-        public Weather entryWeather;
-        public DayPeriod entryPeriod;
     }
     [Serializable] public sealed class FlightState
     {

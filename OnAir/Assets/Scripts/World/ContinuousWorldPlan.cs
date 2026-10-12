@@ -30,7 +30,10 @@ namespace OnAir
         public readonly WorldLayerHighways layerHighways;
         public readonly WorldGreenSpaces greenSpaces;
         public readonly float routeSlope;
-        public ContinuousWorldPlan(int seed,float routeSlope=0){this.seed=seed;this.routeSlope=routeSlope;hydrology=new WorldHydrology(this);crossings=new WorldCrossings(this);highways=new WorldHighways(this);upperHighways=new WorldUpperHighways(this);layerHighways=new WorldLayerHighways(this);greenSpaces=new WorldGreenSpaces(this);}
+        // Relative weight per EcologyZone, from the journey's theme. Shared by reference so caches can detect theme changes.
+        public readonly float[] zoneWeights;
+        public static readonly float[] DefaultZoneWeights={40,14,10,14,7,9,6};
+        public ContinuousWorldPlan(int seed,float routeSlope=0,float[] zoneWeights=null){this.seed=seed;this.routeSlope=routeSlope;this.zoneWeights=zoneWeights??DefaultZoneWeights;hydrology=new WorldHydrology(this);crossings=new WorldCrossings(this);highways=new WorldHighways(this);upperHighways=new WorldUpperHighways(this);layerHighways=new WorldLayerHighways(this);greenSpaces=new WorldGreenSpaces(this);}
         public void TrimCaches(){if(landSamples.Count>250000)landSamples.Clear();if(waterSamples.Count>250000)waterSamples.Clear();if(heightSamples.Count>250000)heightSamples.Clear();if(regionCache.Count>256)regionCache.Clear();if(farms.Count>8192)farms.Clear();if(schedules.Count>64)schedules.Clear();hydrology.TrimCache();crossings.TrimCache();highways.TrimCache();upperHighways.TrimCache();}
         public int Hash(int x,int z,int salt=0){unchecked{uint h=(uint)(seed^salt);h^=(uint)x*374761393u;h=(h^(h>>13))*1274126177u;h^=(uint)z*668265263u;return (int)((h^(h>>16))&0x7fffffff);}}
         float Noise(float x,float z,float scale,int salt)=>Mathf.PerlinNoise(x/scale+(Hash(0,0,salt)%10000),z/scale+(Hash(1,1,salt)%10000));
@@ -49,12 +52,13 @@ namespace OnAir
         ZoneSchedule Schedule(int cycle)
         {
             if(schedules.TryGetValue(cycle,out var saved))return saved;
-            var schedule=new ZoneSchedule();float sum=0;
+            var schedule=new ZoneSchedule();float sum=0;double total=0;foreach(float w in zoneWeights)total+=Mathf.Max(0,w);
             for(int i=0;i<5;i++)
             {
-                // City has the largest individual weight; no fixed hourly quota or repeating biome order.
-                int ticket=Hash(cycle,i,873)%100;
-                var zone=ticket<40?EcologyZone.City:ticket<54?EcologyZone.Town:ticket<64?EcologyZone.CoastalTown:ticket<78?EcologyZone.Forest:ticket<85?EcologyZone.RiverPlain:ticket<94?EcologyZone.Hills:EcologyZone.Ocean;
+                // Weighted by theme; no fixed hourly quota or repeating biome order.
+                // Weights summing to 100 reproduce the original integer thresholds exactly.
+                double ticket=Hash(cycle,i,873)%100*total/100;var zone=EcologyZone.City;double cumulative=0;
+                for(int z=0;z<zoneWeights.Length;z++){if(zoneWeights[z]<=0)continue;zone=(EcologyZone)z;cumulative+=zoneWeights[z];if(ticket<cumulative)break;}
                 sum+=320+Hash(cycle,i,729)%321;schedule.zones[i]=zone;schedule.ends[i]=sum;
             }
             for(int i=0;i<5;i++)schedule.ends[i]=schedule.ends[i]/sum*EcologyCycle;

@@ -15,7 +15,7 @@ namespace OnAir
         [Min(60)] public float retainedFlightSeconds=60;
         [Range(2,12)] public float generationBudgetMs=6;
         [Range(2,12)] public float lookAheadSeconds=6;
-        public int RetainedSlices=>Mathf.Max(3,Mathf.CeilToInt(flight.speedMetersPerSecond*Mathf.Max(60,retainedFlightSeconds)/journey.Current.terrain.distanceMeters)+1);
+        public int RetainedSlices=>Mathf.Max(3,Mathf.CeilToInt(flight.speedMetersPerSecond*Mathf.Max(60,retainedFlightSeconds)/journey.MetersPerSegment)+1);
         // Compatibility diagnostic. Continuous loading no longer generates this entire strip.
         public float CorridorHalfWidth=>Mathf.Max(256,Mathf.Ceil((sceneCamera.orthographicSize*(sceneCamera.aspect*.71f+1)+Mathf.Max(80,flight.altitude+60)*.71f+32)/64)*64);
         public int VisibleFirst{get;private set;}public int VisibleLast{get;private set;}
@@ -55,6 +55,12 @@ namespace OnAir
         System.Diagnostics.Stopwatch preparationWatch;
         WorldState restoreState;
         public bool CanCaptureSave=>restoreState==null&&ResidentTileCount>0&&MissingVisibleTiles==0&&revision==journey.Revision&&teleport==journey.TeleportRevision&&plan!=null&&plan.layerHighways.CanCapture;
+        // What world preparation is still waiting for; shown under the progress bar and logged on timeout.
+        public string PreparationWaitingOn=>PreparationError!=null?"error: "+PreparationError
+            :PreparationDone<PreparationTotal?"tiles "+PreparationDone+"/"+PreparationTotal+(pending!=null?" building "+pendingKey+" "+pendingObject?.GetComponent<ContinuousWorldLayout>()?.BuildStage:"")
+            :highwayWork!=null?"highways "+HighwayState
+            :restoreState!=null?"restoring save":ResidentTileCount==0?"no tiles":MissingVisibleTiles>0?"missing visible tiles "+MissingVisibleTiles
+            :revision!=journey.Revision||teleport!=journey.TeleportRevision?"journey changed":plan==null?"no plan":!plan.layerHighways.CanCapture?"highways unpublished "+HighwayState:"ready";
         public void RestoreState(WorldState saved){restoreState=saved;}
         public WorldState CaptureState()
         {
@@ -89,10 +95,12 @@ namespace OnAir
             {
                 Refresh(false);Pump(generationBudgetMs);
                 PreparationTotal=ensure.Count;PreparationDone=0;foreach(var key in ensure)if(chunks.ContainsKey(key))PreparationDone++;
-                // Finish tile preparation before advancing the road planner. Its route
-                // list must stay stable while initial tile meshes yield across frames.
-                if(PreparationDone==PreparationTotal)PumpHighways(4);
-                if(PreparationDone==PreparationTotal&&CanCaptureSave&&highwayWork==null)
+                // Future highway searches run during normal streaming, after startup.
+                // They must not hold a complete visible world at 99%. Only resume a
+                // committed network still awaiting mesh publication; keep its routes
+                // stable until all initial tile meshes have finished.
+                if(PreparationDone==PreparationTotal&&plan.layerHighways.Active&&!plan.layerHighways.CanCapture)PumpHighways(4);
+                if(PreparationDone==PreparationTotal&&CanCaptureSave)
                 {
                     PreparingView=false;ViewReady=true;InitialBuildMs=preparationWatch.Elapsed.TotalMilliseconds;
                 }
@@ -110,13 +118,12 @@ namespace OnAir
                 if(flight)flight.Tick(0);var follow=sceneCamera.GetComponent<CameraFollow>();if(follow)follow.Follow(0);
                 if(revision!=journey.Revision)
                 {
-                    ClearChunks();plan=new ContinuousWorldPlan(journey.seed,flight.routeSlope);revision=journey.Revision;
+                    ClearChunks();plan=new ContinuousWorldPlan(journey.seed,flight.routeSlope,journey.ZoneWeights);revision=journey.Revision;
                     if(restoreState!=null){populationCache.RestoreState(restoreState.population,plan,buildings);plan.layerHighways.RestoreState(restoreState.highways);foreach(var memory in restoreState.memories)memories[memory.slice]=memory;restoreState=null;}
                 }
                 if(teleport!=journey.TeleportRevision)CancelHighways();
                 teleport=journey.TeleportRevision;
             }
-            if(!journey.continuousWorld){RefreshLegacy();return;}
             var cameraFollow=sceneCamera.GetComponent<CameraFollow>();if(cameraFollow&&cameraFollow.enabled)cameraFollow.Follow(0);
             BuildDemand();
             if(pending!=null&&!wanted.Contains(pendingKey))CancelPending();
@@ -132,7 +139,7 @@ namespace OnAir
                 {
                     var go=new GameObject("World tile "+key);go.SetActive(false);go.transform.SetParent(transform,false);
                     var layout=go.AddComponent<ContinuousWorldLayout>();layout.CommercialViewDirection=-sceneCamera.transform.forward;
-                    layout.Build(journey.seed,key.y,journey.Current.terrain.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(key),populationCache);Commit(key,go);
+                    layout.Build(journey.seed,key.y,journey.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(key),populationCache);Commit(key,go);
                 }
             }
             expired.Clear();ActiveBuildingCount=0;
@@ -178,10 +185,10 @@ namespace OnAir
                 }
             }
             Hull(points,viewHull);var hull=viewHull;required.Clear();Collect(hull,required);
-            float speed=flight.speedMetersPerSecond*64/journey.Current.terrain.distanceMeters;velocity=new Vector2(flight.routeSlope*speed,speed);
+            float speed=flight.speedMetersPerSecond*64/journey.MetersPerSegment;velocity=new Vector2(flight.routeSlope*speed,speed);
             viewCenter=Vector2.zero;foreach(var p in hull)viewCenter+=p;viewCenter/=Mathf.Max(1,hull.Count);
             VisibleFirst=int.MaxValue;VisibleLast=int.MinValue;foreach(var k in required){VisibleFirst=Mathf.Min(VisibleFirst,k.y);VisibleLast=Mathf.Max(VisibleLast,k.y);}
-            float lead=Mathf.Max(24,flight.speedMetersPerSecond*64/journey.Current.terrain.distanceMeters*lookAheadSeconds);
+            float lead=Mathf.Max(24,flight.speedMetersPerSecond*64/journey.MetersPerSegment*lookAheadSeconds);
             var forward=new Vector2(flight.routeSlope*lead,lead);var sweep=sweepPoints;sweep.Clear();
             // Side/rear hysteresis covers sway and changing cruise height, and prevents
             // boundary tiles being destroyed and immediately requested again.
@@ -228,7 +235,7 @@ namespace OnAir
         }
         void Pump(float milliseconds)
         {
-            if(!journey.continuousWorld)return;var budget=System.Diagnostics.Stopwatch.StartNew();
+            var budget=System.Diagnostics.Stopwatch.StartNew();
             while(budget.Elapsed.TotalMilliseconds<milliseconds)
             {
                 if(pending==null)
@@ -243,7 +250,7 @@ namespace OnAir
                     if(!found)return;pendingKey=chosen;pendingObject=new GameObject("Preparing tile "+chosen);pendingObject.SetActive(false);pendingObject.transform.SetParent(transform,false);
                     var layout=pendingObject.AddComponent<ContinuousWorldLayout>();layout.CommercialViewDirection=-sceneCamera.transform.forward;
                     pendingPrepared=PreparingView;
-                    pending=pendingPrepared?PrepareTile(layout,chosen):layout.BuildIncrementally(journey.seed,chosen.y,journey.Current.terrain.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(chosen),populationCache);
+                    pending=pendingPrepared?PrepareTile(layout,chosen):layout.BuildIncrementally(journey.seed,chosen.y,journey.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(chosen),populationCache);
                 }
                 var step=System.Diagnostics.Stopwatch.StartNew();bool more=pending.MoveNext();step.Stop();if(step.Elapsed.TotalMilliseconds>MaxPreparationStepMs){MaxPreparationStepMs=step.Elapsed.TotalMilliseconds;SlowestPreparationStage=pendingObject.GetComponent<ContinuousWorldLayout>().BuildStage;}
                 if(!more){Publish();PreparedSlices++;}
@@ -251,7 +258,7 @@ namespace OnAir
         }
         IEnumerator PrepareTile(ContinuousWorldLayout layout,Vector2Int key)
         {
-            var work=layout.BuildIncrementally(journey.seed,key.y,journey.Current.terrain.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(key),populationCache);
+            var work=layout.BuildIncrementally(journey.seed,key.y,journey.profile.kit,buildings,plan,flight.routeSlope,256,TileBounds(key),populationCache);
             while(work.MoveNext())yield return null;
             work=layout.SyncHighways();while(work.MoveNext())yield return null;
             if(environment)environment.PrepareWindows(layout.gameObject);
@@ -267,7 +274,7 @@ namespace OnAir
         }
         void PumpHighways(float milliseconds)
         {
-            if(!journey.continuousWorld||!WorldLayerHighways.Enabled||wanted.Count==0)return;
+            if(!WorldLayerHighways.Enabled||wanted.Count==0)return;
             var timer=System.Diagnostics.Stopwatch.StartNew();
             if(highwayWork==null){
                 if(Time.unscaledTime<nextHighwayCheck)return;
@@ -276,7 +283,7 @@ namespace OnAir
                 if(!highwayPlanner){
                     var obj=new GameObject("Independent highway planning");obj.SetActive(false);obj.transform.SetParent(transform,false);
                     highwayPlanner=obj.AddComponent<ContinuousWorldLayout>();highwayPlanner.CommercialViewDirection=-sceneCamera.transform.forward;
-                    highwayPlanner.ConfigurePlanner(plan,journey.Current.terrain.profile.kit,buildings);
+                    highwayPlanner.ConfigurePlanner(plan,journey.profile.kit,buildings);
                 }
                 highwayWork=PlanHighways();
             }
@@ -315,23 +322,5 @@ namespace OnAir
         }
         void CancelPending(){(pending as System.IDisposable)?.Dispose();pending=null;if(pendingObject)Destroy(pendingObject);pendingObject=null;}
         void OnDestroy(){CancelHighways();CancelPending();populationCache.palette.Dispose();}
-        void CreateLegacy(JourneyController.Leg leg)
-        {
-            var terrain=leg.terrain;var go=new GameObject("Terrain "+leg.index+" / "+terrain.biome);go.transform.SetParent(transform,false);
-            var layout=go.AddComponent<BlockGenerator>();layout.kit=terrain.profile.kit;layout.buildings=buildings;layout.seed=leg.seed;layout.biome=terrain.biome;layout.weather=leg.entryWeather;layout.period=leg.entryPeriod;layout.buildingDensity=terrain.buildingDensity;layout.streamingRoads=true;layout.Rebuild();
-            var ground=GameObject.CreatePrimitive(PrimitiveType.Cube);ground.name="Terrain base";ground.transform.SetParent(go.transform,false);ground.transform.localPosition=new Vector3(0,-.7f,0);ground.transform.localScale=new Vector3(192,1,64.02f);ground.GetComponent<Renderer>().sharedMaterial=terrain.profile.ground;Destroy(ground.GetComponent<Collider>());
-            if(terrain.biome!=Biome.City && terrain.profile.scenery)for(int i=0;i<5;i++){var prop=Instantiate(terrain.profile.scenery,go.transform);prop.transform.localPosition=new Vector3(i%2==0?-38:38,0,-24+i*12);}
-            chunks.Add(new Vector2Int(0,leg.index),go);GenerationCount++;
-        }
-
-        void RefreshLegacy()
-        {
-            int current=journey.Current.index;
-            for(int i=0;i<3;i++){var leg=journey.Ahead(i);var key=new Vector2Int(0,leg.index);if(chunks.ContainsKey(key))continue;
-                CreateLegacy(leg);}
-
-            expired.Clear();ActiveBuildingCount=0;foreach(var pair in chunks){if(pair.Key.y<current-1||pair.Key.y>current+2){expired.Add(pair.Key);continue;}pair.Value.transform.localPosition=Vector3.forward*((pair.Key.y-current)*64);ActiveBuildingCount+=pair.Value.GetComponent<BlockGenerator>().BuildingCount;}
-            foreach(var key in expired){Destroy(chunks[key]);chunks.Remove(key);}
-        }
     }
 }

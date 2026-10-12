@@ -166,7 +166,7 @@ namespace OnAir
                 }
                 else mesh.RecalculateNormals();
                 if(i==2||i==9)mesh.SetUVs(0,vertices[i].Select(v=>new Vector2(v.y/80,.5f)).ToArray());
-                mesh.RecalculateBounds();var obj=new GameObject(mesh.name);obj.transform.SetParent(transform,false);obj.AddComponent<MeshFilter>().sharedMesh=mesh;var renderer=obj.AddComponent<MeshRenderer>();renderer.sharedMaterial=surface[i];if(i==0||i==1||i==3||i==4||i==5||i==6||i==7||i==12||i==13||i==14||i==15)renderer.shadowCastingMode=ShadowCastingMode.Off;
+                mesh.RecalculateBounds();var obj=new GameObject(mesh.name);obj.transform.SetParent(transform,false);obj.AddComponent<MeshFilter>().sharedMesh=mesh;var renderer=obj.AddComponent<MeshRenderer>();renderer.sharedMaterial=surface[i];if(i==0||i==14||i==15)RainRippleSurface.Attach(obj.transform,mesh);if(i==0||i==1||i==3||i==4||i==5||i==6||i==7||i==12||i==13||i==14||i==15)renderer.shadowCastingMode=ShadowCastingMode.Off;
                 // The mesh owns its data now; do not retain a second set of construction buffers.
                 vertices[i].Clear();vertices[i].Capacity=0;triangles[i].Clear();triangles[i].Capacity=0;
                 if(budget.Elapsed.TotalMilliseconds>3){yield return null;budget.Restart();}

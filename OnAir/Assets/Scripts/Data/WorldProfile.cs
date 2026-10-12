@@ -1,13 +1,13 @@
 using UnityEngine;
 namespace OnAir
 {
-    [CreateAssetMenu(menuName="OnAir/Terrain Profile")]
-    public sealed class TerrainProfile : ScriptableObject
+    // Global settings of the continuous world: route distance scale, building kit and day/night palette.
+    [CreateAssetMenu(menuName="OnAir/World Profile")]
+    public sealed class WorldProfile : ScriptableObject
     {
-        public string id;
+        [Tooltip("Route meters represented by one 64-unit world segment. Drives flight speed and streaming distance.")]
+        [Min(1)] public float segmentMeters=320;
         public WorldKit kit;
-        public Material ground;
-        public GameObject scenery;
         public Color daySky,nightSky,dayAmbient,nightAmbient,daySun,nightSun,nightWindows;
         public float dayIntensity=1.1f,nightIntensity=.12f;
         [Header("Directional sunlight by period (optional)")]

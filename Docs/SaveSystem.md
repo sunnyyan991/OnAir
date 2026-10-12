@@ -37,7 +37,15 @@ SAVE GAME 可立即保存。返回标题或退出时，有未保存变化便显�
 
 首个存档同时创建备份。备份用于损坏恢复，上一段旅程用于主动换图，两者职责分开。
 
-旧版本位于 Editor / Player 根目录的 journey.json、journey.bak 与 previousJourney.json 保留原文件；读取列表提供 LEGACY FLIGHT / PREVIOUS FLIGHT 兼容入口。明确读取后，新保存分别写到 `Slots/LegacyCurrent/` 或 `Slots/LegacyPrevious/`，不自动迁移或覆盖根目录旧文件。滚动备份不作为额外槽位。减少配置槽数不删除已有槽，仍显示 1–8 范围内实际存在的存档。
+旧版本位于 Editor / Player 根目录的 journey.json、journey.bak 与 previousJourney.json 默认保留原文件；读取列表提供 LEGACY FLIGHT / PREVIOUS FLIGHT 入口，但仍需通过配置兼容检查。明确读取后，新保存分别写到 `Slots/LegacyCurrent/` 或 `Slots/LegacyPrevious/`，不自动转换世界配置或覆盖根目录旧文件。滚动备份不作为额外槽位。减少配置槽数不删除已有槽，仍显示 1–8 范围内实际存在的存档。
+
+## 删除存档
+
+NEW FLIGHT 和 LOAD GAME 都有 DELETE SAVE：先选择有内容的槽，再确认 DELETE / CANCEL。空槽禁用删除；正常、不兼容和损坏存档均可删除。Esc 或默认 Enter 取消，不改动文件；确认成功后立即刷新列表，普通槽变为 EMPTY SLOT，额外旧档入口消失。
+
+删除包含该槽当前旅程、备份、上一段旅程及槽内保留的异常文件，不删除其他槽或共享的 settings.json / display.json。删除 LEGACY FLIGHT 还删除它对应的根目录 journey.json、journey.bak 和相关异常副本；删除 PREVIOUS FLIGHT 还删除根目录 previousJourney.json 的对应副本，避免原始旧文件让入口重新出现。两个旧档入口独立处理。
+
+删除仅在没有活动旅程时执行，先完成已发起的写入。目标由固定槽编号解析，不采用界面记录中的任意路径，也不递归删除存档根目录；链接位置拒绝删除。选定内容先移入本根目录的临时删除目录，移动阶段失败则回退。移动完成后清理临时目录；若清理被系统阻止，槽位仍已移除，日志保留临时目录位置以便处理。
 
 测试参数 `-onairSeed 数字` 默认禁用保存；批处理运行同样默认禁用，避免影响日常旅程。显式传入 `-onairSaveDirectory 绝对目录` 可开启隔离测试存档，并覆盖默认位置。固定种子用于 START 创建旅程；LOAD GAME 仍按所选存档恢复，不改写它的种子。
 
@@ -47,8 +55,8 @@ SAVE GAME 可立即保存。返回标题或退出时，有未保存变化便显�
 |---|---|
 | `Game/GameEntry` | 连接各模块与配置，初始化标题及背景；选择槽后再准备活动旅程 |
 | `Game/SaveController` | 当前槽绑定、加载、提交、自动保存、上一旅程切换、失败反馈与退出保存 |
-| `Data/Saves/SaveSlots` | 只读列槽、元数据与旧档路径映射 |
-| `Game/MenuController` | 标题与槽位选择、覆盖确认、临时暂停及离开处理 |
+| `Data/Saves/SaveSlots` | 只读列槽、元数据与旧档路径映射；按固定槽编号执行确认后的删除 |
+| `Game/MenuController` | 标题与槽位选择、覆盖/删除确认、临时暂停及离开处理 |
 | `Data/Saves/SaveData` | 纯数据结构，不保存场景对象或资源引用 |
 | `Data/Saves/SaveFileStore` | 校验、文件大小限制、临时写入、替换、备份与保留异常文件 |
 | `Data/Saves/SaveMigration` | 格式版本、配置指纹与数据有效性检查 |
@@ -68,9 +76,11 @@ SAVE GAME 可立即保存。返回标题或退出时，有未保存变化便显�
 
 可读但属于更高版本、不同生成器或不同配置的存档也停止自动覆盖，不静默回退到更早备份。面板设置独立检查，其格式不兼容不会阻止旅程保存。
 
-当前格式版本为 1，没有已发布旧版本需要迁移。未来升级格式时，在 SaveMigration 中加入明确转换；无法可靠转换的布局保留原文件。配置指纹包含三张规则表、建筑映射与占地、地形套件及昼夜/天气配置。修改算法时更新 `ContinuousWorldPlan.GeneratorVersion`；修改未被指纹覆盖的资源布局或套件内容时更新 `SaveMigration.ContentVersion`。
+当前格式版本为 1；SaveMigration 当前负责版本、配置指纹和数据有效性检查，没有跨世界配置的自动转换。配置指纹包含 buildings.csv、weather_fx.csv、climate.csv、themes.csv 四张表，以及建筑映射与占地、WorldProfile/套件和昼夜配置。修改算法时更新 `ContinuousWorldPlan.GeneratorVersion`；修改未被指纹覆盖的资源布局或套件内容时更新 `SaveMigration.ContentVersion`。
 
-标题菜单更新仅增加可选的保存时群系名，保持格式版本 1；原有旅程快照仍可读取。
+2026-10-05 的标题菜单更新仅增加可选的保存时群系名，当时保持格式版本 1 和原配置指纹，因此当时原旅程快照仍可读取。此结论不适用于之后改变世界配置的更新。
+
+2026-10-12 兼容说明：地形配置改为 WorldProfile、区域气候表和主题表后，配置指纹及旅程中的主题字段发生变化。此前配置生成的旧档会显示 INCOMPATIBLE SAVE，当前没有自动迁移；不会按新规则重新解释旧建筑和道路，也不会自动删掉或覆盖旧文件。可选择空槽开始新行程，或明确确认覆盖/删除不兼容的普通槽。LEGACY FLIGHT / PREVIOUS FLIGHT 表示文件位置的历史入口，不保证其中的世界配置仍兼容。
 
 ## 验证
 
