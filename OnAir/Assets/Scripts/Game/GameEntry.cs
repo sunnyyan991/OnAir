@@ -33,6 +33,8 @@ namespace OnAir
         [Min(10)] public float preparationTimeoutSeconds=60;
         public MenuController menu{get;private set;}
         public DisplayController display{get;private set;}
+        public CitySandboxController citySandbox{get;private set;}
+        public AirportVisitController airport{get;private set;}
         int flightCameraMask;
         CityTraffic traffic;
         void Awake()
@@ -54,6 +56,11 @@ namespace OnAir
             var aircraft=flight.GetComponent<FlightView>().modelPrefab;if(aircraft)flight.ConfigureAircraft(aircraft.GetComponent<AircraftRig>());
             flight.swayAmplitude=3;flight.swayFrequency=.09f;flight.bobAmplitude=.3f;
             flight.GetComponent<FlightView>().sceneCamera=sceneCamera;
+            airport=gameObject.AddComponent<AirportVisitController>();airport.game=this;flight.airport=airport;
+            // Install before the title menu deactivates the flight object.
+            // An active-only scene lookup after scene load misses it on startup.
+            if(AircraftHeightPreview.Enabled&&!flight.GetComponent<AircraftHeightPreview>())
+                flight.gameObject.AddComponent<AircraftHeightPreview>();
             if(!flight.GetComponent<AircraftLights>())flight.gameObject.AddComponent<AircraftLights>();
             if(enableExperimentalWingView){cabin=flight.gameObject.AddComponent<AircraftCabinView>();cabin.view=flight.GetComponent<FlightView>();cabin.sceneCamera=sceneCamera;}
             else RenderSettings.fog=false;
@@ -68,6 +75,7 @@ namespace OnAir
             session.menuPaused=true;
             saves=gameObject.AddComponent<SaveController>();saves.Initialize(this,false,arguments,true);
             display=gameObject.AddComponent<DisplayController>();display.Initialize(saves.RootDirectory,saves.SavingEnabled);
+            citySandbox=gameObject.AddComponent<CitySandboxController>();citySandbox.Initialize(world.buildings,saves.RootDirectory,saves.SavingEnabled);
             menu=gameObject.AddComponent<MenuController>();menu.Initialize(this);
             var menuView=gameObject.AddComponent<MenuView>();menuView.game=this;
         }
@@ -80,23 +88,25 @@ namespace OnAir
         }
         public void ShowTitleBackdrop()
         {
+            clouds.ClearEntrance();
             world.CancelPreparation();
             foreach(var chunk in world.Chunks)if(chunk)chunk.SetActive(false);
             SetFlightSceneActive(false);titleBackdrop.Show();
         }
         public void BeginFlightPreparation()
         {
-            titleBackdrop.Hide();sceneCamera.cullingMask=0;SetFlightSceneActive(true);
+            titleBackdrop.Hide();sceneCamera.cullingMask=flightCameraMask;SetFlightSceneActive(true);clouds.BeginEntrance();
         }
         public void RevealFlight()
         {
-            sceneCamera.cullingMask=flightCameraMask;world.ResumeStreaming();
+            sceneCamera.cullingMask=flightCameraMask;world.ResumeStreaming();clouds.ReleaseEntrance();
         }
         public bool ReloadTables()
         {
             try
             {
                 var nextBuildings=new BuildingData(TableSource.Read(buildingsTable),buildings);
+                nextBuildings.CityAssets=world.buildings.CityAssets;
                 WeatherFxTable.Parse(TableSource.Read(weatherTable));
                 var nextClimate=ClimateTable.Parse(TableSource.Read(climateTable));
                 var nextThemes=ThemeTable.Parse(TableSource.Read(themesTable)).ToArray();

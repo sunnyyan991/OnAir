@@ -1,0 +1,224 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7e2579312d39ad43acbe920015d9f4b, type: 3}
+  m_Name: Catalog
+  m_EditorClassIdentifier: Assembly-CSharp::OnAir.CitySandboxCatalog
+  entries:
+  - id: 122
+    code: JP_OFFICE_04
+    name: JP_004_Office
+    thumbnail: {fileID: 2800000, guid: 0029b301f22b0ee4ebb5ed276ca48d8e, type: 2}
+  - id: 128
+    code: JP_010_DEPARTMENTSTORE
+    name: JP_010_DepartmentStore
+    thumbnail: {fileID: 2800000, guid: 946c3191f932df1409eb9ffd5f8ecb92, type: 2}
+  - id: 132
+    code: RES-APT-001
+    name: "\u7D27\u51D1\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: 6647b24486c706d43a4b790d9e561a37, type: 3}
+  - id: 133
+    code: RES-APT-003
+    name: "\u957F\u6761\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: ceaf9abb85b03134d84874049da878d1, type: 3}
+  - id: 134
+    code: RES-APT-005
+    name: "\u8857\u89D2\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: 1c742123adb8298439944a45adf54a2d, type: 3}
+  - id: 135
+    code: RES-APT-002
+    name: "\u7A84\u9762\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: 2a6d49b90211dd34ab4784d819839f18, type: 3}
+  - id: 136
+    code: RES-APT-004
+    name: "\u6DF1\u8FDB\u6DF1\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: b1a6396118d0c0f4ba41cd38c57f448c, type: 3}
+  - id: 137
+    code: RES-APT-006
+    name: "\u5916\u5ECA\u8001\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: 971f313a4e23bf641aff5fc5befd097d, type: 3}
+  - id: 138
+    code: RES-APT-007
+    name: "\u73B0\u4EE3\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: 92709b850586fd9409b34106cc49ad49, type: 3}
+  - id: 139
+    code: RES-APT-008
+    name: "\u5EAD\u9662\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: 40c170c2e10f03a47af5ef1d92a0d13d, type: 3}
+  - id: 140
+    code: RES-APT-009
+    name: "\u9000\u53F0\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: 740d124181c515443afb473d1252d383, type: 3}
+  - id: 141
+    code: RES-APT-010
+    name: "\u7816\u8272\u516C\u5BD3"
+    thumbnail: {fileID: 2800000, guid: daeea092b017da94583d20e45a69b415, type: 3}
+  - id: 142
+    code: RES-LOW-001
+    name: "\u5916\u5ECA\u51FA\u79DF\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: e203507c5f073764f9a5f522e8ae917f, type: 3}
+  - id: 143
+    code: RES-LOW-002
+    name: "\u73B0\u4EE3\u4F4E\u5C42\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: 67ca43175154d564fb3cb91d3734b997, type: 3}
+  - id: 144
+    code: RES-LOW-003
+    name: "\u7A84\u5730\u5757\u96C6\u5408\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: 42a5a332e6decdc48901988020a66e18, type: 3}
+  - id: 145
+    code: RES-LOW-004
+    name: "\u74E6\u9876\u96C6\u5408\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: a46a4e293ec17b54d88abd816032187c, type: 3}
+  - id: 146
+    code: RES-LOW-005
+    name: "\u5EAD\u9662\u96C6\u5408\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: dbb5b8bb203bc8b419a5157a100299c9, type: 3}
+  - id: 147
+    code: RES-LOW-006
+    name: "\u8857\u89D2\u51FA\u79DF\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: 9fbca522fd0196b4297c6563f9ffe554, type: 3}
+  - id: 148
+    code: RES-DET-001
+    name: "\u4F20\u7EDF\u4E00\u6237\u5EFA"
+    thumbnail: {fileID: 2800000, guid: df704c4b7d720fa48a9891e141a4783c, type: 3}
+  - id: 149
+    code: RES-DET-002
+    name: "\u7070\u7EFF\u4E00\u6237\u5EFA"
+    thumbnail: {fileID: 2800000, guid: d805af32dba78cd41b99f716277b91aa, type: 3}
+  - id: 150
+    code: RES-DET-003
+    name: "\u7A84\u9762\u8F66\u5E93\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: 6d67c2b7ade30db4ca010d53a05dcbcf, type: 3}
+  - id: 151
+    code: RES-DET-004
+    name: "\u6728\u9970\u9762\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: ce339c74855a9874e8dc84eafd3b8c0e, type: 3}
+  - id: 152
+    code: RES-ROW-001
+    name: "\u4E09\u6237\u957F\u5C4B"
+    thumbnail: {fileID: 2800000, guid: 523c5e600f31a7a4aa6dfbcd9dc9b87c, type: 3}
+  - id: 153
+    code: RES-DET-005
+    name: "\u8857\u89D2\u4E00\u6237\u5EFA"
+    thumbnail: {fileID: 2800000, guid: d2000b0fd489ae54586f84e007970e09, type: 3}
+  - id: 154
+    code: COM-FOOD-001
+    name: "\u5C45\u9152\u5C4B"
+    thumbnail: {fileID: 2800000, guid: b49dbda0113289b4cae800f5d9d437e9, type: 3}
+  - id: 155
+    code: COM-SHOP-001
+    name: "\u8857\u89D2\u4FBF\u5229\u5E97"
+    thumbnail: {fileID: 2800000, guid: 1bc97bebf3e82de4781e8dd9bfdd363f, type: 3}
+  - id: 156
+    code: COM-FOOD-002
+    name: "\u55AB\u8336\u5E97"
+    thumbnail: {fileID: 2800000, guid: cc1bb3bc642032e409e693c7bdf67e0d, type: 3}
+  - id: 157
+    code: PUB-MED-001
+    name: "\u793E\u533A\u8BCA\u6240"
+    thumbnail: {fileID: 2800000, guid: 26d77cc63910fa240bbd80a4cbec4a20, type: 3}
+  - id: 158
+    code: COM-FOOD-003
+    name: "\u5BFF\u53F8\u9910\u5385"
+    thumbnail: {fileID: 2800000, guid: 7cf733ba2c131d9488573beafb947d04, type: 3}
+  - id: 159
+    code: COM-MIX-001
+    name: "\u5546\u4F4F\u6DF7\u5408\u697C"
+    thumbnail: {fileID: 2800000, guid: deb3b8bff952c78428f9dbd2c4d1e4c3, type: 3}
+  - id: 160
+    code: RES-DET-006
+    name: "\u68AF\u5F62\u9876\u5C42\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: 583ec78392b7e95468f5341638726c92, type: 3}
+  - id: 161
+    code: RES-DET-007
+    name: "\u4F20\u7EDF\u9662\u5899\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: 58102694be809b141adcc4a9dc2a5913, type: 3}
+  - id: 162
+    code: RES-LOW-007
+    name: "\u957F\u6761\u5E73\u623F\u96C6\u5408\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: 0f826011480c19d49bef51a8e60e0efd, type: 3}
+  - id: 163
+    code: RES-DET-008
+    name: "\u6728\u6784\u5C0F\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: 45bd4a84f9dc19545b51c85605a2dd87, type: 3}
+  - id: 164
+    code: RES-LOW-008
+    name: "\u5012\u89D2\u8857\u89D2\u96C6\u5408\u4F4F\u5B85"
+    thumbnail: {fileID: 2800000, guid: be3daf7d144d7b2478a7e3c7b6c7d74d, type: 3}
+  - id: 165
+    code: COM-SHOP-002
+    name: "\u7EA2\u767D\u7535\u5668\u770B\u677F\u697C"
+    thumbnail: {fileID: 2800000, guid: 56b64bc62fbf31a4583544ebf5158d24, type: 3}
+  - id: 166
+    code: COM-SHOP-003
+    name: "\u7A84\u9762\u591A\u79DF\u6237\u5546\u4E1A\u697C"
+    thumbnail: {fileID: 2800000, guid: 1cbb34edc80a1ac41996223565e12a94, type: 3}
+  - id: 167
+    code: COM-MALL-003
+    name: "\u6A2A\u5E45\u770B\u677F\u97F3\u50CF\u5546\u573A"
+    thumbnail: {fileID: 2800000, guid: 083e0b0201f4464428a21424322ca709, type: 3}
+  - id: 168
+    code: COM-MALL-004
+    name: "\u8584\u8377\u7EFF\u5174\u8DA3\u5546\u573A"
+    thumbnail: {fileID: 2800000, guid: 71cab571188252241969847fa4df3843, type: 3}
+  - id: 169
+    code: COM-MALL-005
+    name: "\u7EA2\u767D\u4E0E\u9EC4\u84DD\u53CC\u697C\u5546\u4E1A\u7EC4"
+    thumbnail: {fileID: 2800000, guid: 20c5310f456aaa740bebb37a04eb148b, type: 3}
+  - id: 170
+    code: COM-MALL-006
+    name: "\u9519\u5C42\u5E7F\u544A\u5546\u4E1A\u7EFC\u5408\u4F53"
+    thumbnail: {fileID: 2800000, guid: a1e71b957fcf6ce48801c965f0c3aef1, type: 3}
+  - id: 171
+    code: COM-MALL-007
+    name: "\u767D\u8272\u5C4B\u9876\u5E7F\u544A\u5854\u5546\u4E1A\u697C"
+    thumbnail: {fileID: 2800000, guid: 65f5ffba12c93e549af971879e50b261, type: 3}
+  - id: 172
+    code: COM-MALL-008
+    name: "\u84DD\u7070\u5012\u89D2\u5927\u5C4F\u5546\u4E1A\u697C"
+    thumbnail: {fileID: 2800000, guid: 3f8f600021d33124a8640e1a640db324, type: 3}
+  - id: 173
+    code: COM-OFF-005
+    name: "\u68D5\u7070\u5C4B\u9876\u6846\u67B6\u529E\u516C\u5854"
+    thumbnail: {fileID: 2800000, guid: dfd24a734aed37e4facb74813f03d516, type: 3}
+  - id: 174
+    code: COM-OFF-007
+    name: "\u6D45\u9F20\u5C3E\u8349\u7AD6\u724C\u79DF\u6237\u697C"
+    thumbnail: {fileID: 2800000, guid: 5277beaffee12994c8cc97f1ddf8859a, type: 3}
+  - id: 175
+    code: COM-OFF-006
+    name: "\u6696\u7070\u68D5\u6A2A\u7A97\u5E26\u529E\u516C\u697C"
+    thumbnail: {fileID: 2800000, guid: dbecf13cb33747942bd11ff8e4f11d2a, type: 3}
+  - id: 181
+    code: COM-MALL-009
+    name: "\u534A\u5F00\u653E\u5C4B\u9876\u5546\u573A"
+    thumbnail: {fileID: 2800000, guid: 28c0297cb80b54e40a5c03f4a0b89c4d, type: 3}
+  - id: 182
+    code: COM-OFF-008
+    name: "\u7AD6\u5411\u5206\u8272\u7A84\u5854"
+    thumbnail: {fileID: 2800000, guid: fbd4b3bd9132756498a170336b197f4e, type: 3}
+  - id: 183
+    code: COM-OFF-009
+    name: "\u7070\u8272\u9000\u53F0\u529E\u516C\u697C"
+    thumbnail: {fileID: 2800000, guid: fc2f59ad0c5744d4ea9d49f08c8f401b, type: 3}
+  - id: 184
+    code: COM-OFF-010
+    name: "\u5706\u89D2\u5916\u5ECA\u5546\u4E1A\u697C"
+    thumbnail: {fileID: 2800000, guid: d3c6eb85fdeab7042867f842fedb9341, type: 3}
+  - id: 185
+    code: COM-MALL-010
+    name: "\u767D\u8272\u7A84\u9762\u62DB\u724C\u697C"
+    thumbnail: {fileID: 2800000, guid: 9cc267b3e73d8e3418e6c8da0017d4bf, type: 3}
+  - id: 186
+    code: COM-MALL-011
+    name: "\u6DF1\u84DD\u73AF\u5F62\u51A0\u9876\u8857\u89D2\u5546\u573A"
+    thumbnail: {fileID: 2800000, guid: 187a999b50da134439c9136e961ffcef, type: 3}
+  airportThumbnail: {fileID: 2800000, guid: 4557f839a8a1dbc44b8ea6311cab52b7, type: 3}

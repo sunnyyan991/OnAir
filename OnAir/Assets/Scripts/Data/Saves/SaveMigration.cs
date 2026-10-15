@@ -43,12 +43,36 @@ namespace OnAir
         public static JourneySaveData ReadJourney(string text, string configuration, float metersPerSegment, ThemeRule[] themes, BuildingData buildings)
         {
             JourneySaveData data;
-            try { data = JsonUtility.FromJson<JourneySaveData>(SaveFileStore.Unpack(text)); }
+            try
+            {
+                var payload=SaveFileStore.Unpack(text);
+                data=JsonUtility.FromJson<JourneySaveData>(payload);
+                // Mark old airport snapshots explicitly; serializer initializer
+                // behaviour must not make an absent route version look current.
+                if(data?.airport!=null&&payload.IndexOf("\"routeVersion\"",StringComparison.Ordinal)<0)data.airport.routeVersion=0;
+            }
             catch (ArgumentException error) { throw new FormatException("Journey JSON is invalid.", error); }
             Require(data != null, "Missing journey.");
+            if(data.cityAssetSandboxEnabled){Require(data.cityAssets!=null,"Missing city sandbox snapshot.");data.cityAssets.Validate(buildings);}
             CheckVersion(data.schemaVersion);
+            // Airport reservation rules changed. Preserve progress/climate/assets and
+            // rebuild only the old derived terrain/highway snapshot on load.
+            if(data.generatorVersion>=18&&data.generatorVersion<=19&&ContinuousWorldPlan.GeneratorVersion==20)
+            {data.generatorVersion=20;data.world=new WorldState();}
             if (data.generatorVersion != ContinuousWorldPlan.GeneratorVersion || data.configuration != configuration)
                 throw new SaveCompatibilityException("Saved world rules differ from the current content.");
+            if(data.airport!=null)
+            {
+                var a=data.airport;
+                Require(a.phase>=0&&a.phase<=(int)AirportPhase.Complete&&a.siteId>=-1&&a.completedSite>=-1,"Invalid airport stage.");
+                Require(a.routeVersion>=0&&a.routeVersion<=new AirportVisitState().routeVersion,"Invalid airport route version.");
+                Require(Finite(a.distance)&&a.distance>=0&&Finite(a.elapsed)&&a.elapsed>=0&&Finite(a.speed)&&a.speed>=0&&Finite(a.groundHeight)&&a.groundHeight>=0&&a.groundHeight<30&&Finite(a.cruiseSpeed)&&a.cruiseSpeed>=0,"Invalid airport motion.");
+                Require(Finite(a.position.x)&&Finite(a.position.y)&&Finite(a.position.z)&&Finite(a.entry.x)&&Finite(a.entry.y)&&Finite(a.entry.z)&&Finite(a.heading.x)&&Finite(a.heading.y)&&Finite(a.heading.z),"Invalid airport position.");
+                Require(Finite(a.simulationRemainder)&&a.simulationRemainder>=0&&a.simulationRemainder<1,"Invalid airport simulation remainder.");
+                // Earlier visits have no service simulation; AirportVisitMotion
+                // rebases them and creates the current parked vehicle defaults.
+                if(a.routeVersion>=6&&a.groundService!=null&&!ValidateAirportService(a.groundService))a.groundService=null;
+            }
             Require(Guid.TryParse(data.journeyId, out _) && DateTimeOffset.TryParse(data.savedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _), "Missing save identity/time.");
             var journey = data.journey;
             Require(journey != null && journey.seed >= 0 && journey.randomState != 0, "Invalid world seed/random state.");
@@ -103,6 +127,25 @@ namespace OnAir
             foreach(var memory in world.memories)
                 Require(memory.seed == journey.seed && memory.version == data.generatorVersion && memory.slice >= 0 && Finite(memory.solarPhase) && memory.solarPhase >= 0 && memory.solarPhase < 1 && Finite(memory.routeSlope), "Invalid landscape history.");
             return data;
+        }
+        static bool ValidateAirportService(AirportGroundServiceState service)
+        {
+            Require(service.phase>=-1&&service.phase<=(int)AirportPhase.Complete&&Finite(service.couplingSeconds)&&service.couplingSeconds>=0,"Invalid airport service stage.");
+            // Unity may expand null inline classes into zero-valued objects.
+            // Service routes never visit the airport origin: an empty vehicle
+            // there is a missing snapshot, not a valid parked/working vehicle.
+            // Normalize the complete set so its constructor restores safe bays.
+            if(service.fuel==null||service.tug==null||service.mechanic==null)return false;
+            foreach(var vehicle in new[]{service.fuel,service.tug,service.mechanic})
+                if(vehicle.position==Vector3.zero&&vehicle.speed==0&&vehicle.distance==0&&vehicle.routeLength==0&&(vehicle.route==null||vehicle.route.Count==0))return false;
+            foreach(var vehicle in new[]{service.fuel,service.tug,service.mechanic})
+            {
+                Require(Finite(vehicle.position.x)&&Finite(vehicle.position.y)&&Finite(vehicle.position.z)&&Finite(vehicle.heading.x)&&Finite(vehicle.heading.y)&&Finite(vehicle.heading.z),"Invalid airport service position.");
+                Require(Finite(vehicle.speed)&&vehicle.speed>=0&&Finite(vehicle.distance)&&vehicle.distance>=0&&Finite(vehicle.routeLength)&&vehicle.routeLength>=0&&vehicle.distance<=vehicle.routeLength+.1f,"Invalid airport service motion.");
+                Require(vehicle.route!=null&&vehicle.route.Count<=4096,"Invalid airport service route.");
+                foreach(var point in vehicle.route)Require(Finite(point.x)&&Finite(point.y)&&Finite(point.z),"Invalid airport service route point.");
+            }
+            return true;
         }
         public static SaveSettings ReadSettings(string text)
         {

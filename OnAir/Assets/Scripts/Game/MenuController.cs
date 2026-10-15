@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace OnAir
 {
-    public enum MenuPage { Title, NewFlight, LoadGame, Credits, Running, Preparing, PrepareFailed }
+    public enum MenuPage { Title, NewFlight, LoadGame, Credits, Running, Preparing, PrepareFailed, Sandbox }
     public enum LeaveTarget { None, Title, Quit }
 
     // Flow and input state only. Rendering is in MenuView; file safety stays in SaveController.
@@ -80,8 +80,9 @@ namespace OnAir
         {
             busy = true;Page = MenuPage.Preparing;game.session.menuPaused = true;game.saves.SuspendAutomatic = true;Notice = "PREPARING FLIGHT...";
             PreparationStatus=stagedNew?"STARTING NEW FLIGHT":"READING SAVE";
-            yield return null;
             game.BeginFlightPreparation();
+            // Draw the real cloud bank and loading UI before synchronous save/world work.
+            yield return null;
             if (!stagedReady && !game.saves.StageSlot(staged,stagedNew,stagedConfirmed))
             { Notice = game.saves.Status;Page = stagedNew ? MenuPage.PrepareFailed : MenuPage.LoadGame;busy = false;if(!stagedNew)game.ShowTitleBackdrop();yield break; }
             Exception failure = null;
@@ -94,12 +95,16 @@ namespace OnAir
             if(game.world.PreparationError!=null){FailPreparation("COULD NOT PREPARE THIS FLIGHT");yield break;}
             if (!game.world.ViewReady||!game.world.CanCaptureSave) { Debug.LogWarning("Flight preparation timed out waiting for: "+game.world.PreparationWaitingOn);game.world.CancelPreparation();FailPreparation("FLIGHT PREPARATION TIMED OUT");yield break; }
             stagedReady = true;
+            // Keep the completed progress bar visible for one rendered frame.
+            // Batch-mode Editors do not render an end-of-frame callback.
+            if(!Application.isBatchMode)yield return new WaitForEndOfFrame();
+            yield return null;
             PreparationStatus=stagedNew?"SAVING FLIGHT":"READY";yield return null;
             if (!game.saves.CommitStagedSlot(stagedNew)) { FailPreparation("SAVE FAILED");yield break; }
             game.RevealFlight();Page = MenuPage.Running;SettingsOpen = DisplayOpen = false;Notice = "";game.session.menuPaused = false;busy = false;
         }
         void FailPreparation(string text) { if(game.world.PreparingView)game.world.CancelPreparation();else game.world.SuspendStreaming();Notice = text;Page = MenuPage.PrepareFailed;busy = false;game.saves.EndJourneyWithoutSaving(); }
-        public void Retry() { if (Page == MenuPage.PrepareFailed && !busy) StartCoroutine(Prepare()); }
+        public void Retry() { if (Page == MenuPage.PrepareFailed && !busy) {if(game.airport.TestMode)StartCoroutine(PrepareAirportTest());else StartCoroutine(Prepare());} }
         public void Back()
         {
             if (busy) return;
@@ -110,6 +115,30 @@ namespace OnAir
             game.ShowTitleBackdrop();
         }
         public void ShowCredits() { if (Page == MenuPage.Title) Page = MenuPage.Credits; }
+        public void OpenSandbox(){if(Page!=MenuPage.Title||busy)return;game.citySandbox.Open();Page=MenuPage.Sandbox;}
+        public void StartAirportTest(){if(Page==MenuPage.Title&&!busy)StartCoroutine(PrepareAirportTest());}
+        public void NextAirportTest(){if(ShowHud&&game.airport.TestMode&&!busy)StartCoroutine(PrepareAirportTest(true));}
+        IEnumerator PrepareAirportTest(bool next=false)
+        {
+            busy=true;Page=MenuPage.Preparing;game.session.menuPaused=true;
+            game.saves.EndJourneyWithoutSaving();game.airport.Reset(true);
+            game.BeginFlightPreparation();yield return null;
+            Exception failure=null;
+            try
+            {
+                game.world.RestoreState(null);if(!next)game.journey.Restart(2409);game.session.paused=false;
+                if(!game.airport.JumpToTest())throw new InvalidOperationException("Airport asset is not ready");
+                game.cameraFollow.Follow(0);game.environment.Refresh(0,true);game.world.BeginPreparation();
+            }
+            catch(Exception error){failure=error;}
+            if(failure!=null){Debug.LogWarning(failure.Message);FailPreparation("AIRPORT TEST PREPARATION FAILED");yield break;}
+            PreparationStatus="PREPARING AIRPORT TEST";
+            float deadline=Time.unscaledTime+game.preparationTimeoutSeconds;
+            while(!game.world.ViewReady&&game.world.PreparationError==null&&Time.unscaledTime<deadline)yield return null;
+            if(!game.world.ViewReady){FailPreparation("AIRPORT TEST PREPARATION FAILED");yield break;}
+            yield return null;game.RevealFlight();Page=MenuPage.Running;SettingsOpen=DisplayOpen=false;
+            Notice="AIRPORT TEST - SAVES UNCHANGED";game.session.menuPaused=false;busy=false;
+        }
         public void ToggleSettings()
         {
             if (!ShowHud || BlocksHud) return;

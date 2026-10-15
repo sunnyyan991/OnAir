@@ -8,7 +8,7 @@ namespace OnAir
     // Automatic weather per ecology zone of the continuous world.
     public static class ClimateTable
     {
-        public static IEnumerable<string> Zones=>Enum.GetNames(typeof(ContinuousWorldPlan.EcologyZone));
+        public static IEnumerable<string> Zones=>Enum.GetNames(typeof(ContinuousWorldPlan.EcologyZone)).Where(zone=>zone!=nameof(ContinuousWorldPlan.EcologyZone.Airport));
         public static Dictionary<string,ClimateRule[]> Parse(string text)
         {
             var rows=CsvReader.Read(text.TrimStart('﻿'));

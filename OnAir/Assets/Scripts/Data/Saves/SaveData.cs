@@ -11,8 +11,12 @@ namespace OnAir
         public string configuration, journeyId, savedAtUtc, biomeName;
         public JourneyState journey;
         public FlightState flight;
+        public AirportVisitState airport;
         public ClimateState climate;
         public WorldState world;
+        public CityAssetLoadout cityAssets;
+        // Unity may construct a missing nested class while deserializing old JSON.
+        public bool cityAssetSandboxEnabled;
     }
 
     [Serializable] public sealed class JourneyState

@@ -203,6 +203,20 @@ namespace OnAir
                 if (Button(new Rect(x+249,28,27,24),collapsed ? "+" : "-")){collapsed = !collapsed;game.saves.RequestSave();}
                 if(game.saves!=null)GUI.Label(new Rect(x+15,collapsed?70:441,270,18),game.saves.Status,small);
                 Label(new Rect(20,140,280,22),"SEED "+journey.seed,true);
+                if(game.airport&&(game.airport.Active||game.airport.TestMode))
+                {
+                    MenuPanel(new Rect(20,176,270,game.airport.TestMode?180:90));
+                    MenuText(new Rect(32,182,246,24),"AIRPORT / RUNWAY "+(game.airport.Runway>=0?"ABCD"[game.airport.Runway].ToString():"-"));
+                    MenuText(new Rect(32,210,246,22),game.airport.Status);
+                    if(game.airport.Remaining>0)MenuText(new Rect(32,238,246,22),"REMAINING "+Mathf.CeilToInt(game.airport.Remaining)+" S");
+                    else if(game.airport.Phase==AirportPhase.TaxiIn||game.airport.Phase==AirportPhase.TaxiOut)MenuText(new Rect(32,238,246,22),"TAXI "+Mathf.CeilToInt(game.airport.TaxiRemaining)+" M");
+                    if(game.airport.TestMode)
+                    {
+                        if(MenuButton(new Rect(30,272,112,32),"SPEED "+game.airport.TestSpeed+"X"))game.airport.CycleTestSpeed();
+                        if(MenuButton(new Rect(148,272,130,32),"SKIP SERVICE",game.airport.Phase==AirportPhase.Maintenance))game.airport.SkipService();
+                        if(MenuButton(new Rect(30,312,248,30),"NEXT RUNWAY"))game.menu.NextAirportTest();
+                    }
+                }
                 if (collapsed) { ReleaseInput();return; }
                 if(game.cabin)
                 {
@@ -237,9 +251,9 @@ namespace OnAir
                 if(biomePicker&&game.biomeNavigator)
                 {
                     float px=Screen.width/scale*.5f-165;
-                    Panel(new Rect(px,150,330,340));Label(new Rect(px+16,163,270,24),"EXPLORE BIOMES");
+                    Panel(new Rect(px,150,330,377));Label(new Rect(px+16,163,270,24),"EXPLORE BIOMES");
                     if(Button(new Rect(px+285,162,28,24),"-"))biomePicker=false;
-                    int row=0;for(int i=0;i<7;i++){var zone=(ContinuousWorldPlan.EcologyZone)i;if(!journey.Theme.Allows(zone))continue;if(Button(new Rect(px+16,201+row++*37,298,31),BiomeNavigator.Name(zone))){game.biomeNavigator.Preview(zone);biomePicker=false;}}
+                    int row=0;for(int i=0;i<(int)ContinuousWorldPlan.EcologyZone.Airport;i++){var zone=(ContinuousWorldPlan.EcologyZone)i;if(!journey.Theme.Allows(zone))continue;if(Button(new Rect(px+16,201+row++*37,298,31),BiomeNavigator.Name(zone))){game.biomeNavigator.Preview(zone);biomePicker=false;}}
                 }
                 if (details)
                 {

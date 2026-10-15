@@ -14,7 +14,7 @@ namespace OnAir
         public readonly List<Rect> RoadFootprints=new List<Rect>();
         // Only fully dry, level asphalt cells belong to ground traffic. A painted
         // rectangle can extend under a water cutout and is not itself proof of a road.
-        public bool TrafficCell(Vector2Int cell){float x=cell.x*2,z=cell.y*2;return CanRoad(x,z,2,2);}
+        public bool TrafficCell(Vector2Int cell){float x=cell.x*2,z=cell.y*2;return !plan.AirportAccessRaisedAt(new Vector2(x+1,z+1))&&CanRoad(x,z,2,2);}
         public readonly List<WorldHighways.Route> HighwayRoutes=new List<WorldHighways.Route>();
         public readonly List<Vector4> ShoreEdges=new List<Vector4>();
         public int TimberBridgeTiles{get;private set;}
@@ -32,6 +32,8 @@ namespace OnAir
         public const float CommercialFacingProbability=.7f;
         WorldPopulationCache ownedPopulationCache;
         ContinuousWorldPlan plan;WorldKit kit;BuildingData data;int index;float start,end,minX,maxX;
+        Rect? airportTerrainCore;
+        bool terrainPass;
         readonly List<Vector3>[] vertices=Enumerable.Range(0,19).Select(_=>new List<Vector3>()).ToArray();
         readonly List<int>[] triangles=Enumerable.Range(0,19).Select(_=>new List<int>()).ToArray();
         public void Build(int worldSeed,int slice,WorldKit worldKit,BuildingData buildings,ContinuousWorldPlan sharedPlan=null,float routeSlope=0,float halfWidth=256,Rect? tile=null,WorldPopulationCache populationCache=null)
@@ -58,10 +60,20 @@ namespace OnAir
             var regions=new List<ContinuousWorldPlan.Region>();
             for(int rz=Mathf.FloorToInt(start/128);rz<=Mathf.FloorToInt((end-.01f)/128);rz++)for(int rx=Mathf.FloorToInt(minX/128);rx<=Mathf.FloorToInt((maxX-.01f)/128);rx++)regions.Add(plan.BuildRegion(rx,rz));
             var roads=regions.SelectMany(r=>r.roads).ToArray();
+            var airportRoads=plan.AirportAccessRoads(WorldBounds).ToArray();
+            var terrainSite=plan.airports.Near(WorldBounds.center.y,WorldBounds.height*.5f);
+            airportTerrainCore=terrainSite!=null&&terrainSite.CoreBounds.Overlaps(WorldBounds)?terrainSite.CoreBounds:(Rect?)null;
             foreach(var region in regions){plan.greenSpaces.Prepare(region,kit);if(budget.Elapsed.TotalMilliseconds>3){yield return null;budget.Restart();}}
             // A shared 2-unit sample grid makes both water and roads identical across slice boundaries.
+            terrainPass=true;
             for(float z=start;z<end;z+=2)for(float x=minX;x<maxX;x+=2)
             {
+                if(airportTerrainCore.HasValue)
+                {
+                    var core=airportTerrainCore.Value;
+                    if(x>=core.xMin&&x+2<=core.xMax&&z>=core.yMin&&z+2<=core.yMax)
+                    {if(budget.Elapsed.TotalMilliseconds>3){yield return null;budget.Restart();}continue;}
+                }
                 var land=plan.Sample(x+1,z+1);bool road=roads.Any(r=>r.Contains(new Vector2(x+1,z+1)));
                 bool farm=plan.Farmland(x+1,z+1);bool natural=plan.Ecology(x+1,z+1).z>.5f||plan.ZoneAt(x+1,z+1)==ContinuousWorldPlan.EcologyZone.Ocean;
                 bool bridge=false;road=road&&CanRoad(x,z,2,2);
@@ -84,7 +96,7 @@ namespace OnAir
                     if(Mathf.Abs(z-bridgeZ)<.1f){Quad(6,x,z+.18f,2,.12f,.28f);if(((int)x/2)%3!=0)Quad(6,x,z+1.94f,1.2f,.08f,.28f);}
                     if(Mathf.Abs(z-bridgeZ-2)<.1f)Quad(6,x,z+1.70f,2,.12f,.28f);
                 }
-                if((land==ContinuousWorldPlan.Land.Forest||land==ContinuousWorldPlan.Land.Park)&&!farm&&!plan.greenSpaces.Reserved(x+1,z+1)&&!plan.DiagonalReserved(x+1,z+1)&&!plan.highways.Reserved(x+1,z+1)&&!plan.crossings.Reserved(x+1,z+1,2)&&terrainHeight<39&&group!=5&&group!=10&&plan.Hash((int)x,(int)z,58)%(hillside?23:land==ContinuousWorldPlan.Land.Forest?plan.TreeSpacing(x,z):17)==0)
+                if((land==ContinuousWorldPlan.Land.Forest||land==ContinuousWorldPlan.Land.Park)&&!plan.AirportReserved(x+1,z+1,3)&&!plan.airports.ApproachClear(x+1,z+1,2)&&!plan.AirportAccessReserved(x+1,z+1,2)&&!farm&&!plan.greenSpaces.Reserved(x+1,z+1)&&!plan.DiagonalReserved(x+1,z+1)&&!plan.highways.Reserved(x+1,z+1)&&!plan.crossings.Reserved(x+1,z+1,2)&&terrainHeight<39&&group!=5&&group!=10&&plan.Hash((int)x,(int)z,58)%(hillside?23:land==ContinuousWorldPlan.Land.Forest?plan.TreeSpacing(x,z):17)==0)
                 {
                     // Tree height varies by authored species, not by stretching baked pixels.
                     var tree=Instantiate(plan.Hash(Mathf.FloorToInt(x/48),Mathf.FloorToInt(z/48),413)%3==0?kit.treeTall:kit.tree,transform);tree.transform.localPosition=new Vector3(x+1,plan.Height(x+1,z+1)+.02f,z+1-index*64);tree.GetComponent<PixelObjectView>()?.Configure();
@@ -92,6 +104,7 @@ namespace OnAir
                 if(budget.Elapsed.TotalMilliseconds>3){yield return null;budget.Restart();}
             }
 
+            terrainPass=false;
             BuildStage="population";if(populationCache==null)populationCache=ownedPopulationCache=new WorldPopulationCache();
             foreach(var region in regions)
             {
@@ -120,6 +133,7 @@ namespace OnAir
                 }
             }
             foreach(var line in regions.SelectMany(r=>r.diagonalRoads))BuildRoadLink(line,4);
+            foreach(var road in airportRoads)BuildAirportAccess(road);
             BuildStage="park paths";
             foreach(var region in regions)
             {
@@ -145,6 +159,12 @@ namespace OnAir
                 if(route!=null&&builtRoutes.Add(route)){var steps=BuildHighway(route);while(steps.MoveNext()){yield return null;budget.Restart();}}
             }
 
+            BuildStage="airport";
+            var airportSites=new HashSet<float>();
+            foreach(float sampleZ in new[]{start,start+32,end})if(plan.AirportAt(sampleZ,out var airport)&&airportSites.Add(airport.bounds.yMin)&&airport.bounds.Overlaps(WorldBounds)){
+                var host=new GameObject("AIRPORT regional airfield");host.transform.SetParent(transform,false);host.AddComponent<AirportGeometry>().Build(airport,WorldBounds,index*64);
+                yield return null;budget.Restart();
+            }
             BuildStage="mesh upload";
             Material[] surface={Mat("River",new Color(.12f,.23f,.29f)),Mat("Bank",new Color(.42f,.47f,.39f)),Mat("Woodland",new Color(.23f,.32f,.23f)),Mat("Park",new Color(.36f,.43f,.30f)),kit.cityPaving,kit.cityAsphalt,kit.cityPaint,Mat("Riverside paving",new Color(.57f,.55f,.50f)),Mat("Concrete embankment",new Color(.49f,.51f,.50f)),Mat("Waterside grass",new Color(.36f,.43f,.30f)),Mat("Timber bridge",new Color(.34f,.26f,.18f)),Mat("Rock terraces",new Color(.40f,.40f,.36f)),Mat("Sand bank",new Color(.67f,.63f,.49f)),Mat("Field bund",new Color(.39f,.34f,.22f)),Mat("Flooded paddy",new Color(.30f,.39f,.29f)),Mat("Shallow sea",new Color(.18f,.34f,.37f)),Mat("Painted bridge steel",new Color(.21f,.33f,.34f)),Mat("Bridge railing",new Color(.66f,.68f,.65f)),Mat("Expressway green",new Color(.045f,.23f,.16f))};
             foreach(int group in new[]{2,9})
@@ -226,7 +246,7 @@ namespace OnAir
         bool CanRoad(float x,float z,float w,float d)
         {
             foreach(var p in new[]{new Vector2(x,z),new Vector2(x+w,z),new Vector2(x,z+d),new Vector2(x+w,z+d),new Vector2(x+w/2,z+d/2)})
-                if(plan.crossings.LotAt(p.x,p.y)||plan.ZoneAt(p.x,p.y)==ContinuousWorldPlan.EcologyZone.Ocean||plan.Farmland(p.x,p.y)||plan.WaterDistance(p.x,p.y)<7||plan.Height(p.x,p.y)>0||(plan.Sample(p.x,p.y)==ContinuousWorldPlan.Land.Forest&&plan.Ecology(p.x,p.y).x<=.55f))return false;
+                if(plan.AirportReserved(p.x,p.y,3)||plan.crossings.LotAt(p.x,p.y)||plan.ZoneAt(p.x,p.y)==ContinuousWorldPlan.EcologyZone.Ocean||plan.Farmland(p.x,p.y)||plan.WaterDistance(p.x,p.y)<7||plan.Height(p.x,p.y)>0||(plan.Sample(p.x,p.y)==ContinuousWorldPlan.Land.Forest&&plan.Ecology(p.x,p.y).x<=.55f))return false;
             return true;
         }
         bool BridgeAt(float x,float z)=>plan.crossings.Reserved(x,z,0);
@@ -239,7 +259,13 @@ namespace OnAir
             if(h>c)RockWall(new Vector3(x+2,c,z),new Vector3(x+2,h,z),new Vector3(x,h,z),new Vector3(x,c,z));
             if(h>d)RockWall(new Vector3(x,d,z+2),new Vector3(x,h,z+2),new Vector3(x+2,h,z+2),new Vector3(x+2,d,z+2));
         }
-        void Quad(int group,float x,float z,float w,float d,float y){if(group==5&&y<.1f)RoadFootprints.Add(new Rect(x,z,w,d));int n=vertices[group].Count;z-=index*64;vertices[group].AddRange(new[]{new Vector3(x,y,z),new Vector3(x,y,z+d),new Vector3(x+w,y,z+d),new Vector3(x+w,y,z)});triangles[group].AddRange(new[]{n,n+1,n+2,n,n+2,n+3});}
+        void Quad(int group,float x,float z,float w,float d,float y)
+        {
+            if(group==5&&y<.1f)RoadFootprints.Add(new Rect(x,z,w,d));
+            if(terrainPass&&airportTerrainCore.HasValue)
+            {Surface(new List<Vector2>{new Vector2(x,z),new Vector2(x,z+d),new Vector2(x+w,z+d),new Vector2(x+w,z)},group,y);return;}
+            int n=vertices[group].Count;z-=index*64;vertices[group].AddRange(new[]{new Vector3(x,y,z),new Vector3(x,y,z+d),new Vector3(x+w,y,z+d),new Vector3(x+w,y,z)});triangles[group].AddRange(new[]{n,n+1,n+2,n,n+2,n+3});
+        }
         void GroundCell(int group,float x,float z,float y)
         {
             float a=plan.WaterDistance(x,z),b=plan.WaterDistance(x,z+2),c=plan.WaterDistance(x+2,z+2),d=plan.WaterDistance(x+2,z);
@@ -285,7 +311,16 @@ namespace OnAir
             else {Band(source,distance,0,.45f,8,.18f);Band(source,distance,.45f,2.9f,7,.16f);Band(source,distance,2.9f,6,9,.025f);}
             var contour=new List<Vector2>();var points=new[]{a,b,c};
             for(int i=0;i<3;i++){var p=points[i];var q=points[(i+1)%3];float u=plan.WaterDistance(p.x,p.y),v=plan.WaterDistance(q.x,q.y);if((u<=0)!=(v<=0))contour.Add(Vector2.Lerp(p,q,u/(u-v)));}
-            if(contour.Count==2){var p=contour[0];var q=contour[1];ShoreEdges.Add(new Vector4(p.x,p.y,q.x,q.y));if(!natural){Face(8,new Vector3(p.x,.05f,p.y),new Vector3(p.x,.18f,p.y),new Vector3(q.x,.18f,q.y),new Vector3(q.x,.05f,q.y));Face(8,new Vector3(q.x,.05f,q.y),new Vector3(q.x,.18f,q.y),new Vector3(p.x,.18f,p.y),new Vector3(p.x,.05f,p.y));}}
+            if(contour.Count==2)
+            {
+                var p=contour[0];var q=contour[1];
+                var edges=terrainPass&&airportTerrainCore.HasValue?OutsideAirportCoreLine(p,q,airportTerrainCore.Value):new[]{new Vector4(p.x,p.y,q.x,q.y)};
+                foreach(var edge in edges)
+                {
+                    p=new Vector2(edge.x,edge.y);q=new Vector2(edge.z,edge.w);ShoreEdges.Add(edge);
+                    if(!natural){Face(8,new Vector3(p.x,.05f,p.y),new Vector3(p.x,.18f,p.y),new Vector3(q.x,.18f,q.y),new Vector3(q.x,.05f,q.y));Face(8,new Vector3(q.x,.05f,q.y),new Vector3(q.x,.18f,q.y),new Vector3(p.x,.18f,p.y),new Vector3(p.x,.05f,p.y));}
+                }
+            }
         }
         float ShallowWidth(Vector2 p){var e=plan.EcologyBlendAt(p.x,p.y);return 1.8f+1.2f*(e.Weight(ContinuousWorldPlan.EcologyZone.Forest)+e.Weight(ContinuousWorldPlan.EcologyZone.Hills))+7.2f*e.Weight(ContinuousWorldPlan.EcologyZone.Ocean);}
         void Band(List<Vector2> source,Func<Vector2,float> distance,float low,float high,int group,float y)
@@ -295,6 +330,43 @@ namespace OnAir
             Surface(polygon,group,y);
         }
         void Surface(List<Vector2> polygon,int group,float y)
+        {
+            if(terrainPass&&airportTerrainCore.HasValue)
+            {
+                var core=airportTerrainCore.Value;
+                // Exact rectangle difference. Border cells retain their outside
+                // polygons up to the fence instead of dropping entire 2m cells.
+                foreach(var outside in OutsideAirportCore(polygon,core))RawSurface(outside,group,y);return;
+            }
+            RawSurface(polygon,group,y);
+        }
+        public static IReadOnlyList<List<Vector2>> OutsideAirportCore(List<Vector2> polygon,Rect core)
+        {
+            if(polygon.Count<3)return Array.Empty<List<Vector2>>();
+            var low=polygon[0];var high=low;foreach(var p in polygon){low=Vector2.Min(low,p);high=Vector2.Max(high,p);}
+            if(high.x<=core.xMin||low.x>=core.xMax||high.y<=core.yMin||low.y>=core.yMax)return new[]{polygon};
+            if(low.x>=core.xMin&&high.x<=core.xMax&&low.y>=core.yMin&&high.y<=core.yMax)return Array.Empty<List<Vector2>>();
+            var result=new List<List<Vector2>>{Clip(polygon,p=>core.xMin-p.x)};
+            var middle=Clip(polygon,p=>p.x-core.xMin);result.Add(Clip(middle,p=>p.x-core.xMax));
+            middle=Clip(middle,p=>core.xMax-p.x);result.Add(Clip(middle,p=>core.yMin-p.y));result.Add(Clip(middle,p=>p.y-core.yMax));return result;
+        }
+        public static IReadOnlyList<Vector4> OutsideAirportCoreLine(Vector2 a,Vector2 b,Rect core)
+        {
+            float enter=0,exit=1;var delta=b-a;
+            for(int axis=0;axis<2;axis++)
+            {
+                float start=axis==0?a.x:a.y,slope=axis==0?delta.x:delta.y,low=axis==0?core.xMin:core.yMin,high=axis==0?core.xMax:core.yMax;
+                if(Mathf.Abs(slope)<.00001f){if(start<low||start>high)return new[]{new Vector4(a.x,a.y,b.x,b.y)};continue;}
+                float first=(low-start)/slope,last=(high-start)/slope;if(first>last){float swap=first;first=last;last=swap;}
+                enter=Mathf.Max(enter,first);exit=Mathf.Min(exit,last);
+            }
+            if(enter>=exit||exit<0||enter>1)return new[]{new Vector4(a.x,a.y,b.x,b.y)};
+            var result=new List<Vector4>();
+            if(enter>.00001f){var end=Vector2.Lerp(a,b,enter);result.Add(new Vector4(a.x,a.y,end.x,end.y));}
+            if(exit<.99999f){var start=Vector2.Lerp(a,b,exit);result.Add(new Vector4(start.x,start.y,b.x,b.y));}
+            return result;
+        }
+        void RawSurface(List<Vector2> polygon,int group,float y)
         {
             if(polygon.Count<3)return;
             int n=vertices[group].Count;foreach(var p in polygon)vertices[group].Add(new Vector3(p.x,y,p.y-index*64));
@@ -336,6 +408,59 @@ namespace OnAir
             var a=new Vector2(link.x,link.y);var b=new Vector2(link.z,link.w);float length=(b-a).magnitude;if(length<.01f)return;
             var direction=(b-a)/length;var frame=new WorldCrossings.Crossing{center=(a+b)*.5f,direction=direction,riverDirection=new Vector2(-direction.y,direction.x)};
             CrossingStrip(frame,-length*.5f-.35f,length*.5f+.35f,-width*.5f,width*.5f,5,.075f);
+        }
+        void BuildAirportAccess(ContinuousWorldPlan.AirportAccessRoad road)
+        {
+            float walked=0;int lastSupport=-1;var offsets=new Vector2[road.points.Count];
+            for(int i=0;i<offsets.Length;i++)
+            {
+                var incoming=(road.points[i]-road.points[Mathf.Max(0,i-1)]).normalized;
+                var outgoing=(road.points[Mathf.Min(road.points.Count-1,i+1)]-road.points[i]).normalized;
+                if(incoming.sqrMagnitude<.001f)incoming=outgoing;if(outgoing.sqrMagnitude<.001f)outgoing=incoming;
+                var normal=new Vector2(-incoming.y,incoming.x);var next=new Vector2(-outgoing.y,outgoing.x);
+                var join=(normal+next).normalized;offsets[i]=join/Mathf.Max(.5f,Vector2.Dot(join,normal));
+            }
+            for(int part=1;part<road.points.Count;part++)
+            {
+                var a=road.points[part-1];var b=road.points[part];float length=Vector2.Distance(a,b);
+                var direction=(b-a)/length;
+                int count=Mathf.Max(1,Mathf.CeilToInt(length/2));
+                for(int step=0;step<count;step++)
+                {
+                    float from=length*step/count,to=length*(step+1)/count;
+                    float u=from-length*.5f,v=to-length*.5f,ha=road.Height(walked+from),hb=road.Height(walked+to);
+                    var pa=a+direction*from;var pb=a+direction*to;
+                    var na=Vector2.Lerp(offsets[part-1],offsets[part],from/length);var nb=Vector2.Lerp(offsets[part-1],offsets[part],to/length);
+                    if(Mathf.Max(pa.x,pb.x)<minX-3||Mathf.Min(pa.x,pb.x)>maxX+3||Mathf.Max(pa.y,pb.y)<start-3||Mathf.Min(pa.y,pb.y)>end+3)continue;
+                    bool raised=ha>.11f||hb>.11f;
+                    if(raised)HighwayBox(pa,pb,na,nb,-2,2,Mathf.Max(0,ha-.2f),ha,Mathf.Max(0,hb-.2f),hb,8);
+                    HighwayStrip(pa,pb,na,nb,-2,2,ha,hb,5);
+                    bool bridge=false;float middle=walked+(from+to)*.5f;
+                    foreach(var span in road.bridges)if(middle>=span.begin-12&&middle<=span.end+12){bridge=true;break;}
+                    if(bridge&&raised)
+                        foreach(int side in new[]{-1,1})foreach(float rail in new[]{.42f,.82f})
+                            HighwayBox(pa,pb,na,nb,side*2-.035f,side*2+.035f,ha+rail,ha+rail+.06f,hb+rail,hb+rail+.06f,17);
+                    var middlePoint=(pa+pb)*.5f;int support=Mathf.FloorToInt(middle/12);
+                    if(bridge&&raised&&support!=lastSupport&&plan.WaterDistance(middlePoint.x,middlePoint.y)<7)
+                    {
+                        lastSupport=support;var normal=new Vector2(-direction.y,direction.x);float cap=(ha+hb)*.5f-.18f;
+                        HighwayBox(middlePoint-direction*.3f,middlePoint+direction*.3f,normal,normal,-.3f,.3f,-.3f,cap,-.3f,cap,8);
+                        HighwayBox(middlePoint-direction*.45f,middlePoint+direction*.45f,normal,normal,-1.95f,1.95f,cap-.1f,cap,cap-.1f,cap,8);
+                    }
+                    if(!raised&&!bridge&&(Mathf.Abs(direction.x)<.01f||Mathf.Abs(direction.y)<.01f))
+                    {
+                        float left=Mathf.Max(minX,Mathf.Min(pa.x,pb.x)-(Mathf.Abs(direction.y)>.5f?2:0));
+                        float right=Mathf.Min(maxX,Mathf.Max(pa.x,pb.x)+(Mathf.Abs(direction.y)>.5f?2:0));
+                        float bottom=Mathf.Max(start,Mathf.Min(pa.y,pb.y)-(Mathf.Abs(direction.x)>.5f?2:0));
+                        float top=Mathf.Min(end,Mathf.Max(pa.y,pb.y)+(Mathf.Abs(direction.x)>.5f?2:0));
+                        // CityTraffic's ground cars are fixed at y=.11m. Register
+                        // only level, dry access pavement; never the bridge deck
+                        // or ramps, so cars cannot spawn/drive under the deck.
+                        if(right>left&&top>bottom)RoadFootprints.Add(new Rect(left,bottom,right-left,top-bottom));
+                    }
+                }
+                walked+=length;
+            }
         }
         Vector3 BridgePoint(WorldCrossings.Crossing c,float u,float v,float y){var p=c.center+c.direction*u+c.riverDirection*v;return new Vector3(p.x,y,p.y);}
         System.Collections.IEnumerator BuildBridge(WorldCrossings.Crossing c)
@@ -513,6 +638,7 @@ namespace OnAir
             foreach(var current in polygon){float b=inside(current);if((a>=0)!=(b>=0))result.Add(Vector2.Lerp(previous,current,a/(a-b)));if(b>=0)result.Add(current);previous=current;a=b;}return result;
         }
         // Choose one owning population region per contiguous city and asset, independent of streaming order.
+        float CityMultiplier(SpawnRule rule,Rect lot)=>plan.cityAssets==null?1:plan.cityAssets.Weight(rule,plan.airports.Neighbourhood(lot)?CityDistrict.Residence:plan.CityDistrictAt(lot.center.x,lot.center.y));
         bool SignatureAllowed(SpawnRule rule,Rect parcel)
         {
             var signature=data.Prefabs[rule.PrefabId].GetComponent<CommercialSignature>();
@@ -532,7 +658,8 @@ namespace OnAir
         {
             var budget=System.Diagnostics.Stopwatch.StartNew();
             var bounds=parcel.bounds;var random=new System.Random(plan.Hash((int)(bounds.x*4),(int)(bounds.y*4),727));
-            var rules=data.Rules.Where(r=>r.Matches(Biome.City,Weather.Clear,DayPeriod.Day)&&r.Weight>0&&!data.Prefabs[r.PrefabId].GetComponent<BuildingStreetFrontage>()&&SignatureAllowed(r,parcel.bounds)).ToArray();
+            if(plan.airports.EntirelyReserved(bounds,AirportVisitPlan.BuildingGap))yield break;
+            var rules=data.Rules.Where(r=>r.Matches(Biome.City,Weather.Clear,DayPeriod.Day)&&r.Weight>0&&CityMultiplier(r,bounds)>0&&!data.Prefabs[r.PrefabId].GetComponent<BuildingStreetFrontage>()&&SignatureAllowed(r,parcel.bounds)).ToArray();
             var occupied=new List<Rect>();string previous=null;var diversity=new BuildingDiversityPicker();
             // Frontage strips can span a large parcel; internal access lanes are reserved every ~18 units.
             for(float z=bounds.yMin+.5f;z<bounds.yMax-3;)
@@ -547,11 +674,11 @@ namespace OnAir
                     {
                         float w=(turn?f.Modules.z:f.Modules.x)*.25f,d=(turn?f.Modules.x:f.Modules.z)*.25f;
                         var lot=new Rect(x,z,w,d);
-                        return w<=bounds.xMax-.5f-x&&d<=depth&&!streetReservations.Any(a=>a.Overlaps(lot))&&plan.AllowsBuilding(lot,f.floors);
+                        return w<=bounds.xMax-.5f-x&&d<=depth&&!streetReservations.Any(a=>a.Overlaps(lot))&&plan.AllowsBuilding(lot,f.floors,f.Modules.y*.25f);
                     }
                     var eligible=rules.Where(r=>{var f=data.Footprint(data.Prefabs[r.PrefabId]);return (Fits(f,false)||(f.allowQuarterTurn&&Fits(f,true)))&&r.DistrictWeight(parcel.district)>0&&(!counts.ContainsKey(r.Id)||r.MaxPerChunk==0||counts[r.Id]<r.MaxPerChunk);}).ToArray();
                     if(eligible.Length==0){x+=2;previous=null;continue;}
-                    Func<SpawnRule,double> weight=r=>r.Weight*r.DistrictWeight(parcel.district)*(r.Family==previous?(previous=="House"?1.8:1.15):1);
+                    Func<SpawnRule,double> weight=r=>r.Weight*CityMultiplier(r,bounds)*r.DistrictWeight(parcel.district)*(r.Family==previous?(previous=="House"?1.8:1.15):1);
                     var chosen=diversity.Choose(eligible,weight,random.NextDouble());
                     var prefab=data.Prefabs[chosen.PrefabId];var fp=data.Footprint(prefab);float width=fp.Modules.x*.25f,length=fp.Modules.z*.25f;
                     bool quarterTurn=fp.allowQuarterTurn&&!Fits(fp,false);
@@ -565,16 +692,16 @@ namespace OnAir
                 for(float xx=bounds.xMin+.5f;xx<bounds.xMax-4;)
                 {
                     if(budget.Elapsed.TotalMilliseconds>3){yield return null;budget.Restart();}
-                    var candidates=rules.Where(r=>{var f=data.Footprint(data.Prefabs[r.PrefabId]);var rr=new Rect(xx,rear-f.Modules.z*.25f,f.Modules.x*.25f,f.Modules.z*.25f);return f.floors<=4&&rr.xMax<=bounds.xMax-.5f&&rr.yMin>=z&&r.DistrictWeight(parcel.district)>0&&(!counts.ContainsKey(r.Id)||r.MaxPerChunk==0||counts[r.Id]<r.MaxPerChunk)&&!occupied.Any(a=>a.Overlaps(rr))&&!streetReservations.Any(a=>a.Overlaps(rr))&&plan.AllowsBuilding(rr,f.floors);}).ToArray();
+                    var candidates=rules.Where(r=>{var f=data.Footprint(data.Prefabs[r.PrefabId]);var rr=new Rect(xx,rear-f.Modules.z*.25f,f.Modules.x*.25f,f.Modules.z*.25f);return f.floors<=4&&rr.xMax<=bounds.xMax-.5f&&rr.yMin>=z&&r.DistrictWeight(parcel.district)>0&&(!counts.ContainsKey(r.Id)||r.MaxPerChunk==0||counts[r.Id]<r.MaxPerChunk)&&!occupied.Any(a=>a.Overlaps(rr))&&!streetReservations.Any(a=>a.Overlaps(rr))&&plan.AllowsBuilding(rr,f.floors,f.Modules.y*.25f);}).ToArray();
                     if(candidates.Length==0){xx+=1;continue;}
-                    var choice=diversity.Choose(candidates,r=>r.Weight*r.DistrictWeight(parcel.district),plan.Hash((int)(xx*4),(int)(z*4),91)/(double)int.MaxValue);var pf=data.Prefabs[choice.PrefabId];var fpp=data.Footprint(pf);var rr2=new Rect(xx,rear-fpp.Modules.z*.25f,fpp.Modules.x*.25f,fpp.Modules.z*.25f);
+                    var choice=diversity.Choose(candidates,r=>r.Weight*CityMultiplier(r,bounds)*r.DistrictWeight(parcel.district),plan.Hash((int)(xx*4),(int)(z*4),91)/(double)int.MaxValue);var pf=data.Prefabs[choice.PrefabId];var fpp=data.Footprint(pf);var rr2=new Rect(xx,rear-fpp.Modules.z*.25f,fpp.Modules.x*.25f,fpp.Modules.z*.25f);
                     // Close the unused gap behind shallow front buildings, preserving a service gap.
                     float nearest=z;
                     foreach(var front in occupied)
                         if(front.xMin<rr2.xMax+.25f&&front.xMax>rr2.xMin-.25f&&front.yMax>z)
                             nearest=Mathf.Max(nearest,front.yMax+.25f);
                     var packed=new Rect(rr2.x,Mathf.Ceil(nearest*4)/4,rr2.width,rr2.height);
-                    if(packed.yMax<=rear&&!streetReservations.Any(a=>a.Overlaps(packed))&&plan.AllowsBuilding(packed,fpp.floors))rr2=packed;
+                    if(packed.yMax<=rear&&!streetReservations.Any(a=>a.Overlaps(packed))&&plan.AllowsBuilding(packed,fpp.floors,fpp.Modules.y*.25f))rr2=packed;
                     occupied.Add(rr2);counts[choice.Id]=counts.TryGetValue(choice.Id,out int rn)?rn+1:1;
                     recording.buildings.Add(new WorldPopulationCache.Building{prefab=pf,bounds=rr2,rotation=180});xx=rr2.xMax+.25f;
                 }
@@ -599,14 +726,18 @@ namespace OnAir
             roads.Add(new Rect(origin.x,origin.y+128,128,4));
             var random=new System.Random(plan.Hash((int)origin.x,(int)origin.y,3983));
             var rules=data.Rules.Where(r=>r.Weight>0&&r.Matches(Biome.City,Weather.Clear,DayPeriod.Day)&&data.Prefabs[r.PrefabId].GetComponent<BuildingStreetFrontage>())
-                .OrderBy(r=>-Math.Log(Math.Max(.000001,random.NextDouble()))/r.Weight).ToArray();
+                .OrderBy(r=>-Math.Log(Math.Max(.000001,random.NextDouble()))/Math.Max(.001,r.Weight*CityMultiplier(r,new Rect(origin.x,origin.y,128,128)))).ToArray();
             foreach(var rule in rules)
             {
                 var prefab=data.Prefabs[rule.PrefabId];var fp=data.Footprint(prefab);
                 var street=prefab.GetComponent<BuildingStreetFrontage>();var candidates=new List<WorldPopulationCache.Building>();
                 foreach(var parcel in region.parcels.OrderBy(p=>plan.Hash((int)(p.bounds.x*4),(int)(p.bounds.y*4),int.Parse(rule.Id))))
                 {
-                    if(rule.DistrictWeight(parcel.district)<=0||!SignatureAllowed(rule,parcel.bounds))continue;
+                    if(plan.airports.EntirelyReserved(parcel.bounds,AirportVisitPlan.BuildingGap))continue;
+                    if(rule.DistrictWeight(parcel.district)<=0||CityMultiplier(rule,parcel.bounds)<=0||!SignatureAllowed(rule,parcel.bounds))continue;
+                    var district=plan.CityDistrictAt(parcel.bounds.center.x,parcel.bounds.center.y);
+                    if(plan.cityAssets!=null&&(district==CityDistrict.CBD||district==CityDistrict.Residence)&&
+                        plan.Hash((int)origin.x,(int)origin.y,47143+int.Parse(rule.Id))/(double)int.MaxValue>=plan.cityAssets.For(district).largeCommercialChance)continue;
                     int firstRotation=random.Next(4);
                     for(int q=0;q<4;q++)
                     {
@@ -617,7 +748,7 @@ namespace OnAir
                         {
                             if(budget.Elapsed.TotalMilliseconds>3){yield return null;budget.Restart();}
                             var lot=new Rect(x,z,w,d);
-                            if(streetReservations.Any(a=>a.Overlaps(lot))||!street.CanPlace(lot,rotation,roads,recording.buildings.Select(a=>a.bounds))||!plan.AllowsBuilding(lot,fp.floors))continue;
+                            if(streetReservations.Any(a=>a.Overlaps(lot))||!street.CanPlace(lot,rotation,roads,recording.buildings.Select(a=>a.bounds))||!plan.AllowsBuilding(lot,fp.floors,fp.Modules.y*.25f))continue;
                             // A planned road through water/forest may not be rendered: verify the facing road too.
                             if(street.Aprons(lot,rotation).Any(a=>!CanRoad(a.center.x-.5f,a.center.y-.5f,1,1)))continue;
                             candidates.Add(new WorldPopulationCache.Building{prefab=prefab,bounds=lot,rotation=rotation});

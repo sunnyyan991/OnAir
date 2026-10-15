@@ -10,6 +10,7 @@ namespace OnAir
         public bool useLowPolyModel = true;
         public GameObject modelPrefab;
         Transform propeller;
+        float airportPitch;
         bool modelLoaded;
         public AircraftRig Rig{get;private set;}
         void Awake()
@@ -28,9 +29,11 @@ namespace OnAir
             if(!flight||!visual||!sceneCamera)return;
             if(modelLoaded)
             {
-                visual.rotation=Quaternion.LookRotation(flight.Heading,Vector3.up)*Quaternion.Euler(0,0,-flight.Bank*(Rig?Rig.bankMultiplier:1));
+                float pitch=flight.airport&&flight.airport.Active?flight.airport.VisualPitch:0;
+                airportPitch=Mathf.Lerp(airportPitch,pitch,1-Mathf.Exp(-5*Mathf.Max(0,Time.deltaTime)));
+                visual.rotation=Quaternion.LookRotation(flight.Heading,Vector3.up)*Quaternion.Euler(airportPitch,0,-flight.Bank*(Rig?Rig.bankMultiplier:1));
                 if(propeller&&!(flight.journey&&flight.journey.context&&flight.journey.context.SimulationPaused))
-                    propeller.Rotate(0,0,1200*Time.deltaTime,Space.Self);
+                    propeller.Rotate(0,0,1200*Time.deltaTime*flight.EngineActivity,Space.Self);
                 return;
             }
             var cameraTransform=sceneCamera.transform;

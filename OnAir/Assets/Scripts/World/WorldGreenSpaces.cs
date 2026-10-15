@@ -15,6 +15,7 @@ namespace OnAir
             if(plots.TryGetValue(region.coordinates,out var result))return result;
             result=new List<WorldPopulationCache.Building>();plots.Add(region.coordinates,result);
             if(kit.greenSpaceAssets==null||kit.greenSpaceAssets.Length!=5)return result;
+            AddTemple(region,kit,result);
             foreach(var parcel in region.parcels)
             {
                 var area=parcel.bounds;int hash=plan.Hash((int)area.x,(int)area.y,30401);
@@ -22,7 +23,7 @@ namespace OnAir
                 if(ecology.x+ecology.y<.65f||hash%100>=48)continue;
                 // One candidate per parcel; large uses first, with smaller fallbacks.
                 int roll=(hash/100)%100;
-                int[] order=roll<15?new[]{4,2,1,0}:roll<40?new[]{3,2,1,0}:roll<70?new[]{2,1,0}:new[]{0,1};
+                int[] order=roll<15?new[]{2,1,0}:roll<40?new[]{3,2,1,0}:roll<70?new[]{2,1,0}:new[]{0,1};
                 bool placed=false;
                 foreach(int kind in order)
                 {
@@ -37,7 +38,7 @@ namespace OnAir
                         float tx=attempt<4?.5f:((hash>>(attempt+1))&255)/255f;
                         float tz=attempt<4?.5f:((hash>>(attempt+4))&255)/255f;
                         var lot=new Rect(area.xMin+1+(area.width-extent.x-2)*tx,area.yMin+1+(area.height-extent.y-2)*tz,extent.x,extent.y);
-                        if(!Suitable(lot,kind==0))continue;
+                        if(result.Exists(b=>b.bounds.Overlaps(lot))||!Suitable(lot,kind==0))continue;
                         result.Add(new WorldPopulationCache.Building{prefab=prefab,bounds=lot,rotation=rotation});placed=true;
                     }
                     if(placed)break;
@@ -51,7 +52,7 @@ namespace OnAir
             for(int iz=0;iz<=nz;iz++)for(int ix=0;ix<=nx;ix++)
             {
                 float x=lot.xMin+lot.width*ix/nx,z=lot.yMin+lot.height*iz/nz;
-                var land=plan.Sample(x,z);
+                if(plan.AirportReserved(x,z,8))return false;var land=plan.Sample(x,z);
                 if((land!=ContinuousWorldPlan.Land.Park&&!(pavedShrine&&land==ContinuousWorldPlan.Land.Urban))||plan.Height(x,z)>.01f||plan.Farmland(x,z)||GrayRoad(x,z)||plan.DiagonalReserved(x,z)||plan.crossings.Reserved(x,z,2)||plan.highways.Reserved(x,z))return false;
             }
             return true;

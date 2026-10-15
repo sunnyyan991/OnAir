@@ -25,7 +25,16 @@ public static class ProjectValidation
         foreach(var root in EditorSceneManager.GetActiveScene().GetRootGameObjects())CheckScripts(root);
         foreach(var guid in AssetDatabase.FindAssets("t:Prefab",new[]{"Assets"}))CheckScripts(AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid)));
         var game=UnityEngine.Object.FindObjectOfType<GameEntry>();Require(game&&game.flight&&game.weatherShader,"Missing game references.");
-        Require(game.flight.GetComponent<FlightView>().modelPrefab,"Missing low-wing model reference.");
+        var aircraft=game.flight.GetComponent<FlightView>().modelPrefab;
+        Require(aircraft,"Missing aircraft model reference.");
+        var rig=aircraft.GetComponent<AircraftRig>();
+        if(rig)
+        {
+            Require((game.flight.transform.lossyScale-Vector3.one).sqrMagnitude<.000001f&&(aircraft.transform.localScale-Vector3.one).sqrMagnitude<.000001f,"Aircraft metre scale changed.");
+            Require(rig.leftNavigation&&rig.rightNavigation&&rig.tailNavigation&&rig.leftStrobe&&rig.rightStrobe&&rig.beacon,"Missing aircraft light anchors.");
+            Require(rig.liveries.Length>0&&rig.liveries.All(l=>l)&&rig.cabinInterior,"Incomplete aircraft livery/interior material.");
+            Require(!ShaderUtil.ShaderHasError(Shader.Find("OnAir/AircraftPixel")),"Aircraft shader errors.");
+        }
         string buildings=TableSource.Read(game.buildingsTable);
         var data=new BuildingData(buildings,game.buildings);
         Require(data.Rules.Count>0,"Missing building rules.");

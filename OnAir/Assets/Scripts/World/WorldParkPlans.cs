@@ -20,7 +20,7 @@ namespace OnAir
             var region=plan.BuildRegion(Mathf.FloorToInt(centre.x/128),Mathf.FloorToInt(centre.y/128));bool road=false;
             foreach(var r in region.roads)if(r.Contains(centre)){road=true;break;}if(!road)return false;
             for(int i=0;i<5;i++){float px=i==4?gx+1:gx+(i%2)*2,pz=i==4?gz+1:gz+(i/2)*2;
-                if(plan.crossings.LotAt(px,pz)||plan.ZoneAt(px,pz)==ContinuousWorldPlan.EcologyZone.Ocean||plan.Farmland(px,pz)||plan.WaterDistance(px,pz)<7||plan.Height(px,pz)>0||(plan.Sample(px,pz)==ContinuousWorldPlan.Land.Forest&&plan.Ecology(px,pz).x<=.55f))return false;}
+                if(plan.AirportReserved(px,pz,8)||plan.crossings.LotAt(px,pz)||plan.ZoneAt(px,pz)==ContinuousWorldPlan.EcologyZone.Ocean||plan.Farmland(px,pz)||plan.WaterDistance(px,pz)<7||plan.Height(px,pz)>0||(plan.Sample(px,pz)==ContinuousWorldPlan.Land.Forest&&plan.Ecology(px,pz).x<=.55f))return false;}
             return true;
         }
         bool Enclosed(Rect r)
@@ -31,7 +31,7 @@ namespace OnAir
         }
         bool Green(Vector2 p,List<WorldPopulationCache.Building> sites)
         {
-            var land=plan.Sample(p.x,p.y);if(land!=ContinuousWorldPlan.Land.Park&&land!=ContinuousWorldPlan.Land.Forest)return false;
+            if(plan.AirportReserved(p.x,p.y,8))return false;var land=plan.Sample(p.x,p.y);if(land!=ContinuousWorldPlan.Land.Park&&land!=ContinuousWorldPlan.Land.Forest)return false;
             if(plan.Height(p.x,p.y)>0||plan.Farmland(p.x,p.y)||plan.WaterDistance(p.x,p.y)<8||plan.highways.Reserved(p.x,p.y)||plan.crossings.Reserved(p.x,p.y,2)||plan.DiagonalReserved(p.x,p.y))return false;
             foreach(var b in sites)if(new Rect(b.bounds.xMin-.5f,b.bounds.yMin-.5f,b.bounds.width+1,b.bounds.height+1).Contains(p))return false;
             return true;

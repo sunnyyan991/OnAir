@@ -6,6 +6,8 @@ Shader "OnAir/ObjectPixelArt"
         _NormalMap("Local normals and surface class",2D)="white"{}
         _DepthMap("Object surface depth",2D)="black"{}
         _WindowMap("Stable individual window identifiers",2D)="black"{}
+        _LocalLightMap("Baked local surface lighting",2D)="black"{}
+        _LocalLightStrength("Local light test strength",Range(0,2))=0
         _Occupancy("Night occupancy",Range(0,1))=.48
         [MainColor] _BaseColor("Facade palette",Color)=(.78,.78,.76,1)
         [HDR] _EmissionColor("Night windows",Color)=(0,0,0,1)
@@ -28,6 +30,7 @@ Shader "OnAir/ObjectPixelArt"
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 3.5
+            #pragma shader_feature_local_fragment _LOCAL_LIGHTING
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -37,8 +40,9 @@ Shader "OnAir/ObjectPixelArt"
             TEXTURE2D(_NormalMap);SAMPLER(sampler_NormalMap);
             TEXTURE2D(_DepthMap);SAMPLER(sampler_DepthMap);
             TEXTURE2D(_WindowMap);SAMPLER(sampler_WindowMap);
+            TEXTURE2D(_LocalLightMap);SAMPLER(sampler_LocalLightMap);
             CBUFFER_START(UnityPerMaterial)
-            float4 _BaseColor,_EmissionColor,_ViewForward,_ObjectSize,_TextureSize;float _DepthRange,_Occupancy;
+            float4 _BaseColor,_EmissionColor,_ViewForward,_ObjectSize,_TextureSize;float _DepthRange,_Occupancy,_LocalLightStrength;
             CBUFFER_END
             float4 _PixelSky,_PixelEquator,_PixelGround;
             float _PixelOriginZ,_PixelWorldSeed,_WindowSleepProgress;
@@ -64,6 +68,10 @@ Shader "OnAir/ObjectPixelArt"
                 half3 albedo=color.rgb*lerp(half3(1,1,1),_BaseColor.rgb,facade);
                 half3 ambient=lerp(_PixelEquator.rgb,normal.y>=0?_PixelSky.rgb:_PixelGround.rgb,abs(normal.y));
                 half3 illumination=ambient*.6+sun.color*saturate(dot(normal,sun.direction))*sun.shadowAttenuation*.85;
+                #if defined(_LOCAL_LIGHTING)
+                half nightBrightness=saturate(dot(_EmissionColor.rgb,half3(.2126,.7152,.0722)));
+                illumination+=SAMPLE_TEXTURE2D(_LocalLightMap,sampler_LocalLightMap,uv).rgb*nightBrightness*_LocalLightStrength;
+                #endif
                 half3 glow=0;
                 UNITY_BRANCH if(encoded.a>=.75 && dot(_EmissionColor.rgb,float3(1,1,1))>.001)
                 {

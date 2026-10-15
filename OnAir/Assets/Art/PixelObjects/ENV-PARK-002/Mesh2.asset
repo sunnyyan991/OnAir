@@ -7,7 +7,7 @@ Mesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Mesh2
-  serializedVersion: 11
+  serializedVersion: 12
   m_SubMeshes:
   - serializedVersion: 2
     firstByte: 0
@@ -17,8 +17,8 @@ Mesh:
     firstVertex: 0
     vertexCount: 4
     localAABB:
-      m_Center: {x: 6.2751822, y: 9.581556, z: 6.275182}
-      m_Extent: {x: 18.697592, y: 9.192387, z: 18.697594}
+      m_Center: {x: 6.6501822, y: 10.111885, z: 6.6501827}
+      m_Extent: {x: 19.956474, y: 9.722717, z: 19.956476}
   m_Shapes:
     vertices: []
     shapes: []
@@ -97,7 +97,7 @@ Mesh:
       format: 0
       dimension: 0
     m_DataSize: 128
-    _typelessdata: 3ec8c7412041c73e05dd133f0000003ff504353ffeffff3e0000000000000000fbdc133f2041c73e3ec8c741fdffff3ef304353ffdffff3e0000803f0000000031c246c1093196417b903f410000003ff504353ffeffff3e0000803f0000803f7b903f410931964132c246c1feffff3ef504353ffcffff3e000000000000803f
+    _typelessdata: 6fdad4412041c73eae2de33e0000003ff304353f0000003f0000000000000000922de33e2041c73e70dad4410000003ff304353f0000003f0000803f0000000093e654c144ad9e41deb44d410000003ff304353f0000003f0000803f0000803fdeb44d4144ad9e4194e654c10000003ff404353fffffff3e000000000000803f
   m_CompressedMesh:
     m_Vertices:
       m_NumItems: 0
@@ -151,17 +151,30 @@ Mesh:
       m_BitSize: 0
     m_UVInfo: 0
   m_LocalAABB:
-    m_Center: {x: -0.012407303, y: 0.68955994, z: -0.01240921}
-    m_Extent: {x: 24.985184, y: 18.084385, z: 24.985184}
+    m_Center: {x: -0.01240921, y: 0.689558, z: -0.012407303}
+    m_Extent: {x: 26.619064, y: 19.145044, z: 26.619066}
   m_MeshUsageFlags: 0
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
-  m_MeshMetrics[1]: 1
+  'm_MeshMetrics[0]': 1
+  'm_MeshMetrics[1]': 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
     serializedVersion: 2
     offset: 0
     size: 0
     path: 
+  m_MeshLodInfo:
+    serializedVersion: 2
+    m_LodSelectionCurve:
+      serializedVersion: 1
+      m_LodSlope: 0
+      m_LodBias: 0
+    m_NumLevels: 1
+    m_SubMeshes:
+    - serializedVersion: 2
+      m_Levels:
+      - serializedVersion: 1
+        m_IndexStart: 0
+        m_IndexCount: 0

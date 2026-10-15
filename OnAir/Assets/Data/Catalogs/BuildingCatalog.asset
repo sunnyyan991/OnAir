@@ -225,3 +225,19 @@ MonoBehaviour:
   - id: pub-shr-002
     prefab: {fileID: 2221633327036101072, guid: 55383b35fd8cea141aa2a347d6eec979,
       type: 3}
+  - id: com-mall-009
+    prefab: {fileID: 3202635803867378941, guid: 7afbb891e60efb04f9ef5bd94b71d3bd,
+      type: 3}
+  - id: com-off-008
+    prefab: {fileID: 2520651248605889416, guid: 033935d5a265e9d409985c8ab7996247,
+      type: 3}
+  - id: com-off-009
+    prefab: {fileID: 214340454766047363, guid: 6f2a86a9decd7e340bce33e6bc2c7396, type: 3}
+  - id: com-off-010
+    prefab: {fileID: 6082148499791340585, guid: 3b5678e7f4b370d4e985ce0d83ec418d,
+      type: 3}
+  - id: com-mall-010
+    prefab: {fileID: 253426482147007396, guid: f9baf861d0464944393a198449a3c0a3, type: 3}
+  - id: com-mall-011
+    prefab: {fileID: 5229950753639057410, guid: 78c5e3ec365116d47b939bb39dbdfc32,
+      type: 3}

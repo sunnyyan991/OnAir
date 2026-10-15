@@ -10,6 +10,7 @@ namespace OnAir
         Vector2 slotScroll;
         Texture2D wordmark, planeMark;
         GUIStyle titleHit;
+        readonly CitySandboxView sandboxView=new CitySandboxView();
         static readonly Color TitleInk=C("F3EDD1"), TitleGold=C("E6CC83");
         MenuController menu => game.menu;
         FlightPanel art => game.panel;
@@ -20,6 +21,7 @@ namespace OnAir
         void OnGUI()
         {
             if(!game||!menu||!game.display)return;
+            if(menu.Page!=MenuPage.Sandbox)sandboxView.ReleaseDrag();
             GUI.depth=-20;var matrix=GUI.matrix;var color=GUI.color;bool oldEnabled=GUI.enabled;
             float scale=Mathf.Max(.01f,game.display.UiScale),width=Screen.width/scale,height=Screen.height/scale;
             GUI.matrix=Matrix4x4.Scale(new Vector3(scale,scale,1));GUI.color=Color.white;
@@ -36,12 +38,14 @@ namespace OnAir
                 else
                 {
                     bool preparing=menu.Page==MenuPage.Preparing||menu.Page==MenuPage.PrepareFailed;
-                    art.MenuFill(new Rect(0,0,width,height),preparing?new Color(.08f,.14f,.17f,1):new Color(.02f,.08f,.1f,.26f));
+                    if(!preparing||!game.clouds.HasEntranceClouds)
+                        art.MenuFill(new Rect(0,0,width,height),preparing?new Color(.08f,.14f,.17f,1):new Color(.02f,.08f,.1f,.26f));
                     switch(menu.Page)
                     {
                         case MenuPage.Title:DrawTitle(width);break;
                         case MenuPage.NewFlight:case MenuPage.LoadGame:DrawSlots(width,height);break;
                         case MenuPage.Credits:DrawCredits(width,height);break;
+                        case MenuPage.Sandbox:sandboxView.Draw(game,width,height);break;
                         case MenuPage.Preparing:case MenuPage.PrepareFailed:DrawPreparation(width,height);break;
                     }
                 }
@@ -58,13 +62,15 @@ namespace OnAir
             DrawTitleBrand(x-6,102);
             int focus=0;
             if(GUI.enabled)
-                for(int i=0;i<5;i++)
-                    if(new Rect(x,280+i*82,250,64).Contains(Event.current.mousePosition))focus=i;
-            if(TitleButton(new Rect(x,280,250,64),"START",focus==0))menu.OpenSlots(true);
-            if(TitleButton(new Rect(x,362,250,64),"LOAD GAME",focus==1))menu.OpenSlots(false);
-            if(TitleButton(new Rect(x,444,250,64),"CREDITS",focus==2))menu.ShowCredits();
-            if(TitleButton(new Rect(x,526,250,64),"SETTINGS",focus==3))menu.OpenDisplay();
-            if(TitleButton(new Rect(x,608,250,64),"QUIT",focus==4))menu.AskLeave(LeaveTarget.Quit);
+                for(int i=0;i<6;i++)
+                    if(new Rect(x,262+i*72,250,58).Contains(Event.current.mousePosition))focus=i;
+            if(TitleButton(new Rect(x,262,250,58),"START",focus==0))menu.OpenSlots(true);
+            if(TitleButton(new Rect(x,334,250,58),"LOAD GAME",focus==1))menu.OpenSlots(false);
+            if(TitleButton(new Rect(x,406,250,58),"ASSET SANDBOX",focus==2))menu.OpenSandbox();
+            if(TitleButton(new Rect(x,478,250,58),"CREDITS",focus==3))menu.ShowCredits();
+            if(TitleButton(new Rect(x,550,250,58),"SETTINGS",focus==4))menu.OpenDisplay();
+            if(TitleButton(new Rect(x,622,250,58),"QUIT",focus==5))menu.AskLeave(LeaveTarget.Quit);
+            if(art.MenuButton(new Rect(x,696,250,38),"AIRPORT TEST"))menu.StartAirportTest();
         }
         // The title has its own brand glyphs; the existing HUD alphabet stays unchanged.
         void DrawTitleBrand(float x,float y)
@@ -204,16 +210,17 @@ namespace OnAir
             Text(box.x+30,box.y+184,460,"Kisa",3);
             if(Button(box.x+30,box.y+278,460,"BACK"))menu.Back();
         }
+        void LoadingText(float x,float y,float w,string value,int size,bool centered)=>art.MenuText(new Rect(x,y,w,28),value,size,centered,new Color(.12f,.23f,.29f));
         void DrawPreparation(float width,float height)
         {
-            var box=Center(520,230,width,height);art.MenuPanel(box);
-            Text(box.x+24,box.y+35,472,menu.Notice,2,true);
+            var box=Center(520,230,width,height);
+            LoadingText(box.x+24,box.y+35,472,menu.Notice,2,true);
             if(menu.Page==MenuPage.Preparing)
             {
-                Text(box.x+24,box.y+76,472,menu.PreparationStatus,2,true);
+                LoadingText(box.x+24,box.y+76,472,menu.PreparationStatus,2,true);
                 if(menu.PreparationStatus=="BUILDING WORLD")
                 {
-                    Text(box.x+24,box.y+108,472,Mathf.FloorToInt(game.world.PreparationProgress*100)+"%",2,true);
+                    LoadingText(box.x+24,box.y+108,472,Mathf.FloorToInt(game.world.PreparationProgress*100)+"%",2,true);
                     art.MenuFill(new Rect(box.x+24,box.y+151,472,12),C("17272E"));
                     art.MenuFill(new Rect(box.x+24,box.y+151,472*game.world.PreparationProgress,12),C("6CAAB4"));
                     Text(box.x+24,box.y+180,472,game.world.PreparationWaitingOn.ToUpperInvariant(),1,true);

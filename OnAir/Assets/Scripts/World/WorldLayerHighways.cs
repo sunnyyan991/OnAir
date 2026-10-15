@@ -133,6 +133,7 @@ namespace OnAir
                 float d=Mathf.Min(distance,route.length);var p=route.Position(d,out var tangent);var normal=new Vector2(-tangent.y,tangent.x);float deck=route.Height(d);
                 for(int side=-1;side<=1;side++){
                     var q=p+normal*(side*route.HalfWidth);
+                    if(plan.AirportReserved(q.x,q.y,24))yield break;
                     if(plan.Height(q.x,q.y)>(route.ramp?Mathf.Max(.01f,deck-.5f):deck-Clearance-.5f))yield break;
                 }
                 for(int rz=Mathf.FloorToInt((p.y-4)/128);rz<=Mathf.FloorToInt((p.y+4)/128);rz++)

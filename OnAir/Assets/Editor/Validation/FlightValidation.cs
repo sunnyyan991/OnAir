@@ -20,6 +20,15 @@ public static class FlightValidation
         SessionState.SetBool("FlightValidation",true);EditorApplication.EnterPlaymode();
     }
     [InitializeOnLoadMethod]static void Resume(){if(SessionState.GetBool("FlightValidation",false))EditorApplication.update+=Test;}
+    public static void RunExtendedCapture()
+    {
+        var runner=typeof(FlightValidation).Assembly.GetType("ContinuousWorldValidation")
+            ?.GetMethod("Run",System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Static,null,Type.EmptyTypes,null);
+        if(runner==null)throw new NotSupportedException("Extended capture tools are not installed. Use Run for the shared flight regression.");
+        try{runner.Invoke(null,null);}
+        catch(System.Reflection.TargetInvocationException error) when(error.InnerException!=null)
+        {System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error.InnerException).Throw();}
+    }
     static void Step(float seconds)
     {
         Require(validationWatch.Elapsed.TotalSeconds<45,"Flight validation exceeded its 45-second limit.");

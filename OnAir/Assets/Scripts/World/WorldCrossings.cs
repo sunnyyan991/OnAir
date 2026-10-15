@@ -55,7 +55,7 @@ namespace OnAir
                         for(int side=-1;valid&&side<=1;side+=2)for(float d=reach.width+7;valid&&d<=length;d+=2)
                         {
                             var p=center+normal*d*side;
-                            if(plan.WaterDistance(p.x,p.y)<6||plan.Height(p.x,p.y)>0)valid=false;
+                            if(plan.AirportReserved(p.x,p.y,12)||plan.WaterDistance(p.x,p.y)<6||plan.Height(p.x,p.y)>0)valid=false;
                             if(!nature&&d>=reach.width+10&&!RoadLanding(p))valid=false;
                         }
                         if(!valid)continue;
@@ -104,7 +104,7 @@ namespace OnAir
         bool RoadLanding(Vector2 p)
         {
             for(int z=-1;z<=1;z++)for(int x=-1;x<=1;x++)
-            {float xx=p.x+x,zz=p.y+z;if(plan.WaterDistance(xx,zz)<9||plan.Height(xx,zz)>.001f||plan.Ecology(xx,zz).z>.6f||plan.Farmland(xx,zz))return false;}
+            {float xx=p.x+x,zz=p.y+z;if(plan.AirportReserved(xx,zz,12)||plan.WaterDistance(xx,zz)<9||plan.Height(xx,zz)>.001f||plan.Ecology(xx,zz).z>.6f||plan.Farmland(xx,zz))return false;}
             return true;
         }
         bool ClearLink(Vector2 a,Vector2 b,Crossing c)
@@ -113,7 +113,7 @@ namespace OnAir
             for(float t=0;t<=length+1;t+=1)for(int side=-1;side<=1;side++)
             {
                 var p=Vector2.Lerp(a,b,Mathf.Clamp01(t/Mathf.Max(.001f,length)))+normal*(c.width*.5f+.3f)*side;
-                if(plan.WaterDistance(p.x,p.y)<7||plan.Height(p.x,p.y)>.001f||plan.Farmland(p.x,p.y)||c.lots.Exists(r=>r.Contains(p)))return false;
+                if(plan.AirportReserved(p.x,p.y,12)||plan.WaterDistance(p.x,p.y)<7||plan.Height(p.x,p.y)>.001f||plan.Farmland(p.x,p.y)||c.lots.Exists(r=>r.Contains(p)))return false;
             }
             return true;
         }

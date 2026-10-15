@@ -11,7 +11,8 @@ namespace OnAir
             if(!game||game.journey.Current==null||game.flight.Landscape==null||Time.unscaledTime<nextSample)return;
             nextSample=Time.unscaledTime+.5f;
             float z=(game.journey.Current.index+game.journey.Progress)*TerrainStreamer.SegmentLength;
-            game.session.SetClimateZone(game.flight.Landscape.ZoneAt(game.flight.transform.position.x,z).ToString());
+            var zone=game.airport&&game.airport.Active?ContinuousWorldPlan.EcologyZone.City:game.flight.Landscape.ZoneAt(game.flight.transform.position.x,z);
+            game.session.SetClimateZone((zone==ContinuousWorldPlan.EcologyZone.Airport?ContinuousWorldPlan.EcologyZone.City:zone).ToString());
         }
     }
 }

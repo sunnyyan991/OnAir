@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8386e59e86ae5c640a94d612ca91d70e, type: 3}
+  m_Name: FlightLayout
+  m_EditorClassIdentifier: Assembly-CSharp::OnAir.AirportFlightLayout
+  airport: {fileID: 3609262703362221442, guid: 87270bf431440954982c28426af07371, type: 3}
+  bounds:
+    m_Center: {x: 60, y: 6.0825, z: 0}
+    m_Extent: {x: 105, y: 6.2475, z: 165}
+  approachHomes:
+  - {fileID: 7948223266231872818, guid: bebe8920f1d7b33499115096bcd51fc5, type: 3}
+  - {fileID: 5913385645864679269, guid: ef88e7eb9b85b674e963d0e3f564712a, type: 3}
+  - {fileID: 4602483434705417019, guid: 62b3c47696c818b49a2332d2a37ca24c, type: 3}
+  - {fileID: 41407040492747488, guid: 1145eff3cd47503408af0f7eb06ef2e1, type: 3}
+  - {fileID: 1955852633811166913, guid: 06ba429759074d84eb4d0b9963f6cf08, type: 3}
+  cruiseVisualOffset: {x: -45.96194, y: -45.96194}
