@@ -8,10 +8,86 @@ namespace OnAir {
   public GameEntry game;public int VisibleClouds{get;private set;}public int PoolCount=>groups==null?0:groups.Length;
   public Vector3 LayerHeights{get;private set;}public int VisiblePresenceChanges{get;private set;}public int OffscreenPopulationChanges{get;private set;}
   public float PixelsPerMetre=>catalog?catalog.pixelsPerMetre/2:0;
+  public Vector2 ScreenDrift{get;private set;}
+  public const float ParkedWindFraction=.08f;
+  // Screen-space clouds must include camera travel rather than following the
+  // camera at a fixed cruise speed. Calibrate to the approved cruise appearance;
+  // a small independent wind remains when the aircraft is parked.
+  public static Vector2 RelativeDrift(Vector3 velocity,Vector3 route,Vector3 right,Vector3 up,float cruiseSpeed){
+   var projected=new Vector2(Vector3.Dot(route,right),Vector3.Dot(route,up));
+   float reference=Mathf.Max(.01f,projected.magnitude*Mathf.Max(.01f,cruiseSpeed));
+   var travel=new Vector2(Vector3.Dot(velocity,right),Vector3.Dot(velocity,up));
+   return -projected.normalized*ParkedWindFraction-travel*((1-ParkedWindFraction)/reference);
+  }
   sealed class Part {public Transform t;public Renderer r;public Material material;public CloudCatalog.Shape shape;}
-  sealed class Group {public string id;public int layer,index;public Vector2 origin,size;public float speed;public int passage;public Transform root;public Part[] parts;public bool present;public bool fading,arriving,reserved;public float fade=1,fadeInSeconds=FadeSeconds;public Group next,target;public Vector2 screen;}
+  sealed class Group {public string id;public int layer,index;public float entranceHeight;public Vector2 origin,size;public float speed;public int passage;public Transform root;public Part[] parts;public bool present;public bool fading,arriving,reserved;public float fade=1,fadeInSeconds=FadeSeconds;public Group next,target;public Vector2 screen;}
   CloudCatalog catalog;Group[] groups;Mesh quad;int seed;bool ready,populated;System.Random random,thirdLayerRandom;
   readonly List<Group> retiring=new List<Group>();CloudShadowOverlay shadowOverlay;
+  readonly List<Group> entranceClouds=new List<Group>();
+  bool entranceHeld;float entranceLight=1;Vector2 entranceViewport;
+  System.Random entranceSpeedRandom;
+  Camera entranceCamera;float entranceOriginalNear;
+  public bool HasEntranceClouds=>entranceClouds.Count>0;
+  public void BeginEntrance(){ClearEntrance();entranceHeld=true;entranceLight=1;entranceSpeedRandom=new System.Random();entranceCamera=game.sceneCamera;entranceOriginalNear=entranceCamera.nearClipPlane;}
+  public void ReleaseEntrance(){entranceHeld=false;}
+  public void ClearEntrance(){foreach(var g in entranceClouds)Release(g);entranceClouds.Clear();entranceHeld=false;RestoreEntranceClip();}
+  void RestoreEntranceClip(){if(entranceCamera)entranceCamera.nearClipPlane=entranceOriginalNear;entranceCamera=null;}
+  void FitEntranceClip(){
+   if(!entranceCamera||!entranceCamera.orthographic)return;
+   if(!entranceHeld&&entranceClouds.Count==0){RestoreEntranceClip();return;}
+   // A horizontal high cloud sheet approaches the camera toward the lower edge.
+   // Orthographic cameras permit a negative near plane; include the sheet instead
+   // of slicing it into a horizontal strip. Position, zoom and far plane stay fixed.
+   float near=entranceOriginalNear,top=AircraftHeightPreview.AbsoluteHeight+ThirdLayerAircraftOffset+10;
+   for(int y=0;y<2;y++)for(int x=0;x<2;x++){
+    var ray=entranceCamera.ViewportPointToRay(new Vector3(x,y,0));
+    if(Mathf.Abs(ray.direction.y)<.001f)continue;
+    var point=ray.GetPoint((top-ray.origin.y)/ray.direction.y);
+    near=Mathf.Min(near,entranceCamera.transform.InverseTransformPoint(point).z-2);
+   }
+   entranceCamera.nearClipPlane=near;
+  }
+  void UpdateEntrance(float dt,Vector2 drift,float w,float h){
+   if(entranceHeld&&(entranceClouds.Count==0||entranceViewport!=new Vector2(w,h))){
+    foreach(var g in entranceClouds)Release(g);entranceClouds.Clear();entranceViewport=new Vector2(w,h);
+    // Fixed, seed-independent large-cloud layout. Cell sizes fit wholly inside
+    // Leave several opaque texels of overlap for sampling, plus an offscreen border.
+    float coveredW=w+12,coveredH=h+12;
+    int columns=Mathf.Max(1,Mathf.CeilToInt(coveredW/96f)),rows=Mathf.Max(1,Mathf.CeilToInt(coveredH/28f));
+    float cellW=coveredW/columns,cellH=coveredH/rows;
+    var source=Resources.Load<Material>("PixelClouds/Cloud");
+    for(int row=0;row<rows;row++)for(int col=0;col<columns;col++){
+     int index=row*columns+col;bool upper=(row+col)%2!=0;int shape=upper?5:4;
+     var g=new Group{id="Entrance L"+(upper?5:4)+" / "+index,layer=2,index=index,entranceHeight=AircraftHeightPreview.AbsoluteHeight+ThirdLayerAircraftOffset+(upper?10:5),fade=1,speed=1,present=true};
+     // Sample once per cloud, not per frame; independent of world/weather randomness.
+     g.speed=2f*Mathf.Lerp(.7f,1.3f,(float)entranceSpeedRandom.NextDouble());
+     g.root=new GameObject(g.id).transform;g.root.SetParent(transform,false);
+     var parts=new List<Part>();AddPart(g,shape,Vector2.zero,source,parts);g.parts=parts.ToArray();g.size=catalog.shapes[shape].Size(PixelsPerMetre);
+     // Opaque centres measured in the original pixel grids: L05 (66,20), L06 (70.5,24).
+     var opaqueCentre=upper?new Vector2(70.5f,24):new Vector2(66,20);
+     var grid=catalog.shapes[shape].grid;
+     // Opaque interior closes atlas/compression pinholes without adding more clouds.
+     var halfCore=new Vector2(100f,30f)*PixelsPerMetre*.5f;
+     g.parts[0].material.SetVector("_EntranceCore",new Vector4((opaqueCentre.x-halfCore.x)/grid.x,(opaqueCentre.y-halfCore.y)/grid.y,(opaqueCentre.x+halfCore.x)/grid.x,(opaqueCentre.y+halfCore.y)/grid.y));
+     var offset=(opaqueCentre-new Vector2(grid.x,grid.y)*.5f)/PixelsPerMetre;
+     g.screen=new Vector2(-coveredW*.5f+(col+.5f)*cellW,-coveredH*.5f+(row+.5f)*cellH)-offset;
+     // Explicit far-to-near draw order prevents transparent centre sorting from swapping sheets.
+     g.parts[0].material.renderQueue=upper?3023:3022;
+     g.parts[0].r.sortingOrder=index;
+     entranceClouds.Add(g);
+    }
+   }
+   FitEntranceClip();
+   if(!entranceHeld)entranceLight=Mathf.MoveTowards(entranceLight,0,dt/10f);
+   for(int n=entranceClouds.Count-1;n>=0;n--){var g=entranceClouds[n];
+    if(!entranceHeld){g.screen+=drift*CloudSpeed(g)*dt;
+     if(!g.fading&&((g.screen.x>w*.5f+g.size.x*.5f+2&&drift.x>0)||(g.screen.x<-w*.5f-g.size.x*.5f-2&&drift.x<0)||(g.screen.y>h*.5f+g.size.y*.5f+2&&drift.y>0)||(g.screen.y<-h*.5f-g.size.y*.5f-2&&drift.y<0)))g.fading=true;
+     if(g.fading)g.fade=Mathf.MoveTowards(g.fade,0,dt/FadeSeconds);
+    }
+    foreach(var part in g.parts)part.material.SetFloat("_EntranceWhite",entranceLight);
+    if(g.fade<=0){Release(g);entranceClouds.RemoveAt(n);}
+   }
+  }
   string reviewId;Vector2 reviewPoint;
   System.Random thunderRandom;Part flashPart;Vector2 flashUV;float flashAge=10,thunderWait;bool wasStorm;
   public int ThunderEvents{get;private set;}
@@ -106,7 +182,9 @@ namespace OnAir {
   void Advance(float dt){if(!ready)return;var camera=game.sceneCamera;
    var current=game.flight.transform.position;
    float h=camera.orthographicSize*2,w=h*camera.aspect;var route=new Vector3(game.flight.routeSlope,0,1).normalized;
-   var drift=-new Vector2(Vector3.Dot(route,camera.transform.right),Vector3.Dot(route,camera.transform.up)).normalized;
+   var cruiseDrift=-new Vector2(Vector3.Dot(route,camera.transform.right),Vector3.Dot(route,camera.transform.up)).normalized;
+   var drift=RelativeDrift(game.flight.StreamingVelocity,route,camera.transform.right,camera.transform.up,game.flight.CruiseWorldSpeed);
+   ScreenDrift=drift;
    Shader.SetGlobalVector("_CloudViewForward",camera.transform.forward);
    Shader.SetGlobalColor("_CloudLightTint",game.environment.sun.color);
    float phase=game.session.solarPhase;
@@ -130,18 +208,20 @@ namespace OnAir {
    Populate(drift,w,h,false);
    AdvanceThunder(dt,w,h);
    shadowOverlay.count=0;
+   // Loading-transition clouds retain their separately approved fast exit.
+   UpdateEntrance(dt,cruiseDrift,w,h);
    foreach(var g in RenderGroups()){
     float sx=g.screen.x,sy=g.screen.y;
     bool outside=Mathf.Abs(sx)>w*.5f+g.size.x*.5f+2||Mathf.Abs(sy)>h*.5f+g.size.y*.5f+2;
     bool show=g.present;if(reviewId!=null){show=g.id==reviewId;if(show){sx=(reviewPoint.x-.5f)*w;sy=(reviewPoint.y-.5f)*h;outside=false;}}
-    float y=LayerHeights[g.layer]-(g.layer==2?0:g.index*.10f);var ray=camera.ViewportPointToRay(new Vector3(.5f+sx/w,.5f+sy/h,0));g.root.position=ray.GetPoint((y-ray.origin.y)/ray.direction.y);g.root.rotation=camera.transform.rotation;
+    float y=g.entranceHeight>0?g.entranceHeight:LayerHeights[g.layer]-(g.layer==2?0:g.index*.10f);var ray=camera.ViewportPointToRay(new Vector3(.5f+sx/w,.5f+sy/h,0));g.root.position=ray.GetPoint((y-ray.origin.y)/ray.direction.y);g.root.rotation=camera.transform.rotation;
     for(int p=0;p<g.parts.Length;p++){g.parts[p].r.enabled=show&&camera.enabled;g.parts[p].material.SetFloat("_CloudPlaneY",y+p*.01f);g.parts[p].material.SetFloat("_CloudFade",show?g.fade:0);
      var part=g.parts[p];part.material.SetVector("_CloudFlash",part==flashPart?new Vector4(flashUV.x,flashUV.y,0,ThunderStrength):Vector4.zero);var bounds=new Bounds();bool first=true;
      for(int cy=-1;cy<=1;cy+=2)for(int cx=-1;cx<=1;cx+=2){var v=part.t.TransformPoint(new Vector3(cx*.5f,cy*.5f,0));v+=camera.transform.forward*((y+p*.01f-v.y)/camera.transform.forward.y);if(first){bounds=new Bounds(v,Vector3.zero);first=false;}else bounds.Encapsulate(v);}
      // One shadow path across birth, full opacity and retirement. No caster
      // handoff at fade=1, and no second cloud shadow over the same receiver.
      bounds.Expand(.2f);part.r.bounds=bounds;part.r.shadowCastingMode=ShadowCastingMode.Off;
-     if(show&&shadowOverlay.count<128){int n=shadowOverlay.count++;var centre=part.t.position;centre+=camera.transform.forward*((y+p*.01f-centre.y)/camera.transform.forward.y);shadowOverlay.centres[n]=centre;var size=part.shape.Size(PixelsPerMetre);shadowOverlay.sizes[n]=new Vector4(size.x,size.y,g.fade,g.layer);var rect=part.shape.uv;shadowOverlay.rects[n]=new Vector4(rect.x,rect.y,rect.width,rect.height);shadowOverlay.grids[n]=new Vector4(part.shape.grid.x,part.shape.grid.y,0,0);}
+     if(show&&shadowOverlay.count<512){int n=shadowOverlay.count++;var centre=part.t.position;centre+=camera.transform.forward*((y+p*.01f-centre.y)/camera.transform.forward.y);shadowOverlay.centres[n]=centre;var size=part.shape.Size(PixelsPerMetre);shadowOverlay.sizes[n]=new Vector4(size.x,size.y,g.fade,g.layer);var rect=part.shape.uv;shadowOverlay.rects[n]=new Vector4(rect.x,rect.y,rect.width,rect.height);shadowOverlay.grids[n]=new Vector4(part.shape.grid.x,part.shape.grid.y,0,0);}
     }if(show&&!outside)VisibleClouds++;
    }
   }
@@ -166,6 +246,8 @@ namespace OnAir {
    if(flashAge>.8f){flashPart=null;ThunderStrength=0;}
   }
   Vector2 Incoming(Group g,Vector2 direction,float width,float height){
+   if(direction.sqrMagnitude<.000001f){var route=new Vector3(game.flight.routeSlope,0,1).normalized;direction=-new Vector2(Vector3.Dot(route,game.sceneCamera.transform.right),Vector3.Dot(route,game.sceneCamera.transform.up));}
+   direction=direction.normalized;
    // Sample the full crosswind extent of the camera, including both corners.
    // A different lane on each passage avoids permanent empty diagonal wedges.
    float extent=(Mathf.Abs(direction.y)*width+Mathf.Abs(direction.x)*height)*.5f;
@@ -185,10 +267,10 @@ namespace OnAir {
    }return covered/576f;
   }
   public bool UniformGrain(){if(!ready)return false;foreach(var g in groups)foreach(var p in g.parts)if(Mathf.Abs(p.t.lossyScale.x/p.shape.grid.x-1/PixelsPerMetre)>.0001f||Mathf.Abs(p.t.lossyScale.y/p.shape.grid.y-1/PixelsPerMetre)>.0001f)return false;return true;}
-  IEnumerable<Group> RenderGroups(){foreach(var g in groups){yield return g;if(g.next!=null)yield return g.next;}foreach(var g in retiring)yield return g;}
+  IEnumerable<Group> RenderGroups(){foreach(var g in groups){yield return g;if(g.next!=null)yield return g.next;}foreach(var g in retiring)yield return g;foreach(var g in entranceClouds)yield return g;}
   void BeginCloudShadows(ScriptableRenderContext context,Camera camera){if(!ready||camera!=game.sceneCamera)return;shadowOverlay.Prepare(catalog.atlas,camera,game.environment.sun);camera.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass(shadowOverlay);}
   void Retire(Group source){var root=Instantiate(source.root.gameObject,transform).transform;var renderers=root.GetComponentsInChildren<Renderer>();var g=new Group{id=source.id,layer=source.layer,index=source.index,size=source.size,speed=source.speed,screen=source.screen,root=root,present=true,fading=true,fade=source.fade,parts=new Part[source.parts.Length]};for(int n=0;n<g.parts.Length;n++){var mat=new Material(source.parts[n].material);renderers[n].sharedMaterial=mat;g.parts[n]=new Part{t=renderers[n].transform,r=renderers[n],material=mat,shape=source.parts[n].shape};}retiring.Add(g);}
   void Release(Group g){foreach(var p in g.parts)if(p.material)Destroy(p.material);if(g.root)Destroy(g.root.gameObject);}
-  void OnDestroy(){RenderPipelineManager.beginCameraRendering-=BeginCloudShadows;shadowOverlay?.Dispose();foreach(var g in retiring)Release(g);if(groups!=null)foreach(var g in groups){if(g.next!=null)Release(g.next);Release(g);}if(quad)Destroy(quad);}
+  void OnDestroy(){ClearEntrance();RenderPipelineManager.beginCameraRendering-=BeginCloudShadows;shadowOverlay?.Dispose();foreach(var g in retiring)Release(g);if(groups!=null)foreach(var g in groups){if(g.next!=null)Release(g.next);Release(g);}if(quad)Destroy(quad);}
  }
 }

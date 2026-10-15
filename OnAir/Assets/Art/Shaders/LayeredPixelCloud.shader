@@ -1,5 +1,5 @@
 Shader "OnAir/LayeredPixelCloud" {
-Properties { _MainTex("Approved atlas",2D)="white"{} _CloudRect("UV rectangle",Vector)=(0,0,1,1) _CloudGrid("Art pixel grid",Vector)=(64,32,0,0) _CloudPlaneY("Layer height",Float)=80 _CloudFade("Fade",Range(0,1))=1 }
+Properties { _EntranceCore("Entrance opaque interior",Vector)=(0,0,0,0)  _EntranceWhite("Entrance white",Range(0,1))=0  _MainTex("Approved atlas",2D)="white"{} _CloudRect("UV rectangle",Vector)=(0,0,1,1) _CloudGrid("Art pixel grid",Vector)=(64,32,0,0) _CloudPlaneY("Layer height",Float)=80 _CloudFade("Fade",Range(0,1))=1 }
 SubShader { Tags {"Queue"="Transparent+20" "RenderType"="Transparent" "RenderPipeline"="UniversalPipeline"} Blend SrcAlpha OneMinusSrcAlpha ZWrite Off Cull Off
 Pass { HLSLPROGRAM
 #pragma vertex vert
@@ -7,13 +7,18 @@ Pass { HLSLPROGRAM
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 struct A {float4 vertex:POSITION;float2 uv:TEXCOORD0;};struct V {float4 pos:SV_POSITION;float2 uv:TEXCOORD0;};
-TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);float4 _PixelSky,_PixelEquator,_CloudRect,_CloudGrid;float _CloudPlaneY,_CloudSunsetGlow,_CloudFade;float4 _CloudViewForward,_CloudLightTint,_CloudFlash;
+TEXTURE2D(_MainTex);SAMPLER(sampler_MainTex);float4 _EntranceCore;float4 _PixelSky,_PixelEquator,_CloudRect,_CloudGrid;float _CloudPlaneY,_CloudSunsetGlow,_CloudFade,_EntranceWhite;float4 _CloudViewForward,_CloudLightTint,_CloudFlash;
 V vert(A i){V o;float3 p=TransformObjectToWorld(i.vertex.xyz);float3 forward=_CloudViewForward.xyz;
 // Project the billboard onto a horizontal layer ALONG the viewing ray. In an
 // orthographic view this preserves its exact silhouette while giving each pixel
 // the correct depth. Large lower clouds can never rise over the aircraft.
 p+=forward*((_CloudPlaneY-p.y)/min(forward.y,-.001));o.pos=TransformWorldToHClip(p);o.uv=i.uv;return o;}
-half4 frag(V i):SV_Target {float2 q=(floor(saturate(i.uv)*(_CloudGrid.xy-.0001))+.5)/_CloudGrid.xy;half4 t=SAMPLE_TEXTURE2D(_MainTex,sampler_MainTex,_CloudRect.xy+q*_CloudRect.zw);clip(t.a-.5);Light sun=GetMainLight();
+half4 frag(V i):SV_Target {float2 q=(floor(saturate(i.uv)*(_CloudGrid.xy-.0001))+.5)/_CloudGrid.xy;half4 t=SAMPLE_TEXTURE2D(_MainTex,sampler_MainTex,_CloudRect.xy+q*_CloudRect.zw);// Only loading-cloud materials declare this opaque interior. Preserve the outer silhouette.
+if(_EntranceCore.z>0 && all(i.uv>=_EntranceCore.xy) && all(i.uv<=_EntranceCore.zw)){
+ if(t.a<.5)t.rgb=half3(.85,.85,.85);
+ t.a=1;
+}
+clip(t.a-.5);Light sun=GetMainLight();
 half3 bright=_PixelSky.rgb*.6+sun.color*.85*(.35+.65*saturate(sun.direction.y));half3 shade=_PixelEquator.rgb*.6+sun.color*.10;
 // Retain the approved painted value clusters while removing baked cyan pigment.
 float value=dot(t.rgb,half3(.30,.59,.11));
@@ -44,6 +49,7 @@ half3 result=albedo*lighting*lerp(underside,half3(1,1,1),value);
 float2 flashDelta=(q-_CloudFlash.xy)/float2(.20,.25);
 float pocket=1-smoothstep(0,1,dot(flashDelta,flashDelta));
 result+=half3(.91,.94,1)*(_CloudFlash.w*pocket);
+result=lerp(result,lerp(half3(.78,.82,.85),half3(1,1,1),smoothstep(.12,.85,value)),_EntranceWhite);
 return half4(result,_CloudFade);}
 
 ENDHLSL }

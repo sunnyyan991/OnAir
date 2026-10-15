@@ -75,3 +75,9 @@
 ,178,env-park-002,City,*,*,0,1,1,Generic,0,0,0,1
 ,179,env-park-003,City,*,*,0,1,1,Generic,0,0,0,1
 ,180,pub-shr-002,City,*,*,0,1,1,Generic,0,0,0,1
+,181,com-mall-009,City,*,*,1.2,1,1,Retail,0,0.5,2,1
+,182,com-off-008,City,*,*,1.2,1,1,Office,0,0.5,2,1
+,183,com-off-009,City,*,*,1.2,1,1,Office,0,0.5,2,1
+,184,com-off-010,City,*,*,1.2,1,1,Office,0,0.5,2,1
+,185,com-mall-010,City,*,*,1.2,1,1,Retail,0,0.5,2,1
+,186,com-mall-011,City,*,*,1.2,1,1,Retail,0,0.5,2,1

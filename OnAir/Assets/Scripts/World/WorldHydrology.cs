@@ -23,7 +23,7 @@ namespace OnAir
             if(basins.TryGetValue(id,out var cached))return cached;
             var list=new List<Reach>();float z=id*768;var random=new System.Random(world.Hash(id,0,1701));
             if(random.Next(100)<12){basins.Add(id,list);return list;}
-            float width=world.ZoneAt(0,z+256)==ContinuousWorldPlan.EcologyZone.RiverPlain?24+random.Next(13):7+random.Next(12);
+            float width=world.NaturalZoneAt(0,z+256)==ContinuousWorldPlan.EcologyZone.RiverPlain?24+random.Next(13):7+random.Next(12);
             bool transverse=random.Next(100)<40;
             int steps=2+random.Next(4);
             var points=new List<Vector2>{new Vector2((random.Next(9)-4)*32,z+48+random.Next(3)*16)};
@@ -78,7 +78,7 @@ namespace OnAir
                     var corner=points[i+1];
                     if(transverse)corner=new Vector2(corner.y-basinZ-384,basinZ+384-corner.x);
                     corner.x+=Mathf.Round(world.routeSlope*(basinZ+384)/32)*32;
-                    var zone=world.ZoneAt(corner.x,corner.y);
+                    var zone=world.NaturalZoneAt(corner.x,corner.y);
                     bool natural=zone==ContinuousWorldPlan.EcologyZone.Forest||zone==ContinuousWorldPlan.EcologyZone.Hills||zone==ContinuousWorldPlan.EcologyZone.RiverPlain;
                     if(zone==ContinuousWorldPlan.EcologyZone.Town||zone==ContinuousWorldPlan.EcologyZone.CoastalTown)
                         natural=world.Hash(Mathf.RoundToInt(corner.x/32),Mathf.RoundToInt(corner.y/32),1799)%100<35;

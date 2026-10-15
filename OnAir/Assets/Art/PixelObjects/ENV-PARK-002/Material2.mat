@@ -41,12 +41,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DepthRange: 25.150364
+    - _DepthRange: 26.650364
     - _Occupancy: 0.46
     m_Colors:
     - _BaseColor: {r: 0.78, g: 0.78, b: 0.76, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _ObjectSize: {r: 34.5, g: 26, b: 0, a: 0}
-    - _TextureSize: {r: 138, g: 104, b: 0.007246377, a: 0.009615385}
+    - _ObjectSize: {r: 37, g: 27.5, b: 0, a: 0}
+    - _TextureSize: {r: 148, g: 110, b: 0.006756757, a: 0.009090909}
     - _ViewForward: {r: 0.5, g: -0.7071068, b: 0.49999994, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

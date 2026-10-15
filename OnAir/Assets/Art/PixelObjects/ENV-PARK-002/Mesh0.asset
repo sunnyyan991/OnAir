@@ -7,7 +7,7 @@ Mesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Mesh0
-  serializedVersion: 11
+  serializedVersion: 12
   m_SubMeshes:
   - serializedVersion: 2
     firstByte: 0
@@ -17,8 +17,8 @@ Mesh:
     firstVertex: 0
     vertexCount: 4
     localAABB:
-      m_Center: {x: -6.4496064, y: 9.651453, z: -6.449606}
-      m_Extent: {x: 18.635092, y: 9.103998, z: 18.635094}
+      m_Center: {x: -6.857107, y: 10.227743, z: -6.8571053}
+      m_Extent: {x: 19.893974, y: 9.634329, z: 19.893976}
   m_Shapes:
     vertices: []
     shapes: []
@@ -97,7 +97,7 @@ Mesh:
       format: 0
       dimension: 0
     m_DataSize: 128
-    _typelessdata: 76adc8c1f0250c3ff08330bffdffffbef504353ffbffffbe0000000000000000308430bff0250c3f77adc8c1feffffbef604353ff9ffffbe0000803f00000000bff742412a0b9641ed5a43c1fdffffbef504353ffbffffbe0000803f0000803feb5a43c12a0b9641c2f74241ffffffbef504353ffcffffbe000000000000803f
+    _typelessdata: 3702d6c110ea173fa88f16bf000000bff404353ffdffffbe0000000000000000e88f16bf10ea173f3702d6c1000000bff404353ffeffffbe0000803f000000000297504186e59e416e0452c1000000bff404353ffdffffbe0000803f0000803f6c0452c186e59e4106975041000000bff404353ffcffffbe000000000000803f
   m_CompressedMesh:
     m_Vertices:
       m_NumItems: 0
@@ -151,17 +151,30 @@ Mesh:
       m_BitSize: 0
     m_UVInfo: 0
   m_LocalAABB:
-    m_Center: {x: -0.1060524, y: 0.6803131, z: -0.106054306}
-    m_Extent: {x: 24.978645, y: 18.075138, z: 24.978645}
+    m_Center: {x: -0.12230492, y: 0.70329285, z: -0.12230301}
+    m_Extent: {x: 26.628777, y: 19.15878, z: 26.628778}
   m_MeshUsageFlags: 0
   m_CookingOptions: 30
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
-  m_MeshMetrics[1]: 1
+  'm_MeshMetrics[0]': 1
+  'm_MeshMetrics[1]': 1
   m_MeshOptimizationFlags: 1
   m_StreamData:
     serializedVersion: 2
     offset: 0
     size: 0
     path: 
+  m_MeshLodInfo:
+    serializedVersion: 2
+    m_LodSelectionCurve:
+      serializedVersion: 1
+      m_LodSlope: 0
+      m_LodBias: 0
+    m_NumLevels: 1
+    m_SubMeshes:
+    - serializedVersion: 2
+      m_Levels:
+      - serializedVersion: 1
+        m_IndexStart: 0
+        m_IndexCount: 0

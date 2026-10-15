@@ -110,7 +110,7 @@ namespace OnAir
                 if(flight)flight.Tick(0);var follow=sceneCamera.GetComponent<CameraFollow>();if(follow)follow.Follow(0);
                 if(revision!=journey.Revision)
                 {
-                    ClearChunks();plan=new ContinuousWorldPlan(journey.seed,flight.routeSlope);revision=journey.Revision;
+                    ClearChunks();plan=new ContinuousWorldPlan(journey.seed,flight.routeSlope,buildings.CityAssets);revision=journey.Revision;
                     if(restoreState!=null){populationCache.RestoreState(restoreState.population,plan,buildings);plan.layerHighways.RestoreState(restoreState.highways);foreach(var memory in restoreState.memories)memories[memory.slice]=memory;restoreState=null;}
                 }
                 if(teleport!=journey.TeleportRevision)CancelHighways();
@@ -178,11 +178,11 @@ namespace OnAir
                 }
             }
             Hull(points,viewHull);var hull=viewHull;required.Clear();Collect(hull,required);
-            float speed=flight.speedMetersPerSecond*64/journey.Current.terrain.distanceMeters;velocity=new Vector2(flight.routeSlope*speed,speed);
+            var travel=flight.StreamingVelocity;velocity=new Vector2(travel.x,travel.z);
             viewCenter=Vector2.zero;foreach(var p in hull)viewCenter+=p;viewCenter/=Mathf.Max(1,hull.Count);
             VisibleFirst=int.MaxValue;VisibleLast=int.MinValue;foreach(var k in required){VisibleFirst=Mathf.Min(VisibleFirst,k.y);VisibleLast=Mathf.Max(VisibleLast,k.y);}
             float lead=Mathf.Max(24,flight.speedMetersPerSecond*64/journey.Current.terrain.distanceMeters*lookAheadSeconds);
-            var forward=new Vector2(flight.routeSlope*lead,lead);var sweep=sweepPoints;sweep.Clear();
+            var forward=flight.airport&&flight.airport.Active?velocity*Mathf.Max(lookAheadSeconds,3):new Vector2(flight.routeSlope*lead,lead);var sweep=sweepPoints;sweep.Clear();
             // Side/rear hysteresis covers sway and changing cruise height, and prevents
             // boundary tiles being destroyed and immediately requested again.
             foreach(var p in hull)for(int dz=-1;dz<=1;dz+=2)for(int dx=-1;dx<=1;dx+=2){var guard=p+new Vector2(dx*cacheGuard,dz*cacheGuard);sweep.Add(guard);sweep.Add(guard+forward);}

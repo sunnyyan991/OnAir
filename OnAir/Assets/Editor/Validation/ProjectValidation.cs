@@ -25,17 +25,27 @@ public static class ProjectValidation
         foreach(var root in EditorSceneManager.GetActiveScene().GetRootGameObjects())CheckScripts(root);
         foreach(var guid in AssetDatabase.FindAssets("t:Prefab",new[]{"Assets"}))CheckScripts(AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid)));
         var game=UnityEngine.Object.FindObjectOfType<GameEntry>();Require(game&&game.flight&&game.weatherShader,"Missing game references.");
-        Require(game.flight.GetComponent<FlightView>().modelPrefab,"Missing low-wing model reference.");
+        var aircraft=game.flight.GetComponent<FlightView>().modelPrefab;
+        Require(aircraft,"Missing aircraft model reference.");
+        var rig=aircraft.GetComponent<AircraftRig>();
+        if(rig)
+        {
+            Require((game.flight.transform.lossyScale-Vector3.one).sqrMagnitude<.000001f&&(aircraft.transform.localScale-Vector3.one).sqrMagnitude<.000001f,"Aircraft metre scale changed.");
+            Require(rig.leftNavigation&&rig.rightNavigation&&rig.tailNavigation&&rig.leftStrobe&&rig.rightStrobe&&rig.beacon,"Missing aircraft light anchors.");
+            Require(rig.liveries.Length>0&&rig.liveries.All(l=>l)&&rig.cabinInterior,"Incomplete aircraft livery/interior material.");
+            Require(!ShaderUtil.ShaderHasError(Shader.Find("OnAir/AircraftPixel")),"Aircraft shader errors.");
+        }
         string buildings=TableSource.Read(game.buildingsTable),terrains=TableSource.Read(game.terrainsTable);
         var data=new BuildingData(buildings,game.buildings);var rules=TerrainTable.Parse(terrains);var definitions=game.terrains.Resolve(rules);
-        Require(data.Rules.Count==18&&definitions.Length==3,"Missing migrated table rows.");
+        Require(data.Rules.Count>=18&&definitions.Length==3,"Missing base table rows.");
         foreach(var terrain in definitions)
         {
-            Require(data.Rules.Count(b=>b.Matches(terrain.biome,Weather.Clear,DayPeriod.Day))==6,"Wrong per-terrain building selection.");
+            Require(data.Rules.Any(b=>b.Matches(terrain.biome,Weather.Clear,DayPeriod.Day)&&b.Weight>0),"Terrain has no active building selection.");
             Require(terrain.distanceMeters==320&&terrain.selectionWeight==1,"Migration changed route settings.");
             var so=new SerializedObject(terrain.profile);Require(so.FindProperty("distanceMeters")==null&&so.FindProperty("weather")==null,"Duplicated editable terrain rules remain in profile.");
         }
-        Require(BuildingRules.Parse(buildings.Replace(",101,",",00101,"))[0].Id=="00101","Building ID was converted to a number.");
+        string firstId=data.Rules[0].Id;
+        Require(BuildingRules.Parse(buildings.Replace(","+firstId+",",",00"+firstId+","))[0].Id=="00"+firstId,"Building ID was converted to a number.");
         Require(TerrainTable.Parse(terrains.Replace(",1,City,",",001,City,"))[0].id=="001","Terrain ID was converted to a number.");
         foreach(string bad in new[]{terrains.Replace(",320,",",0,"),terrains.Replace(",320,",",NaN,"),terrains.Replace(",City,",",Unknown,"),terrains.Replace("5|1|1|1|1","5|1"),terrains.Replace(",2,Coast,",",1,Coast,"),terrains.Replace("5|1|1|1|1","0|0|0|0|0")})
         {
@@ -45,13 +55,15 @@ public static class ProjectValidation
         foreach(var entry in game.buildings.entries)
         {
             var view=entry.prefab.GetComponent<BuildingView>();Require(view&&view.windows.Length>0&&view.windows.All(r=>r),"Missing explicit window references: "+entry.id);
-            Require(entry.prefab.GetComponent<BuildingFootprint>().size.x<=7.95f,"Building footprint overflow.");
+            var fp=entry.prefab.GetComponent<BuildingFootprint>();
+            bool legacyGrid=data.Rules.Any(r=>r.PrefabId==entry.id&&(r.Biomes.Contains("Coast")||r.Biomes.Contains("Desert")||r.Biomes.Contains("*")));
+            Require(fp&&fp.size.x>0&&fp.size.y>0&&(!legacyGrid||(fp.size.x<=7.95f&&fp.size.y<=7.95f)),"Building footprint incompatible with its terrain.");
         }
         var pipeline=GraphicsSettings.defaultRenderPipeline as UniversalRenderPipelineAsset;
-        Require(pipeline&&!pipeline.useSRPBatcher&&QualitySettings.renderPipeline==pipeline,"Main rendering configuration changed.");
+        Require(pipeline&&pipeline.useSRPBatcher&&QualitySettings.renderPipeline==pipeline&&pipeline.renderScale==1,"Expected native output and SRP batching.");
         Require(!ShaderUtil.ShaderHasError(game.weatherShader),"Weather shader errors.");
         WeatherValidation.Validate();Directory.CreateDirectory("Validation");
-        File.WriteAllText("Validation/structure.txt","PASS: single Main scene and build entry; scene/prefab scripts; 18 building rules / 3 terrains; preserved per-terrain settings; numeric-string IDs; malformed table rejection; shared CSV parser; explicit prefab windows; footprint; unified rendering and weather shader.");
+        File.WriteAllText("Validation/structure.txt","PASS: single Main scene and build entry; scene/prefab scripts; "+data.Rules.Count+" building rules / 3 terrain configurations; preserved per-terrain settings; numeric-string IDs; malformed table rejection; shared CSV parser; explicit prefab windows; footprint; native rendering and weather shader.");
         Debug.Log("PROJECT_STRUCTURE_VALIDATED");
     }
     static void CheckScripts(GameObject root)

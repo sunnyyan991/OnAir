@@ -81,7 +81,10 @@ namespace OnAir
         public void JumpForwardWorld(float worldZ)
         {
             Initialize();float current=(Current.index+Progress)*64;if(worldZ<=current)return;
-            bool paused=context.paused;var weather=context.weather;context.paused=false;Advance((worldZ-current)*Current.terrain.distanceMeters/64);context.paused=paused;context.SetWeather(weather);TeleportRevision++;JourneyChanged?.Invoke();
+            bool paused=context.paused,menuPaused=context.menuPaused;var weather=context.weather;
+            try{context.paused=false;context.menuPaused=false;Advance((worldZ-current)*Current.terrain.distanceMeters/64);}
+            finally{context.paused=paused;context.menuPaused=menuPaused;}
+            context.SetWeather(weather);TeleportRevision++;JourneyChanged?.Invoke();
         }
         public void NextTerrain(){Initialize();TotalMeters+=Current.terrain.distanceMeters-SegmentMeters;SegmentMeters=0;legs.RemoveAt(0);EnsureLookahead();EnterCurrent();TeleportRevision++;JourneyChanged?.Invoke();}
         public void CycleWeather()

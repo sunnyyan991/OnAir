@@ -119,6 +119,8 @@ namespace OnAir
                 Restored = !create; firstSave = false; dirty = false;
                 if (create)
                 {
+                    game.airport.Reset();
+                    game.world.buildings.CityAssets=game.citySandbox.Applied.Copy();
                     game.world.RestoreState(null);
                     journeyId = Guid.NewGuid().ToString("N"); game.session.RestoreState(initialClimate);
                     game.journey.Restart(testSeed ?? JourneyController.FreshSeed(game.journey.seed));
@@ -178,9 +180,11 @@ namespace OnAir
         }
         void ApplyState(JourneySaveData data)
         {
+            game.world.buildings.CityAssets=data.cityAssetSandboxEnabled?data.cityAssets.Copy():null;
             journeyId = data.journeyId;
-            game.journey.RestoreState(data.journey);game.session.RestoreState(data.climate);
+            game.airport.Reset();game.journey.RestoreState(data.journey);game.session.RestoreState(data.climate);
             game.world.RestoreState(data.world);game.flight.RestoreState(data.flight);
+            game.airport.Restore(data.airport);
             game.cameraFollow.Follow(0);
         }
         public JourneySaveData CaptureState() => CaptureState(game.world.CaptureState());
@@ -190,8 +194,8 @@ namespace OnAir
             {
                 configuration = configuration, journeyId = journeyId, savedAtUtc = DateTimeOffset.UtcNow.ToString("O"),
                 biomeName = game.biomeNavigator ? game.biomeNavigator.VisibleName : game.session.biome.ToString().ToUpperInvariant(),
-                journey = game.journey.CaptureState(), flight = game.flight.CaptureState(),
-                climate = game.session.CaptureState(), world = world
+                journey = game.journey.CaptureState(), flight = game.flight.CaptureState(), airport=game.airport.Capture(),
+                climate = game.session.CaptureState(), world = world, cityAssets=game.world.buildings.CityAssets?.Copy(),cityAssetSandboxEnabled=game.world.buildings.CityAssets!=null
             };
         }
         JourneySaveData CaptureForFlush()

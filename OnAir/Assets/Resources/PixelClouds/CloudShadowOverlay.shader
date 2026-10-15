@@ -8,7 +8,7 @@ Shader "Hidden/OnAir/CloudShadowOverlay"
  #pragma target 3.5
  #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
  TEXTURE2D(_CloudAtlas); SAMPLER(sampler_CloudAtlas);
- float4 _CloudCentres[128],_CloudSizes[128],_CloudRects[128],_CloudGrids[128];
+ float4 _CloudCentres[512],_CloudSizes[512],_CloudRects[512],_CloudGrids[512];
  float3 _CloudRight,_CloudUp;float4 _CloudMapBounds,_CloudSunSlope;
  struct V {float4 pos:SV_POSITION;float2 uv:TEXCOORD0;nointerpolation uint cloud:TEXCOORD1;};
  V vert(uint vertex:SV_VertexID,uint instance:SV_InstanceID){

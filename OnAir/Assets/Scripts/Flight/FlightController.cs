@@ -38,6 +38,21 @@ namespace OnAir
         public float CircleProgress=>0;
         public Vector3 Heading{get;private set;}=Vector3.forward;
         public float Bank{get;private set;}
+        public AirportVisitController airport;
+        public float VisualAltitude => airport&&airport.Active?airport.Position.y:AircraftHeightPreview.AbsoluteHeight;
+        public float EngineActivity => airport&&airport.Active?airport.EngineActivity:1;
+        float airportRecovery=1;
+        public void FinishAirportVisit()=>airportRecovery=0;
+        public Vector3 StreamingVelocity => airport&&airport.Active?airport.Velocity:Heading*WorldSpeed;
+        public float CruiseWorldSpeed => WorldSpeed;
+        public void ApplyAirportPose(Vector3 physical,Vector3 heading,Camera camera)
+        {
+            Heading=heading.sqrMagnitude>.001f?heading.normalized:Vector3.forward;Bank=0;
+            var ray=camera.transform.forward;
+            var anchor=physical-ray*((physical.y-AircraftHeightPreview.CameraAnchorHeight)/ray.y);
+            anchor.z-=journey.Current.index*TerrainStreamer.SegmentLength;
+            transform.SetPositionAndRotation(anchor,Quaternion.LookRotation(Heading,Vector3.up));
+        }
         float flightTime;int teleport=-1;
         ContinuousWorldPlan landscape;
         float nextCacheTrim;
@@ -53,19 +68,23 @@ namespace OnAir
         }
         float WorldSpeed=>Mathf.Max(0,speedMetersPerSecond)*TerrainStreamer.SegmentLength/journey.Current.terrain.distanceMeters;
         void Start()=>Tick(0);
-        void Update()=>Tick(Mathf.Min(Time.deltaTime,.05f));
+        void Update()=>Tick(Time.deltaTime);
         public void Tick(float seconds)
         {
             if(!journey)return;journey.Initialize();
+            if(airport&&airport.TryTick(seconds))return;
+            seconds=Mathf.Min(seconds,.05f);
             if(landscape==null||landscape.seed!=journey.seed||landscape.routeSlope!=routeSlope)landscape=new ContinuousWorldPlan(journey.seed,routeSlope);
             if(Time.unscaledTime>=nextCacheTrim){landscape.TrimCaches();nextCacheTrim=Time.unscaledTime+2;}
             if(teleport!=journey.TeleportRevision){teleport=journey.TeleportRevision;flightTime=0;Bank=0;clearanceVelocity=0;}
             if(!journey.context.SimulationPaused&&seconds>0&&!float.IsNaN(seconds)&&!float.IsInfinity(seconds)&&WorldSpeed>0){flightTime+=seconds;journey.Advance(seconds*speedMetersPerSecond);}
             float phase=flightTime*swayFrequency,seedPhase=(journey.seed%997)*.013f;
             float x=swayAmplitude*(.78f*Mathf.Sin(phase+seedPhase)+.22f*Mathf.Sin(phase*.43f+seedPhase*2));
+            if(!journey.context.SimulationPaused)airportRecovery=Mathf.Min(1,airportRecovery+seconds/5);
+            x*=Mathf.SmoothStep(0,1,airportRecovery);
             // Visual sway must not yaw the cruise heading.
             Heading=new Vector3(routeSlope,0,1).normalized;
-            Bank=-Mathf.Sin(phase+seedPhase)*7f;
+            Bank=-Mathf.Sin(phase+seedPhase)*7f*Mathf.SmoothStep(0,1,airportRecovery);
             float globalZ=(journey.Current.index+journey.Progress)*TerrainStreamer.SegmentLength;
             x+=RouteX(globalZ);
             if(AircraftHeightPreview.Enabled)

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 34f50fe91ffab98468e9588ecb008d13, type: 3}
   m_Name: ENV-PARK-002 pixel art
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnAir.PixelObjectArt
   meshes:
   - {fileID: 4300000, guid: 28144fac86d56574a89d58b486308879, type: 2}
   - {fileID: 4300000, guid: 13e6132f7659a3c498523184c1a82159, type: 2}
@@ -24,5 +24,5 @@ MonoBehaviour:
   - {fileID: 2100000, guid: e90dd4f7bd2aabc4797d01e7df585349, type: 2}
   pixelsPerUnit: 4
   viewRotation: {x: 0.3535534, y: 0.3535534, z: -0.14644663, w: 0.85355335}
-  sourceGeometryHash: b201745dfc4f144a2d03ee818f030bc0
+  sourceGeometryHash: 34364a357f9ad746d62408ab6018e504
   artRevision: City pixel painting 02

@@ -38,7 +38,7 @@ namespace OnAir
             if (Mathf.Abs(direction.y) < .001f) return;
             // Moving along the view ray preserves both screen coordinates.
             // Orthographic projection preserves apparent size as well.
-            float rise = AbsoluteHeight - baseline.y;
+            float rise = (view.flight?view.flight.VisualAltitude:AbsoluteHeight) - baseline.y;
             originalVisual.position = baseline + direction * (rise / direction.y);
         }
 

@@ -9,7 +9,7 @@ namespace OnAir
     // opacity shadow map in SUN space, never a fullscreen colour multiply.
     public sealed class CloudShadowOverlay:ScriptableRenderPass
     {
-        public readonly Vector4[] centres=new Vector4[128],sizes=new Vector4[128],rects=new Vector4[128],grids=new Vector4[128];
+        public readonly Vector4[] centres=new Vector4[512],sizes=new Vector4[512],rects=new Vector4[512],grids=new Vector4[512];
         public int count;
         public const float RelativeStrength=.8f;
         readonly Material material;Vector4 bounds,slope,heights;float strength;

@@ -7,6 +7,7 @@ namespace OnAir
     {
         public IReadOnlyList<SpawnRule> Rules {get;}
         public IReadOnlyDictionary<string,GameObject> Prefabs {get;}
+        public CityAssetLoadout CityAssets {get;set;}
         readonly Dictionary<GameObject,BuildingFootprint> footprints=new Dictionary<GameObject,BuildingFootprint>();
         readonly Dictionary<GameObject,string> saveIds=new Dictionary<GameObject,string>();
         readonly Dictionary<string,GameObject> savedPrefabs=new Dictionary<string,GameObject>();
