@@ -28,6 +28,11 @@ namespace OnAir
         public int ThemeIndex { get; private set; }
         public ThemeRule SelectedTheme => game.journey.themes[Mathf.Clamp(ThemeIndex, 0, game.journey.themes.Length - 1)];
         public void CycleTheme() { if (!busy) ThemeIndex = (ThemeIndex + 1) % game.journey.themes.Length; }
+        // Aircraft chosen for a new flight; loaded flights keep their saved aircraft.
+        public int AircraftIndex { get; private set; }
+        public AircraftModel SelectedAircraft { get { var models = game.flight.View.Models; return models.Count == 0 ? null : models[Mathf.Clamp(AircraftIndex, 0, models.Count - 1)]; } }
+        public bool CanChooseAircraft => game.flight.View.Models.Count > 1;
+        public void CycleAircraft() { if (!busy && CanChooseAircraft) AircraftIndex = (AircraftIndex + 1) % game.flight.View.Models.Count; }
         public bool ShowHud => Page == MenuPage.Running;
         public bool BlocksHud => !ShowHud || DisplayOpen || Leaving != LeaveTarget.None;
         SaveSlot staged;
@@ -85,6 +90,7 @@ namespace OnAir
             yield return null;
             if (!stagedReady && !game.saves.StageSlot(staged,stagedNew,stagedConfirmed))
             { Notice = game.saves.Status;Page = stagedNew ? MenuPage.PrepareFailed : MenuPage.LoadGame;busy = false;if(!stagedNew)game.ShowTitleBackdrop();yield break; }
+            if (stagedNew && SelectedAircraft != null) game.flight.View.SelectAircraft(SelectedAircraft.id);
             Exception failure = null;
             try { if (!stagedReady) { game.flight.Tick(0);game.cameraFollow.Follow(0);game.environment.Refresh(0,true);game.world.BeginPreparation();game.biomeNavigator.RefreshLabel(); } }
             catch (Exception error) { failure = error; }

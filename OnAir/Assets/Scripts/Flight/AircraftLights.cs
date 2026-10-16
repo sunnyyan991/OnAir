@@ -26,22 +26,53 @@ namespace OnAir
             view=GetComponent<FlightView>();ResolveAirport();
             if(!view||!view.visual)return;
             red=LensMaterial(new Color(1,.04f,.015f));green=LensMaterial(new Color(.02f,1,.18f));white=LensMaterial(Color.white);
+            view.AircraftChanged+=Build;Build();
+        }
+        // Lenses live under the current visual and are replaced with it.
+        void Build()
+        {
+            if(!view||!view.visual||!red)return;
             var rig=view.Rig;
             if(rig)
             {
-                leftPosition=Lens("Left red position",rig.leftNavigation.localPosition,.22f,red);
-                rightPosition=Lens("Right green position",rig.rightNavigation.localPosition,.22f,green);
-                tailPosition=Lens("Tail white position",rig.tailNavigation.localPosition,.20f,white);
-                leftFlash=Lens("Left white strobe",rig.leftStrobe.localPosition,.38f,white);
-                rightFlash=Lens("Right white strobe",rig.rightStrobe.localPosition,.38f,white);
-                beacon=Lens("Red engine beacon",rig.beacon.localPosition,.28f,red);Tick(0);return;
+                var v=view.visual;
+                leftPosition=Lens("Left red position",v,rig.leftNavigation.localPosition,.22f,red);
+                rightPosition=Lens("Right green position",v,rig.rightNavigation.localPosition,.22f,green);
+                tailPosition=Lens("Tail white position",v,rig.tailNavigation.localPosition,.20f,white);
+                leftFlash=Lens("Left white strobe",v,rig.leftStrobe.localPosition,.38f,white);
+                rightFlash=Lens("Right white strobe",v,rig.rightStrobe.localPosition,.38f,white);
+                beacon=Lens("Red engine beacon",v,rig.beacon.localPosition,.28f,red);Tick(0);return;
             }
-            leftPosition=Lens("Left red position",new Vector3(-1.79f,.035f,-.05f),.065f,red);
-            rightPosition=Lens("Right green position",new Vector3(1.79f,.035f,-.05f),.065f,green);
-            tailPosition=Lens("Tail white position",new Vector3(0,.09f,-1.39f),.045f,white);
-            leftFlash=Lens("Left white strobe",new Vector3(-1.82f,.045f,-.17f),.11f,white);
-            rightFlash=Lens("Right white strobe",new Vector3(1.82f,.045f,-.17f),.11f,white);
-            beacon=Lens("Red engine beacon",new Vector3(0,.39f,-.35f),.075f,red);Tick(0);
+            // Metric small-aircraft prefabs carry named FlightAnchors (metres, model space).
+            var anchors=Find(view.visual,"FlightAnchors");
+            var left=anchors?anchors.Find("LeftNavigation"):null;var right=anchors?anchors.Find("RightNavigation"):null;var tail=anchors?anchors.Find("TailNavigation"):null;
+            if(left&&right&&tail)
+            {
+                var back=new Vector3(0,0,-.3f);
+                leftPosition=Lens("Left red position",anchors,left.localPosition,.2f,red);
+                rightPosition=Lens("Right green position",anchors,right.localPosition,.2f,green);
+                tailPosition=Lens("Tail white position",anchors,tail.localPosition,.18f,white);
+                leftFlash=Lens("Left white strobe",anchors,left.localPosition+back,.3f,white);
+                rightFlash=Lens("Right white strobe",anchors,right.localPosition+back,.3f,white);
+                // Beacon on top of the tail: the T-tail fairing when present, else the fin.
+                var fin=Find(view.visual,"TailplaneFairing");if(!fin)fin=Find(view.visual,"VerticalFin");
+                var mesh=fin?fin.GetComponent<MeshFilter>():null;
+                var bounds=mesh&&mesh.sharedMesh?mesh.sharedMesh.bounds:new Bounds(tail.localPosition,Vector3.zero);
+                beacon=Lens("Red engine beacon",anchors,new Vector3(0,bounds.max.y+.05f,bounds.center.z),.22f,red);Tick(0);return;
+            }
+            var w=view.visual;
+            leftPosition=Lens("Left red position",w,new Vector3(-1.79f,.035f,-.05f),.065f,red);
+            rightPosition=Lens("Right green position",w,new Vector3(1.79f,.035f,-.05f),.065f,green);
+            tailPosition=Lens("Tail white position",w,new Vector3(0,.09f,-1.39f),.045f,white);
+            leftFlash=Lens("Left white strobe",w,new Vector3(-1.82f,.045f,-.17f),.11f,white);
+            rightFlash=Lens("Right white strobe",w,new Vector3(1.82f,.045f,-.17f),.11f,white);
+            beacon=Lens("Red engine beacon",w,new Vector3(0,.39f,-.35f),.075f,red);Tick(0);
+        }
+        static Transform Find(Transform root,string name)
+        {
+            if(root.name==name)return root;
+            foreach(Transform child in root){var hit=Find(child,name);if(hit)return hit;}
+            return null;
         }
         Material LensMaterial(Color color)
         {
@@ -49,9 +80,9 @@ namespace OnAir
             var m=new Material(view.visual.GetComponentInChildren<MeshRenderer>().sharedMaterial){name="Aircraft navigation lens"};
             m.SetColor("_BaseColor",color);m.EnableKeyword("_EMISSION");m.SetColor("_EmissionColor",color*2);return m;
         }
-        Renderer Lens(string label,Vector3 position,float size,Material material)
+        Renderer Lens(string label,Transform parent,Vector3 position,float size,Material material)
         {
-            var obj=GameObject.CreatePrimitive(PrimitiveType.Sphere);obj.name=label;obj.transform.SetParent(view.visual,false);obj.transform.localPosition=position;obj.transform.localScale=Vector3.one*size;
+            var obj=GameObject.CreatePrimitive(PrimitiveType.Sphere);obj.name=label;obj.transform.SetParent(parent,false);obj.transform.localPosition=position;obj.transform.localScale=Vector3.one*size;
             var collider=obj.GetComponent<Collider>();if(Application.isPlaying)Destroy(collider);else DestroyImmediate(collider);
             var r=obj.GetComponent<Renderer>();r.sharedMaterial=material;r.shadowCastingMode=ShadowCastingMode.Off;r.receiveShadows=false;return r;
         }
@@ -108,6 +139,6 @@ namespace OnAir
         }
         void Release(Material material)
         {if(!material)return;if(Application.isPlaying)Destroy(material);else DestroyImmediate(material);}
-        void OnDestroy(){Release(red);Release(green);Release(white);}
+        void OnDestroy(){if(view)view.AircraftChanged-=Build;Release(red);Release(green);Release(white);}
     }
 }

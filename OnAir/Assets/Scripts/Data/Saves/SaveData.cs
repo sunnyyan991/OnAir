@@ -33,6 +33,8 @@ namespace OnAir
     [Serializable] public sealed class FlightState
     {
         public float flightTime, routeSlope, speedMetersPerSecond;
+        // FlightView model id; empty in older saves means the default aircraft.
+        public string aircraft;
     }
     [Serializable] public sealed class ClimateState
     {

@@ -159,3 +159,10 @@ MonoBehaviour:
   useLowPolyModel: 1
   modelPrefab: {fileID: 1289300893334994180, guid: b8c5e7fcf122df74c9e8fb7ca88faf45,
     type: 3}
+  extraModels:
+  - id: lightjet
+    displayName: LIGHT JET
+    prefab: {fileID: 2144467655083570502, guid: 74f7ac0c93a7390489641facb81c1a8d,
+      type: 3}
+    metric: 1
+    pivotHeight: 0.9

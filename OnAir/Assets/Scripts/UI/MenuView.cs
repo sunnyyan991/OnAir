@@ -169,8 +169,9 @@ namespace OnAir
         void DrawSlots(float width,float height)
         {
             bool create=menu.Page==MenuPage.NewFlight;
-            // New flights add a theme row above the notice and action buttons.
-            float extra=create?52:0;
+            // New flights add theme and aircraft rows above the notice and action buttons.
+            bool aircraft=create&&menu.CanChooseAircraft;
+            float extra=create?(aircraft?104:52):0;
             var box=Center(Mathf.Min(660,width-40),520+extra,width,height);art.MenuPanel(box);
             Text(box.x+24,box.y+22,box.width-48,create?"NEW FLIGHT":"LOAD GAME",4);
             var area=new Rect(box.x+16,box.y+76,box.width-32,310);
@@ -193,6 +194,7 @@ namespace OnAir
             GUI.EndScrollView();
             bool occupied=menu.Slots.Any(s=>s.occupied);
             if(create&&Button(box.x+28,box.y+397,box.width-56,"THEME: "+menu.SelectedTheme.name))menu.CycleTheme();
+            if(aircraft&&Button(box.x+28,box.y+449,box.width-56,"AIRCRAFT: "+menu.SelectedAircraft.displayName))menu.CycleAircraft();
             Text(box.x+24,box.y+397+extra,box.width-48,!create&&!occupied?"NO SAVED FLIGHTS":menu.Notice,1);
             bool can=menu.Selected>=0&&menu.Selected<menu.Slots.Count&&(create?!menu.Slots[menu.Selected].IsLegacy:menu.Slots[menu.Selected].occupied);
             float actionWidth=(box.width-72)/3;

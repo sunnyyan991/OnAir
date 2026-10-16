@@ -1,6 +1,6 @@
 # OnAir
 
-当前飞机：Main 使用原 LowWing 小飞机。第二视角暂时关闭并保留进度；第一视角使用已确认的 12 款云形和三层运行云，统一颗粒度，支持云海飞行与穿云。A330 及涂装已归档。详见 [分层云说明](Docs/CloudAssetApproval.md) 与 [三层云更新](Docs/CloudLayers.md)。
+当前飞机：Main 默认使用原 LowWing 小飞机，新航程可在 NEW FLIGHT 页改选 LIGHT JET 小型公务机（AIR-SML-003，见[小型飞机资产](Docs/SmallAircraftAssets.md)）。第二视角暂时关闭并保留进度；第一视角使用已确认的 12 款云形和三层运行云，统一颗粒度，支持云海飞行与穿云。A330 及涂装已归档。详见 [分层云说明](Docs/CloudAssetApproval.md) 与 [三层云更新](Docs/CloudLayers.md)。
 
 面向副屏的日式城市飞行氛围游戏：飞机持续前进，城市、河流、森林与山地在下方滚动，并显示现实时间。
 
